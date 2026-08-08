@@ -1,1 +1,1813 @@
+const CEFR_CONVERSATION_PROMPTS = {
+
+       A1: [
+        {
+            prompt_fr: "¿Qu'est-ce que tu aimerais boire ?",
+            prompt_en: "What would you like to drink?",
+            expected_responses: [
+                { fr: "je veux de l'eau s'il vous plaît", en: "I want water please" },
+                { fr: "j'aimerais une bière", en: "I would like a beer" },
+                { fr: "je veux du café", en: "I want coffee" }
+            ]
+        },
+        {
+            prompt_fr: "¿Comment vas-tu aujourd'hui ?",
+            prompt_en: "How are you today?",
+            expected_responses: [
+                { fr: "je suis heureux", en: "I am happy" },
+                { fr: "je vais bien merci", en: "I am good, thank you" },
+                { fr: "je suis fatigué", en: "I am tired" }
+            ]
+        },
+        {
+            prompt_fr: "¿Où habites-tu ?",
+            prompt_en: "Where do you live?",
+            expected_responses: [
+                { fr: "j'habite dans la maison", en: "I live in the house" },
+                { fr: "j'habite près de l'hôtel", en: "I live near the hotel" },
+                { fr: "j'habite avec ma famille", en: "I live with my family" }
+            ]
+        },
+        {
+            prompt_fr: "¿Qu'est-ce que tu veux manger ?",
+            prompt_en: "What do you want to eat?",
+            expected_responses: [
+                { fr: "je veux du poulet", en: "I want chicken" },
+                { fr: "je veux une salade", en: "I want a salad" },
+                { fr: "je veux de la soupe", en: "I want soup" }
+            ]
+        },
+        {
+            prompt_fr: "¿As-tu faim ?",
+            prompt_en: "Are you hungry?",
+            expected_responses: [
+                { fr: "oui j'ai faim", en: "Yes, I'm hungry" },
+                { fr: "je n'ai pas faim", en: "I'm not hungry" },
+                { fr: "g'ai un peu faim", en: "I'm a little hungry" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'est-ce que tu aimes faire ?",
+            prompt_en: "What do you like to do?",
+            expected_responses: [
+                { fr: "j'aime lire des livres", en: "I like reading books" },
+                { fr: "j'aime écouter de la musique", en: "I like listening to music" },
+                { fr: "j'aime cuisiner", en: "I like cooking" }
+            ]
+        },
+        {
+            prompt_fr: "¿À quelle heure te lèves-tu ?",
+            prompt_en: "What time do you get up?",
+            expected_responses: [
+                { fr: "je me lève tôt", en: "I get up early" },
+                { fr: "je me lève tard", en: "I get up late" },
+                { fr: "je me lève à sept heures", en: "I get up at seven" }
+            ]
+        },
+        {
+            prompt_fr: "¿Veux-tu sortir aujourd'hui ?",
+            prompt_en: "Do you want to go out today?",
+            expected_responses: [
+                { fr: "oui je veux sortir", en: "Yes, I want to go out" },
+                { fr: "je ne veux pas sortir", en: "I don't want to go out" },
+                { fr: "je veux sortir plus tard", en: "I want to go out later" }
+            ]
+        },
+        {
+            prompt_fr: "¿Qu'est-ce que tu fais ?",
+            prompt_en: "What are you doing?",
+            expected_responses: [
+                { fr: "j'apprends le français", en: "I am learning Spanish" },
+                { fr: "je cuisine", en: "I am cooking" },
+                { fr: "je regarde la télévision", en: "I am watching TV" }
+            ]
+        },
+        {
+            prompt_fr: "¿Veux-tu regarder un film ?",
+            prompt_en: "Do you want to watch a movie?",
+            expected_responses: [
+                { fr: "oui je veux regarder un film", en: "Yes, I want to watch a movie" },
+                { fr: "je ne veux pas regarder la télévision", en: "I don't want to watch TV" },
+                { fr: "je veux regarder un nouveau film", en: "I want to watch a new movie" }
+            ]
+        },
+        {
+            prompt_fr: "¿Où sont les toilettes ?",
+            prompt_en: "Where is the bathroom?",
+            expected_responses: [
+                { fr: "c'est tout près", en: "It is near" },
+                { fr: "c'est dans la gare", en: "It is in the station" },
+                { fr: "c'est dans la maison", en: "It is in the house" }
+            ]
+        },
+        {
+            prompt_fr: "Quelle musique aimes-tu ?",
+            prompt_en: "What music do you like?",
+            expected_responses: [
+                { fr: "j'aime la musique", en: "I like music" },
+                { fr: "j'aime écouter de la musique", en: "I like listening to music" },
+                { fr: "j'aime la nouvelle musique", en: "I like new music" }
+            ]
+        },
+        {
+            prompt_fr: "¿Veux-tu te reposer ?",
+            prompt_en: "Do you want to rest?",
+            expected_responses: [
+                { fr: "oui je veux me reposer", en: "Yes, I want to rest" },
+                { fr: "je ne veux pas me reposer", en: "I don't want to rest" },
+                { fr: "je veux me reposer un peu", en: "I want to rest a little" }
+            ]
+        },
+        {
+            prompt_fr: "¿Qu'est-ce qu'il y a dans la maison ?",
+            prompt_en: "What is in the house?",
+            expected_responses: [
+                { fr: "il y a du pain", en: "There is bread" },
+                { fr: "il y a du riz", en: "There is rice" },
+                { fr: "il y a du poulet", en: "There is chicken" }
+            ]
+        },
+        {
+            prompt_fr: "¿Veux-tu aller à l'hôtel ?",
+            prompt_en: "Do you want to go to the hotel?",
+            expected_responses: [
+                { fr: "oui je veux aller à l'hôtel", en: "Yes, I want to go to the hotel" },
+                { fr: "je ne veux pas y aller", en: "I don't want to go" },
+                { fr: "je veux y aller plus tard", en: "I want to go later" }
+            ]
+        },
+        {
+            prompt_fr: "¿Quel fruit aimes-tu ?",
+            prompt_en: "What fruit do you like?",
+            expected_responses: [
+                { fr: "j'aime la pomme", en: "I like apple" },
+                { fr: "j'aime l'orange", en: "I like orange" },
+                { fr: "j'aime la banane", en: "I like banana" }
+            ]
+        },
+        {
+            prompt_fr: "¿Veux-tu apprendre plus ?",
+            prompt_en: "Do you want to learn more?",
+            expected_responses: [
+                { fr: "oui je veux apprendre plus", en: "Yes, I want to learn more" },
+                { fr: "je veux apprendre vite", en: "I want to learn fast" },
+                { fr: "je veux apprendre avec de la musique", en: "I want to learn with music" }
+            ]
+        },
+        {
+            prompt_fr: "¿Qu'est-ce que tu regardes à la télévision ?",
+            prompt_en: "What do you watch on TV?",
+            expected_responses: [
+                { fr: "je regarde des livres", en: "I look at books" },
+                { fr: "je regarde de bonnes choses", en: "I watch good things" },
+                { fr: "je regarde de nouveaux clips de musique", en: "I watch new music videos" }
+            ]
+        },
+        {
+            prompt_fr: "¿Veux-tu du pain avec du fromage ?",
+            prompt_en: "Do you want bread with cheese?",
+            expected_responses: [
+                { fr: "oui je veux du pain avec du fromage", en: "Yes, I want bread with cheese" },
+                { fr: "je ne veux pas de pain", en: "I don't want bread" },
+                { fr: "je veux du fromage", en: "I want cheese" }
+            ]
+        },
+        {
+            prompt_fr: "Où est ta famille ?",
+            prompt_en: "Where is your family?",
+            expected_responses: [
+                { fr: "elle est à la maison", en: "They are at home" },
+                { fr: "elle est tout près", en: "They are near" },
+                { fr: "elle est à la gare", en: "They are at the station" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu y aller en bus ?",
+            prompt_en: "Do you want to go by bus?",
+            expected_responses: [
+                { fr: "oui je veux y aller en bus", en: "Yes, I want to go by bus" },
+                { fr: "je ne veux pas y aller en bus", en: "I don't want to go by bus" },
+                { fr: "je veux y aller en train", en: "I want to go by train" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'est-ce que tu fais à la maison ?",
+            prompt_en: "What do you do at home?",
+            expected_responses: [
+                { fr: "je cuisine", en: "I cook" },
+                { fr: "je lis des livres", en: "I read books" },
+                { fr: "je regarde la télévision", en: "I watch TV" }
+            ]
+        },
+        {
+            prompt_fr: "Bonjour, as-tu ton billet ?",
+            prompt_en: "Hello, do you have your ticket?",
+            expected_responses: [
+                { fr: "oui j'ai ton billet", en: "Yes, I have your ticket" },
+                { fr: "je n'ai pas mon billet", en: "I don't have my ticket" },
+                { fr: "j'ai besoin d'un billet", en: "I need a ticket" }
+            ]
+        },
+        {
+            prompt_fr: "De quoi as-tu besoin à la gare ?",
+            prompt_en: "What do you need at the station?",
+            expected_responses: [
+                { fr: "j'ai besoin du bus", en: "I need the bus" },
+                { fr: "j'ai besoin du train", en: "I need the train" },
+                { fr: "j'ai besoin de mon ami", en: "I need my friend" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu du café ou du thé ?",
+            prompt_en: "Do you want coffee or tea?",
+            expected_responses: [
+                { fr: "je veux du café chaud", en: "I want hot coffee" },
+                { fr: "je veux du thé glacé", en: "I want cold tea" },
+                { fr: "je ne veux pas de café", en: "I don't want coffee" }
+            ]
+        },
+        {
+            prompt_fr: "Qui est-elle ?",
+            prompt_en: "Who is she?",
+            expected_responses: [
+                { fr: "elle, c'est ma mère", en: "She is my mother" },
+                { fr: "elle, c'est ma sœur", en: "She is my sister" },
+                { fr: "elle, c'est mon amie", en: "She is my friend (female)" }
+            ]
+        },
+        {
+            prompt_fr: "Qui est-ce ?",
+            prompt_en: "Who is he?",
+            expected_responses: [
+                { fr: "c'est mon père", en: "He is my father" },
+                { fr: "c'est mon fils", en: "He is my son" },
+                { fr: "c'est mon ami", en: "He is my friend" }
+            ]
+        },
+        {
+            prompt_fr: "Y a-t-il des problèmes avec les transports ?",
+            prompt_en: "Are there problems with the transport?",
+            expected_responses: [
+                { fr: "il n'y a pas de problèmes aujourd'hui", en: "There are no problems today" },
+                { fr: "oui il y a des problèmes avec le train", en: "Yes, there are problems with the train" },
+                { fr: "le bus est lent", en: "The bus is slow" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'est-ce que tu veux apprendre aujourd'hui ?",
+            prompt_en: "What do you want to learn today?",
+            expected_responses: [
+                { fr: "je veux apprendre à cuisiner", en: "I want to learn to cook" },
+                { fr: "je veux apprendre à écrire", en: "I want to learn to write" },
+                { fr: "je veux apprendre plus", en: "I want to learn more" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu manger du steak aujourd'hui ?",
+            prompt_en: "Do you want to eat steak today?",
+            expected_responses: [
+                { fr: "oui avec des frites", en: "Yes, with french fries" },
+                { fr: "je ne veux pas de steak aujourd'hui", en: "I don't want steak today" },
+                { fr: "je veux de la soupe chaude", en: "I want hot soup" }
+            ]
+        },
+        {
+            prompt_fr: "Où est l'école ?",
+            prompt_en: "Where is the school?",
+            expected_responses: [
+                { fr: "l'école est tout près", en: "The school is near" },
+                { fr: "c'est près de l'hôtel", en: "It is near the hotel" },
+                { fr: "ce n'est pas tout près", en: "It is not near" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu du lait ou de la bière à la maison ?",
+            prompt_en: "Do you have milk or beer at home?",
+            expected_responses: [
+                { fr: "j'ai du lait et du pain", en: "I have milk and bread" },
+                { fr: "j'ai de la bière fraîche", en: "I have cold beer" },
+                { fr: "je n'ai pas de bière à la maison", en: "I don't have beer at home" }
+            ]
+        },
+        {
+            prompt_fr: "À quelle heure vas-tu travailler ?",
+            prompt_en: "What hour do you go to work?",
+            expected_responses: [
+                { fr: "j'y vais tôt", en: "I go early" },
+                { fr: "j'y vais tard aujourd'hui", en: "I go late today" },
+                { fr: "je ne vais pas travailler aujourd'hui", en: "I don't go to work today" }
+            ]
+        },
+        {
+            prompt_fr: "Comment va sa grand-mère ?",
+            prompt_en: "How is your grandmother?",
+            expected_responses: [
+                { fr: "sa grand-mère est très heureuse", en: "His grandmother is very happy" },
+                { fr: "elle va bien merci", en: "She is well, thank you" },
+                { fr: "elle est fatiguée aujourd'hui", en: "She is tired today" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu écouter de la nouvelle musique ?",
+            prompt_en: "Do you want to listen to new music?",
+            expected_responses: [
+                { fr: "oui j'aime la musique", en: "Yes, I like music" },
+                { fr: "je ne veux pas écouter de musique", en: "I don't want to listen to music" },
+                { fr: "je veux écouter avec mon ami", en: "I want to listen with my friend" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'est-ce que tu as besoin de nettoyer aujourd'hui ?",
+            prompt_en: "What do you need to clean today?",
+            expected_responses: [
+                { fr: "j'ai besoin de nettoyer la maison", en: "I need to clean the house" },
+                { fr: "j'ai besoin de nettoyer la salle de bain", en: "I need to clean the bathroom" },
+                { fr: "je n'ai pas besoin de nettoyer aujourd'hui", en: "I don't need to clean today" }
+            ]
+        },
+        {
+            prompt_fr: "Aimes-tu les nouveaux livres ?",
+            prompt_en: "Do you like new books?",
+            expected_responses: [
+                { fr: "oui j'aime beaucoup lire", en: "Yes, I like reading a lot" },
+                { fr: "je n'aime pas les livres", en: "I don't like books" },
+                { fr: "je veux écrire un livre", en: "I want to write a book" }
+            ]
+        },
+        {
+            prompt_fr: "Y a-t-il des fruits sur la table ?",
+            prompt_en: "Is there fruit on the table?",
+            expected_responses: [
+                { fr: "il y a des pommes et des oranges", en: "There is apple and orange" },
+                { fr: "il y a une bonne banane", en: "There is a good banana" },
+                { fr: "il n'y a pas de fruits aujourd'hui", en: "There is no fruit today" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu du riz avec des haricots ?",
+            prompt_en: "Do you want rice with beans?",
+            expected_responses: [
+                { fr: "oui avec un peu de fromage", en: "Yes, with a little cheese" },
+                { fr: "je veux du riz sans haricots", en: "I want rice without beans" },
+                { fr: "je ne veux pas de riz aujourd'hui", en: "I don't want rice today" }
+            ]
+        },
+        {
+            prompt_fr: "Bonjour, es-tu prêt ?",
+            prompt_en: "Good morning, are you ready?",
+            expected_responses: [
+                { fr: "bonjour oui je suis prêt", en: "Good morning, yes I am ready" },
+                { fr: "je ne suis pas prêt aujourd'hui", en: "I am not ready today" },
+                { fr: "j'ai besoin de plus de temps s'il vous plaît", en: "I need more time please" }
+            ]
+        },
+        {
+            prompt_fr: "Quand vas-tu à l'aéroport ?",
+            prompt_en: "When do you go to the airport?",
+            expected_responses: [
+                { fr: "j'y vais maintenant", en: "I am going now" },
+                { fr: "j'y vais tôt aujourd'hui", en: "I am going early today" },
+                { fr: "j'y vais en bus plus tard", en: "I am going by bus later" }
+            ]
+        },
+        {
+            prompt_fr: "Aimes-tu ce nouvel endroit ?",
+            prompt_en: "Do you like this new place?",
+            expected_responses: [
+                { fr: "oui l'endroit est très bien", en: "Yes, the place is very good" },
+                { fr: "je n'aime pas cet endroit", en: "I don't like this place" },
+                { fr: "c'est un petit endroit", en: "It is a small place" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu un steak avec des frites ?",
+            prompt_en: "Do you want a steak with french fries?",
+            expected_responses: [
+                { fr: "oui avec un peu de sel", en: "Yes, with a little salt" },
+                { fr: "non je veux une salade", en: "No, I want a salad" },
+                { fr: "je veux du steak sans frites", en: "I want steak without fries" }
+            ]
+        },
+        {
+            prompt_fr: "À quelle heure se termine le programme télé ?",
+            prompt_en: "What hour does the television finish?",
+            expected_responses: [
+                { fr: "il se termine à dix heures", en: "It finishes at ten" },
+                { fr: "il se termine dans une heure", en: "It finishes in an hour" },
+                { fr: "je ne regarde pas la télévision aujourd'hui", en: "I don't watch TV today" }
+            ]
+        },
+        {
+            prompt_fr: "Quels fruits y a-t-il à la maison ?",
+            prompt_en: "What fruit is there in the house?",
+            expected_responses: [
+                { fr: "il y a des pommes et des bananes", en: "There is apple and banana" },
+                { fr: "il y a une orange douce", en: "There is sweet orange" },
+                { fr: "il n'y a pas de fruits ici", en: "There is no fruit here" }
+            ]
+        },
+        {
+            prompt_fr: "Où est la gare ?",
+            prompt_en: "Where is the train station?",
+            expected_responses: [
+                { fr: "la gare est tout près", en: "The station is near" },
+                { fr: "c'est près de l'école", en: "It is near the school" },
+                { fr: "c'est loin de l'hôtel", en: "It is far from the hotel" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu écouter de la musique avec ton ami ?",
+            prompt_en: "Do you want to listen to music with your friend?",
+            expected_responses: [
+                { fr: "oui j'aime écouter de la musique", en: "Yes, I like to listen to music" },
+                { fr: "non je veux lire un livre", en: "No, I want to read a book" },
+                { fr: "mon ami n'est pas ici", en: "My friend is not here" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'est-ce que tu as besoin de faire aujourd'hui ?",
+            prompt_en: "What do you need to do today?",
+            expected_responses: [
+                { fr: "j'ai besoin de travailler plus", en: "I need to work more" },
+                { fr: "j'ai besoin d'étudier le français", en: "I need to study Spanish" },
+                { fr: "je veux me reposer à la maison", en: "I want to rest at home" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu des problèmes avec le bus ?",
+            prompt_en: "Do you have problems with the bus?",
+            expected_responses: [
+                { fr: "il n'y a pas de problèmes aujourd'hui", en: "There are no problems today" },
+                { fr: "oui le bus est lent", en: "Yes, the bus is slow" },
+                { fr: "je veux y aller en train", en: "I want to go by train" }
+            ]
+        },
+        {
+            prompt_fr: "Aimes-tu cuisiner des plats chauds ?",
+            prompt_en: "Do you like to cook hot food?",
+            expected_responses: [
+                { fr: "oui je cuisine de la soupe et du poulet", en: "Yes, I cook soup and chicken" },
+                { fr: "non j'aime les fruits frais", en: "No, I like cold fruit" },
+                { fr: "je veux apprendre à cuisiner", en: "I want to learn to cook" }
+            ]
+        }
+    ],
+    A2: [
+        {
+            prompt_fr: "Qu'est-ce que tu veux pour le petit-déjeuner ?",
+            prompt_en: "What do you want for breakfast?",
+            expected_responses: [
+                { fr: "je veux de l'œuf, du pain et du café", en: "I want egg, bread and coffee" },
+                { fr: "normalement je préfère des fruits frais", en: "Normally I prefer cold fruit" },
+                { fr: "un petit-déjeuner tôt s'il vous plaît", en: "An early breakfast, please" }
+            ]
+        },
+        {
+            prompt_fr: "À quelle heure est le dîner aujourd'hui ?",
+            prompt_en: "What time is dinner today?",
+            expected_responses: [
+                { fr: "le dîner est tard aujourd'hui", en: "Dinner is late today" },
+                { fr: "c'est dans vingt minutes", en: "It is in twenty minutes" },
+                { fr: "je veux cuisiner le dîner maintenant", en: "I want to cook dinner now" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi arrives-tu en retard ?",
+            prompt_en: "Why are you arriving late?",
+            expected_responses: [
+                { fr: "le bus est lent aujourd'hui", en: "The bus is slow today" },
+                { fr: "parce que j'ai eu des problèmes avec la voiture", en: "Because I had problems with the car" },
+                { fr: "désolé le trajet est difficile", en: "I am sorry, the trip is difficult" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu fini les devoirs de l'école ?",
+            prompt_en: "Did you finish the school homework?",
+            expected_responses: [
+                { fr: "oui j'ai déjà fini les devoirs", en: "Yes, I already finished the homework" },
+                { fr: "j'ai encore besoin de quelques minutes", en: "I still need more minutes" },
+                { fr: "non les devoirs sont très difficiles", en: "No, the homework is very difficult" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu lu mon message hier soir ?",
+            prompt_en: "Did you read my message last night?",
+            expected_responses: [
+                { fr: "oui j'ai lu ton message hier soir", en: "Yes, I read your message last night" },
+                { fr: "non j'ai oublié de regarder la télévision", en: "No, I forgot to look at the television" },
+                { fr: "j'ai reçu l'information maintenant", en: "I received the information now" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu regarder un film maintenant ?",
+            prompt_en: "Do you want to watch a movie now?",
+            expected_responses: [
+                { fr: "oui le film est nouveau", en: "Yes, the movie is new" },
+                { fr: "avant je veux nettoyer la cuisine", en: "Before I want to clean the kitchen" },
+                { fr: "non il est très tard pour regarder un film", en: "No, it is very late to watch a movie" }
+            ]
+        },
+        {
+            prompt_fr: "Peux-tu ouvrir la fenêtre de la cuisine ?",
+            prompt_en: "Can you open the kitchen window?",
+            expected_responses: [
+                { fr: "oui la cuisine est très chaude", en: "Yes, the kitchen is very hot" },
+                { fr: "je ne peux pas ouvrir la fenêtre maintenant", en: "I cannot open the window now" },
+                { fr: "la fenêtre est cassée", en: "The window is broken" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu acheter de nouvelles chaussures ?",
+            prompt_en: "Do you want to buy new shoes?",
+            expected_responses: [
+                { fr: "oui j'ai besoin de chaussures pour le voyage", en: "Yes, I need shoes for the trip" },
+                { fr: "non mes petites chaussures sont bonnes", en: "No, my small shoes are good" },
+                { fr: "je veux essayer ces chaussures noires", en: "I want to try these black shoes" }
+            ]
+        },
+        {
+            prompt_fr: "Quand voyages-tu en avion ?",
+            prompt_en: "When do you travel by plane?",
+            expected_responses: [
+                { fr: "l'avion part dans quinze minutes", en: "The plane leaves in fifteen minutes" },
+                { fr: "je voyage tôt le matin", en: "I travel early in the morning" },
+                { fr: "j'attends encore mon billet d'avion", en: "I am still waiting for my plane ticket" }
+            ]
+        },
+        {
+            prompt_fr: "Vas-tu rendre visite à tes parents ?",
+            prompt_en: "Are you going to visit your parents?",
+            expected_responses: [
+                { fr: "oui je vais rendre visite à mes parents aujourd'hui", en: "Yes, I am going to visit my parents today" },
+                { fr: "je leur rends souvent visite chez eux", en: "Often I visit them at their house" },
+                { fr: "non ils sont en voyage maintenant", en: "No, they are on a trip now" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu besoin de transport pour aller à l'hôtel ?",
+            prompt_en: "Do you need transport to go to the hotel?",
+            expected_responses: [
+                { fr: "oui j'ai besoin d'un transport rapide maintenant", en: "Yes, I need fast transport now" },
+                { fr: "non l'hôtel est très proche", en: "No, the hotel is very near" },
+                { fr: "je préfère conduire ma voiture jusqu'à l'hôtel", en: "I prefer to drive my car to the hotel" }
+            ]
+        },
+        {
+            prompt_fr: "Quand le train arrive-t-il à la gare ?",
+            prompt_en: "When does the train arrive at the station?",
+            expected_responses: [
+                { fr: "le train arrive dans onze minutes", en: "The train arrives in eleven minutes" },
+                { fr: "normalmente il arrive tôt", en: "Normally it arrives early" },
+                { fr: "il est déjà arrivé à la gare", en: "It already arrived at the station" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu déjeuner avec moi maintenant ?",
+            prompt_en: "Do you want to have lunch with me now?",
+            expected_responses: [
+                { fr: "oui j'ai très faim", en: "Yes, I am very hungry" },
+                { fr: "avant j'ai besoin de finir mes devoirs", en: "Before I need to finish my homework" },
+                { fr: "désolé il est très tard pour déjeuner", en: "I am sorry, it is very late to have lunch" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu oublié le message hier soir ?",
+            prompt_en: "Did you forget the message last night?",
+            expected_responses: [
+                { fr: "oui j'ai oublié de lire le message hier soir", en: "Yes, I forgot to read the message last night" },
+                { fr: "non j'ai l'information ici", en: "No, I have the information here" },
+                { fr: "je n'ai pas reçu ton message", en: "I did not receive your message" }
+            ]
+        },
+        {
+            prompt_fr: "De combien de minutes as-tu besoin pour être prêt ?",
+            prompt_en: "How many minutes do you need to be ready?",
+            expected_responses: [
+                { fr: "j'ai besoin de douze minutes de plus", en: "I need twelve minutes more" },
+                { fr: "je suis déjà prêt à sortir", en: "I am already ready to go out" },
+                { fr: "attends quinze minutes s'il vous plaît", en: "Wait fifteen minutes please" }
+            ]
+        },
+        {
+            prompt_fr: "Aimes-tu conduire la nuit ?",
+            prompt_en: "Do you like to drive at night?",
+            expected_responses: [
+                { fr: "non je préfère conduire l'après-midi", en: "No, I prefer to drive in the afternoon" },
+                { fr: "je conduis souvent tôt", en: "Often I drive early" },
+                { fr: "oui la route est dégagée maintenant", en: "Yes, the road is clear now" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'est-ce que tu as besoin de réparer dans la maison ?",
+            prompt_en: "What do you need to fix in the house?",
+            expected_responses: [
+                { fr: "j'ai besoin de réparer la grande fenêtre", en: "I need to fix the big window" },
+                { fr: "je veux réparer la cuisine aujourd'hui", en: "I want to fix the kitchen today" },
+                { fr: "j'ai déjà réparé la nouvelle télévision", en: "I already fixed the new television" }
+            ]
+        },
+        {
+            prompt_fr: "Quand vas-tu quitter l'hôtel ?",
+            prompt_en: "When are you going to leave the hotel?",
+            expected_responses: [
+                { fr: "je veux partir tôt le matin", en: "I want to leave early in the morning" },
+                { fr: "je pars dans treize minutes", en: "I am leaving in thirteen minutes" },
+                { fr: "j'ai encore besoin d'attendre mon transport", en: "I still need to wait for my transport" }
+            ]
+        },
+        {
+            prompt_fr: "Combien de billets de bus as-tu ?",
+            prompt_en: "How many bus tickets do you have?",
+            expected_responses: [
+                { fr: "j'ai quatorze nouveaux billets", en: "I have fourteen new tickets" },
+                { fr: "j'ai seulement douze billets pour la famille", en: "I only have twelve tickets for the family" },
+                { fr: "j'ai besoin d'acheter un autre billet", en: "I need to buy another entry" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu essayer cette nouvelle nourriture ?",
+            prompt_en: "Do you want to try this new food?",
+            expected_responses: [
+                { fr: "oui j'aimerais essayer le steak", en: "Yes, I would like to try the steak" },
+                { fr: "non je préfère mon petit-déjeuner habituel", en: "No, I prefer my usual breakfast" },
+                { fr: "parce que j'ai déjà mangé du riz avec des haricots", en: "Because I already ate rice with beans" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu des informations sur le voyage ?",
+            prompt_en: "Do you have information about the trip?",
+            expected_responses: [
+                { fr: "oui j'ai déjà l'information ici", en: "Yes, I already have the information here" },
+                { fr: "j'attends encore le message de mon ami", en: "I am still waiting for my friend's message" },
+                { fr: "non j'ai oublié de demander à la gare", en: "No, I forgot to ask at the station" }
+            ]
+        },
+        {
+            prompt_fr: "À quelle heure arrive ton ami ?",
+            prompt_en: "What time does your friend arrive?",
+            expected_responses: [
+                { fr: "il arrive dans seize minutes", en: "He arrives in sixteen minutes" },
+                { fr: "normalement il arrive tôt pour le déjeuner", en: "Normally he arrives early for lunch" },
+                { fr: "il arrive en retard parce que le train est lent", en: "Arriving late because the train is slow" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu dîner à l'hôtel aujourd'hui ?",
+            prompt_en: "Do you want to have dinner at the hotel today?",
+            expected_responses: [
+                { fr: "oui le dîner de l'hôtel est bon", en: "Yes, the hotel dinner is good" },
+                { fr: "avant je veux rendre visite à mes parents", en: "Before I want to visit my parents" },
+                { fr: "non je préfère cuisiner chez moi", en: "No, I prefer to cook at my house" }
+            ]
+        },
+        {
+            prompt_fr: "Combien de minutes dure le film ?",
+            prompt_en: "How many minutes does the movie last?",
+            expected_responses: [
+                { fr: "le film dure vingt minutes de plus", en: "The movie lasts twenty minutes more" },
+                { fr: "il se termine tôt aujourd'hui", en: "Finishing early today" },
+                { fr: "il reste encore dix-sept minutes", en: "There are still seventeen minutes left" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu nettoyé la fenêtre de la cuisine ?",
+            prompt_en: "Did you clean the kitchen window?",
+            expected_responses: [
+                { fr: "oui la fenêtre est propre maintenant", en: "Yes, the window is clean now" },
+                { fr: "non j'ai oublié de nettoyer la cuisine", en: "No, I forgot to clean the kitchen" },
+                { fr: "je veux réparer la fenêtre avant", en: "Before, I want to fix the window" }
+            ]
+        },
+        {
+            prompt_fr: "Combien de nouvelles chaussures as-tu ?",
+            prompt_en: "How many new shoes do you have?",
+            expected_responses: [
+                { fr: "j'ai dix-huit chaussures chez moi", en: "I have eighteen shoes at my house" },
+                { fr: "j'ai seulement une nouvelle paire", en: "I only have one new pair" },
+                { fr: "j'ai besoin d'acheter des chaussures pour le voyage", en: "I need to buy shoes for the trip" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu attendre le bus ici ?",
+            prompt_en: "Do you want to wait for the bus here?",
+            expected_responses: [
+                { fr: "oui le transport est en retard aujourd'hui", en: "Yes, the transport is late today" },
+                { fr: "non je préfère aller à l'aéroport maintenant", en: "No, I prefer to go to the airport now" },
+                { fr: "c'est mieux d'attendre à la gare", en: "It is better to wait at the station" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi as-tu acheté quatorze pommes ?",
+            prompt_en: "Why did you buy fourteen apples?",
+            expected_responses: [
+                { fr: "parce que ma famille mange beaucoup de fruits", en: "Because my family eats a lot of fruit" },
+                { fr: "pour préparer un grand petit-déjeuner", en: "To prepare a big breakfast" },
+                { fr: "j'ai déjà oublié pourquoi je les ai achetées", en: "I already forgot why I bought them" }
+            ]
+        },
+        {
+            prompt_fr: "Aimes-tu voyager en avion ?",
+            prompt_en: "Do you like to travel by plane?",
+            expected_responses: [
+                { fr: "oui le voyage en avion est rapide", en: "Yes, the trip by plane is fast" },
+                { fr: "non je préfère le train ou le bus", en: "No, I prefer the train or the bus" },
+                { fr: "je voyage souvent pour mon travail", en: "Often I travel for my work" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu dix-neuf billets de train ?",
+            prompt_en: "Do you have nineteen train tickets?",
+            expected_responses: [
+                { fr: "oui j'ai dix-neuf billets prêts", en: "Yes, I have nineteen tickets ready" },
+                { fr: "non j'ai seulement quinze billets", en: "No, I only have fifteen tickets" },
+                { fr: "j'en ai besoin de vingt pour le groupe", en: "I need twenty for the group" }
+            ]
+        },
+        {
+            prompt_fr: "Quand vas-tu rendre visite à ta famille ?",
+            prompt_en: "When are you going to visit your family?",
+            expected_responses: [
+                { fr: "normalement je leur rends visite tôt", en: "Normally I visit them early" },
+                { fr: "je vais y aller maintenant en train", en: "I am going to go now by train" },
+                { fr: "demain parce qu'aujourd'hui j'ai des devoirs", en: "Tomorrow because today I have homework" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu laissé un message sur mon téléphone ?",
+            prompt_en: "Did you leave a message on my phone?",
+            expected_responses: [
+                { fr: "oui j'ai envoyé un message rapide", en: "Yes, I sent a quick message" },
+                { fr: "non j'ai oublié tes coordonnées", en: "No, I forgot your information" },
+                { fr: "pas encore je rappelle plus tard", en: "Not yet, I will call later" }
+            ]
+        },
+        {
+            prompt_fr: "Quel film veux-tu regarder à la télévision ?",
+            prompt_en: "What movie do you want to watch on TV?",
+            expected_responses: [
+                { fr: "je veux regarder un nouveau film", en: "I want to watch a new movie" },
+                { fr: "je préfère écouter de la musique maintenant", en: "I prefer to listen to music now" },
+                { fr: "n'importe quel bon film est parfait", en: "Any good movie is perfect" }
+            ]
+        },
+        {
+            prompt_fr: "Où as-tu acheté ces nouvelles chaussures ?",
+            prompt_en: "Where did you buy those new shoes?",
+            expected_responses: [
+                { fr: "je les ai achetées près de la gare", en: "I bought them near the station" },
+                { fr: "dans un petit endroit du centre-ville", en: "In a small place downtown" },
+                { fr: "j'ai déjà oublié le nom du magasin", en: "I already forgot the name of the store" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi as-tu ouvert la fenêtre de la cuisine ?",
+            prompt_en: "Why did you open the kitchen window?",
+            expected_responses: [
+                { fr: "parce que la cuisine est très chaude", en: "Because the kitchen is very hot" },
+                { fr: "avant de nettoyer la cuisine aujourd'hui", en: "Before cleaning the kitchen today" },
+                { fr: "pour regarder le jardin une minute", en: "To see the garden for a minute" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu assez d'informations pour le voyage ?",
+            prompt_en: "Do you have enough information for the trip?",
+            expected_responses: [
+                { fr: "oui j'ai déjà les informations prêtes", en: "Yes, I already have the information ready" },
+                { fr: "j'ai encore besoin d'attendre le message", en: "I still need to wait for the message" },
+                { fr: "non l'information est très difficile", en: "No, the information is very difficult" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu dîner tôt aujourd'hui ?",
+            prompt_en: "Do you want to have dinner early today?",
+            expected_responses: [
+                { fr: "oui je veux dîner maintenant s'il vous plaît", en: "Yes, I want to have dinner now please" },
+                { fr: "non normalement je dîne très tard", en: "No, normally I have dinner very late" },
+                { fr: "parce que je dois faire mes devoirs avant", en: "Because I have to do homework before" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu réparé la voiture de ton père ?",
+            prompt_en: "Did you fix your father's car?",
+            expected_responses: [
+                { fr: "oui réparer la voiture a été facile", en: "Yes, fixing the car was easy" },
+                { fr: "je suis encore en train de réparer la voiture", en: "I am still fixing the car" },
+                { fr: "non la voiture est au garage", en: "No, the car is in the repair shop" }
+            ]
+        },
+        {
+            prompt_fr: "Combien de minutes restent-elles avant d'arriver ?",
+            prompt_en: "How many minutes are left to arrive?",
+            expected_responses: [
+                { fr: "il reste quinze minutes avant d'arriver", en: "There are fifteen minutes left to arrive" },
+                { fr: "nous arrivons tôt dans douze minutes", en: "We arrive early in twelve minutes" },
+                { fr: "le bus est en retard aujourd'hui", en: "The bus arrives late today" }
+            ]
+        },
+        {
+            prompt_fr: "Voyages-tu souvent en avion ?",
+            prompt_en: "Do you often travel by plane?",
+            expected_responses: [
+                { fr: "je voyage souvent pour mon travail", en: "Often I travel for my work" },
+                { fr: "non je préfère voyager en train à grande vitesse", en: "No, I prefer to travel by fast train" },
+                { fr: "c'est déjà mon deuxième voyage cette année", en: "It is already my second trip this year" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu oublié de préparer le déjeuner aujourd'hui ?",
+            prompt_en: "Did you forget to prepare lunch today?",
+            expected_responses: [
+                { fr: "oui j'ai oublié de cuisiner le déjeuner tôt", en: "Yes, I forgot to cook lunch early" },
+                { fr: "non la nourriture est dans la cuisine", en: "No, the food is in the kitchen" },
+                { fr: "j'ai déjà préparé un steak avec du riz", en: "I already prepared a steak with rice" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu essayer ces chaussures noires ?",
+            prompt_en: "Do you want to try these black shoes?",
+            expected_responses: [
+                { fr: "oui je veux essayer les nouvelles chaussures", en: "Yes, I want to try the new shoes" },
+                { fr: "non mes vieilles chaussures sont bonnes", en: "No, my old shoes are good" },
+                { fr: "les chaussures sont trop petites pour moi", en: "The shoes are small for me" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi veux-tu quitter l'hôtel maintenant ?",
+            prompt_en: "Why do you want to leave the hotel now?",
+            expected_responses: [
+                { fr: "parce que mon avion part dans une heure", en: "Because my plane leaves in an hour" },
+                { fr: "avant je veux aller à la gare", en: "Before I want to visit the station" },
+                { fr: "partir tôt est une bonne idée", en: "Leaving early is a good idea" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu quatorze ou quinze billets ?",
+            prompt_en: "Do you have fourteen or fifteen tickets?",
+            expected_responses: [
+                { fr: "j'ai quatorze billets pour le transport", en: "I have fourteen tickets for the transport" },
+                { fr: "j'ai besoin de quinze billets pour la famille", en: "I need fifteen tickets for the family" },
+                { fr: "j'ai seulement onze billets aujourd'hui", en: "I only have eleven tickets today" }
+            ]
+        },
+        {
+            prompt_fr: "Est-ce que tu étudies normalement après le dîner ?",
+            prompt_en: "Do you normally study after dinner?",
+            expected_responses: [
+                { fr: "normalement j'étudie avant le dîner", en: "Normally I study before dinner" },
+                { fr: "oui j'étudie trente minutes toutes les nuits", en: "Yes, I study thirty minutes every night" },
+                { fr: "non je préfère regarder un film tard", en: "No, I prefer to watch a movie late" }
+            ]
+        },
+        {
+            prompt_fr: "Où est la fenêtre de ta cuisine ?",
+            prompt_en: "Where is the window of your kitchen?",
+            expected_responses: [
+                { fr: "elle est près de la grande porte", en: "It is near the big door" },
+                { fr: "la fenêtre donne sur le jardin lumineux", en: "The window opens to the clear garden" },
+                { fr: "j'ai oublié de fermer la fenêtre maintenant", en: "I forgot to close the window now" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu prendre le petit-déjeuner tôt demain ?",
+            prompt_en: "Do you want to have breakfast early tomorrow?",
+            expected_responses: [
+                { fr: "oui le petit-déjeuner tôt est bon", en: "Yes, early breakfast is good" },
+                { fr: "non demain je préfère me lever tard", en: "No, tomorrow I prefer to get up late" },
+                { fr: "je veux du pain, du lait et des fruits maintenant", en: "I want bread, milk and fruit now" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu dix-sept minutes pour parler ?",
+            prompt_en: "Do you have seventeen minutes to talk?",
+            expected_responses: [
+                { fr: "oui j'ai du temps libre maintenant", en: "Yes, I have free time now" },
+                { fr: "j'ai encore besoin de finir mes devoirs", en: "I still need to finish my homework" },
+                { fr: "désolé le transport arrive déjà", en: "I am sorry, the transport is arriving already" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi n'as-tu pas répondu à mon message hier soir ?",
+            prompt_en: "Why didn't you answer my message last night?",
+            expected_responses: [
+                { fr: "parce que je dormais déjà tôt", en: "Because I was already sleeping early" },
+                { fr: "j'ai oublié mon téléphone à l'école", en: "I forgot my phone at school" },
+                { fr: "j'ai lu le message ce matin", en: "I read the message today in the morning" }
+            ]
+        },
+        {
+            prompt_fr: "Le transport est-il arrivé à l'heure aujourd'hui ?",
+            prompt_en: "Did the transport arrive on time today?",
+            expected_responses: [
+                { fr: "oui le bus est arrivé très tôt", en: "Yes, the bus arrived very early" },
+                { fr: "non le train est arrivé vingt minutes en retard", en: "No, the train arrived twenty minutes late" },
+                { fr: "j'attends encore à la gare", en: "I am still waiting at the station" }
+            ]
+        }
+    ],
+
+    B1: [
+        {
+            prompt_fr: "As-tu travaillé dans le nouveau restaurant ?",
+            prompt_en: "Have you been working at the new restaurant?",
+            expected_responses: [
+                { fr: "oui j'y travaille depuis un mois", en: "Yes, I have been working there a month" },
+                { fr: "non j'ai étudié pour m'améliorer", en: "No, I have been studying to improve" },
+                { fr: "pas encore mais je veux commencer maintenant", en: "Not yet, but I want to start now" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'as-tu appris de tes expériences passées ?",
+            prompt_en: "What have you learned from past experiences?",
+            expected_responses: [
+                { fr: "j'ai appris à améliorer mes compétences", en: "I have learned to improve my skills" },
+                { fr: "j'ai appris à écouter avec attention", en: "I have learned to listen carefully" },
+                { fr: "j'ai encore besoin de réviser les informations", en: "I still need to review the information" }
+            ]
+        },
+        {
+            prompt_fr: "Le restaurant a-t-il apporté le menu ?",
+            prompt_en: "Has the restaurant brought the menu?",
+            expected_responses: [
+                { fr: "oui il a apporté le menu à la table", en: "Yes, they have brought the menu to the table" },
+                { fr: "non s'il vous plaît apportez aussi l'addition", en: "No, please bring the bill too" },
+                { fr: "je veux comprendre le menu avant de manger", en: "I want to understand the menu before eating" }
+            ]
+        },
+        {
+            prompt_fr: "Où as-tu habité ce mois-ci ?",
+            prompt_en: "Where have you been living this month?",
+            expected_responses: [
+                { fr: "j'ai habité près de l'aéroport", en: "I have been living near the airport" },
+                { fr: "j'ai habité avec ma famille", en: "I have been living with my family" },
+                { fr: "nous prévoyons de déménager bientôt", en: "We plan to move house soon" }
+            ]
+        },
+        {
+            prompt_fr: "Ont-ils annulé le trajet en bus aujourd'hui ?",
+            prompt_en: "Have they canceled the bus trip today?",
+            expected_responses: [
+                { fr: "oui ils ont annulé le transport à cause de problèmes", en: "Yes, they have canceled the transport due to problems" },
+                { fr: "non le bus arrive dans quinze minutes", en: "No, the bus arrives in fifteen minutes" },
+                { fr: "j'ai besoin de trouver une autre gare rapidement", en: "I need to find another station quickly" }
+            ]
+        },
+        {
+            prompt_fr: "Es-tu en train de lire les informations quotidiennes à la maison ?",
+            prompt_en: "Are you reading the daily news at home?",
+            expected_responses: [
+                { fr: "oui je lis pour améliorer ma communication", en: "Yes, I am reading to improve my communication" },
+                { fr: "non je préfère continuer mes conversations", en: "No, I prefer to continue my conversations" },
+                { fr: "j'ai oublié de vérifier les informations quotidiennes", en: "I forgot to review the daily information" }
+            ]
+        },
+        {
+            prompt_fr: "Avons-nous obtenu les billets pour l'avion ?",
+            prompt_en: "Have we gotten the tickets for the plane?",
+            expected_responses: [
+                { fr: "oui nous avons obtenu les billets tôt", en: "Yes, we have gotten the tickets early" },
+                { fr: "pas encore le transport est difficile", en: "Not yet, the transport is difficult" },
+                { fr: "j'ai besoin de trouver la facture du voyage", en: "I need to find the bill for the trip" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'est-ce que tu prépares pour le dîner aujourd'hui ?",
+            prompt_en: "What are you preparing for dinner today?",
+            expected_responses: [
+                { fr: "je prépare du poulet avec du riz et du fromage", en: "I am preparing chicken with rice and cheese" },
+                { fr: "j'ai préparé un steak avec des frites", en: "I have prepared a steak with french fries" },
+                { fr: "je veux préparer de la soupe pendant que nous attendons", en: "I want to prepare soup while we wait" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu compris les conversations de l'école ?",
+            prompt_en: "Have you understood the school conversations?",
+            expected_responses: [
+                { fr: "oui j'ai presque tout compris aujourd'hui", en: "Yes, I have understood almost everything today" },
+                { fr: "cependant j'ai besoin d'étudier plus", en: "However, I need to study more" },
+                { fr: "c'est encore difficile de comprendre rapidement", en: "It is still difficult to understand fast" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu te joindre à notre voyage ce mois-ci ?",
+            prompt_en: "Do you want to join our trip this month?",
+            expected_responses: [
+                { fr: "oui je veux me joindre à votre groupe aujourd'hui", en: "Yes, I want to join your group today" },
+                { fr: "non je dois travailler pendant le mois", en: "No, I have to work during the month" },
+                { fr: "nous prévoyons de rendre visite aux parents avant", en: "We plan to visit parents before" }
+            ]
+        },
+        {
+            prompt_fr: "À quelle heure avons-nous fini les tâches quotidiennes ?",
+            prompt_en: "What time have we finished the daily tasks?",
+            expected_responses: [
+                { fr: "nous avons fini tôt aujourd'hui", en: "We have finished early today" },
+                { fr: "après avoir étudié pendant trois heures", en: "After studying for three hours" },
+                { fr: "nous y travaillons encore maintenant", en: "We are still working on them now" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi ont-ils annulé leur compte d'hôtel ?",
+            prompt_en: "Why have they canceled their hotel account?",
+            expected_responses: [
+                { fr: "parce qu'ils ont changé leur plan de voyage", en: "Because they have changed their trip plan" },
+                { fr: "cependant ils vont payer la facture demain", en: "However they are going to pay the bill tomorrow" },
+                { fr: "ils ont oublié de vérifier les informations avant de partir", en: "They forgot to review the information before leaving" }
+            ]
+        },
+        {
+            prompt_fr: "Es-tu en train d'étudier pour améliorer tes compétences aujourd'hui ?",
+            prompt_en: "Are you studying to improve your skills today?",
+            expected_responses: [
+                { fr: "oui j'étudie pour obtenir un travail", en: "Yes, I am studying to get a job" },
+                { fr: "j'ai besoin de continuer nos conversations quotidiennes", en: "I need to continue my daily conversations" },
+                { fr: "réviser mes livres m'aide à apprendre rapidement", en: "Reviewing my books helps me learn fast" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu apporté la nourriture du restaurant ?",
+            prompt_en: "Have you brought the food from the restaurant?",
+            expected_responses: [
+                { fr: "oui j'ai apporté du pain, de la soupe et du fromage", en: "Yes, I have brought bread, soup and cheese" },
+                { fr: "non le restaurant est fermé maintenant", en: "No, the restaurant is closed now" },
+                { fr: "apporter la nourriture est difficile sans transport", en: "Bringing the food is difficult without transport" }
+            ]
+        },
+        {
+            prompt_fr: "Où pouvons-nous trouver un bon menu aujourd'hui ?",
+            prompt_en: "Where can we find a good menu today?",
+            expected_responses: [
+                { fr: "nous pouvons trouver un menu à l'hôtel", en: "We can find a menu at the hotel" },
+                { fr: "pendant que nous marchons nous pouvons chercher un restaurant", en: "While we walk we can look for a restaurant" },
+                { fr: "j'ai déjà le menu de la cuisine ici", en: "I already have the kitchen menu here" }
+            ]
+        },
+        {
+            prompt_fr: "Combien de temps as-tu habité dans cette maison ?",
+            prompt_en: "How much time have you been living in this house?",
+            expected_responses: [
+                { fr: "j'ai habité ici pendant deux ans", en: "I have been living here for two years" },
+                { fr: "nous avons habité ici un mois seulement", en: "We have lived here one month only" },
+                { fr: "après ce mois-ci je veux déménager", en: "After this month I want to move" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'est-ce que tu lis sur les expériences passées ?",
+            prompt_en: "What are you reading about past experiences?",
+            expected_responses: [
+                { fr: "je lis un livre sur la communication", en: "I am reading a book about communication" },
+                { fr: "cela a été un voyage long et difficile", en: "It has been a long and difficult trip" },
+                { fr: "je veux comprendre leurs problèmes avant de continuer", en: "I want to understand their problems before following" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu planifier un nouveau voyage avec moi ?",
+            prompt_en: "Do you want to plan a new trip with me?",
+            expected_responses: [
+                { fr: "oui je veux planifier un voyage en avion", en: "Yes, I want to plan a trip by plane" },
+                { fr: "pendant ce mois-ci je n'ai pas de temps livre", en: "During this month I do not have free time" },
+                { fr: "cependant nous pouvons en parler plus tard", en: "However we can talk about that later" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu réussi à vérifier les informations du train ?",
+            prompt_en: "Have you managed to review the train information?",
+            expected_responses: [
+                { fr: "oui j'ai tout vérifié à la gare", en: "Yes, I have reviewed everything at the station" },
+                { fr: "pas encore le message n'est pas arrivé", en: "Not yet, the message did not arrive" },
+                { fr: "j'ai besoin de trouver mon billet de train avant", en: "I need to find my train ticket before" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi as-tu décidé de déménager cette année ?",
+            prompt_en: "Why have you decided to move house this year?",
+            expected_responses: [
+                { fr: "parce que ma nouvelle maison est près du travail", en: "Because my new house is near work" },
+                { fr: "pour habiter de nouveau avec ma famille", en: "To live with my family again" },
+                { fr: "j'ai habité dans un endroit très petit", en: "I have been living in a very small place" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu payé l'addition au restaurant ?",
+            prompt_en: "Have you paid the bill at the restaurant?",
+            expected_responses: [
+                { fr: "oui j'ai déjà payé l'addition en espèces", en: "Yes, I have already paid the bill with money" },
+                { fr: "non j'attends encore qu'ils apportent l'addition", en: "No, I am still waiting for them to bring the bill" },
+                { fr: "mon ami a tout payé aujourd'hui", en: "My friend has paid for everything today" }
+            ]
+        },
+        {
+            prompt_fr: "Travailles-tu pour améliorer tes compétences quotidiennes ?",
+            prompt_en: "Are you working to improve your daily skills?",
+            expected_responses: [
+                { fr: "oui je travaille dur chaque heure", en: "Yes, I am working hard every hour" },
+                { fr: "je veux continuer à apprendre plus de choses", en: "I want to continue learning more things" },
+                { fr: "réviser mes devoirs m'aide à m'améliorer", en: "Reviewing my homework helps me improve" }
+            ]
+        },
+        {
+            prompt_fr: "A-t-elle préparé la nourriture pour le voyage ?",
+            prompt_en: "Has she prepared the food for the trip?",
+            expected_responses: [
+                { fr: "oui elle a préparé du pain, du fromage et des fruits", en: "Yes, she has prepared bread, cheese and fruit" },
+                { fr: "elle prépare la nourriture dans la cuisine maintenant", en: "She is preparing the food in the kitchen now" },
+                { fr: "non elle a oublié de préparer les affaires quotidiennes", en: "No, she forgot to prepare the daily things" }
+            ]
+        },
+        {
+            prompt_fr: "Où tes frères ont-ils étudié ce mois-ci ?",
+            prompt_en: "Where have your brothers been studying this month?",
+            expected_responses: [
+                { fr: "ils ont étudié dans la grande école", en: "They have been studying at the big school" },
+                { fr: "nous avons étudié ensemble à la maison", en: "We have been studying together at home" },
+                { fr: "ils veulent continuer à étudier à l'hôtel", en: "They want to continue studying at the hotel" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu lire son message pendant que nous attendons le train ?",
+            prompt_en: "Do you want to read his message while we wait for the train?",
+            expected_responses: [
+                { fr: "oui je veux lire le message maintenant", en: "Yes, I want to read the message now" },
+                { fr: "non je préfère écouter de la musique sur ma télévision", en: "No, I prefer to listen to music on my television" },
+                { fr: "j'ai besoin de vérifier les informations du transport avant", en: "I need to review the transport information before" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu réussi à trouver un endroit près de la gare ?",
+            prompt_en: "Have you managed to find a place near the station?",
+            expected_responses: [
+                { fr: "oui j'ai trouvé une petite maison tout près", en: "Yes, I have found a small house very near" },
+                { fr: "je cherche encore avec mon ami", en: "I am still looking with my friend" },
+                { fr: "c'est difficile de trouver un endroit rapidement aujourd'hui", en: "It is difficult to find a place quickly today" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi as-tu annulé tes conversations d'aujourd'hui ?",
+            prompt_en: "Why have you canceled your conversations today?",
+            expected_responses: [
+                { fr: "parce que j'ai été très fatigué ce mois-ci", en: "Because I have been very tired this month" },
+                { fr: "j'ai besoin de préparer mon voyage en avion avant", en: "I need to prepare my plane trip before" },
+                { fr: "cependant nous pouvons en parler après le dîner", en: "However we can talk after having dinner" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'a dit sa famille à propos du déménagement ?",
+            prompt_en: "What has his family said about the move?",
+            expected_responses: [
+                { fr: "ils veulent déménager le mois prochain", en: "They want to move next month" },
+                { fr: "ils sont heureux du changement d'endroit", en: "They are happy with the change of place" },
+                { fr: "ils ont encore des problèmes pour faire les cartons", en: "They still have problems packing" }
+            ]
+        },
+        {
+            prompt_fr: "Habites-tu chez tes parents cette année ?",
+            prompt_en: "Are you living with your parents this year?",
+            expected_responses: [
+                { fr: "oui j'habite avec eux depuis cinq mois", en: "Yes, I have been working/living with them for five months" },
+                { fr: "non je préfère vivre seul en ville", en: "No, I prefer to live alone in the city" },
+                { fr: "je veux déménager dans une autre maison bientôt", en: "I want to move to another house soon" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu vérifié le menu du nouveau restaurant ?",
+            prompt_en: "Have you reviewed the menu of the new restaurant?",
+            expected_responses: [
+                { fr: "oui le menu propose du steak, du poulet et du poisson", en: "Yes, the menu has steak, chicken and fish" },
+                { fr: "non j'ai oublié de regarder le menu avant", en: "No, I forgot to look at the menu before" },
+                { fr: "je veux d'abord comprendre leurs tarifs", en: "I want to understand their prices first" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu continué à étudier pendant le voyage ?",
+            prompt_en: "Have you continued studying during the trip?",
+            expected_responses: [
+                { fr: "oui j'ai étudié des livres tous les jours", en: "Yes, I have been studying daily books" },
+                { fr: "non je me suis reposé et j'ai regardé des films", en: "No, I have been resting and watching movies" },
+                { fr: "pendant que je voyage c'est difficile d'étudier plus", en: "While I travel it is difficult to study more" }
+            ]
+        },
+        {
+            prompt_fr: "Les parents ont-ils apporté leur nouvelle voiture ?",
+            prompt_en: "Have the parents brought their new car?",
+            expected_responses: [
+                { fr: "oui ils ont apporté la grande voiture aujourd'hui", en: "Yes, they have brought the big car today" },
+                { fr: "non on est en train de réparer la voiture à la maison", en: "No, the car is fixing at home" },
+                { fr: "ils veulent voyager en train aujourd'hui", en: "They want to travel by train today" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu suivre les instructions du menu ?",
+            prompt_en: "Do you want to follow the menu instructions?",
+            expected_responses: [
+                { fr: "oui pour préparer la soupe de poisson", en: "Yes, to prepare the fish soup" },
+                { fr: "non je veux cuisiner du poulet avec de la salade", en: "No, I want to cook chicken with salad" },
+                { fr: "j'ai besoin de comprendre les informations avant", en: "I need to understand the information before" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu obtenu la facture du transport ?",
+            prompt_en: "Have you gotten the transport bill?",
+            expected_responses: [
+                { fr: "oui j'ai obtenu la facture de la gare", en: "Yes, I have gotten the bill from the station" },
+                { fr: "pas encore le message n'est pas arrivé", en: "Not yet, the message did not arrive" },
+                { fr: "mon ami a le billet et la facture", en: "My friend has the ticket and the bill" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi as-tu lu des choses sur cet endroit ?",
+            prompt_en: "Why have you been reading about this place?",
+            expected_responses: [
+                { fr: "parce que je prévois de visiter l'hôtel bientôt", en: "Because I plan to visit the hotel soon" },
+                { fr: "pour comprendre sa culture et sa bonne cuisine", en: "To understand its culture and good food" },
+                { fr: "cependant je lis seulement pour le plaisir aujourd'hui", en: "However I only read for pleasure today" }
+            ]
+        },
+        {
+            prompt_fr: "Est-ce qu'ils habitent dans cet hôtel depuis cinq ans ?",
+            prompt_en: "Have they been living in this hotel for five years?",
+            expected_responses: [
+                { fr: "non ils habitent ici depuis un mois", en: "No, they have been living here a month" },
+                { fr: "oui ils habitent ici depuis de nombreuses années", en: "Yes, they have been living here many years" },
+                { fr: "ils veulent déménager après ce mois-ci", en: "They want to move house after this month" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu réviser tes devoirs après manger ?",
+            prompt_en: "Do you want to review your homework after eating?",
+            expected_responses: [
+                { fr: "oui j'ai besoin de tout réviser aujourd'hui", en: "Yes, I need to review everything today" },
+                { fr: "non je préfère écouter de la musique et me reposer", en: "No, I prefer to listen to music and rest" },
+                { fr: "j'ai déjà révisé les tâches quotidiennes tôt", en: "I already reviewed the daily tasks early" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu travaillé pour améliorer tu communication ?",
+            prompt_en: "Have you been working to improve your communication?",
+            expected_responses: [
+                { fr: "oui j'ai eu de nombreuses conversations", en: "Yes, I have been having many conversations" },
+                { fr: "je veux acquérir de meilleures compétences cette année", en: "I want to get better skills this year" },
+                { fr: "c'est encore difficile de parler rapidement avec des amis", en: "It is still difficult to talk fast with friends" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'as-tu apporté pour le petit-déjeuner d'aujourd'hui ?",
+            prompt_en: "What have you brought for today's breakfast?",
+            expected_responses: [
+                { fr: "j'ai apporté du pain chaud, du lait et des fruits", en: "I have brought hot bread, milk and fruit" },
+                { fr: "je n'ai rien apporté de la cuisine", en: "I have not brought anything from the kitchen" },
+                { fr: "ma sœur a préparé des œufs avec du fromage", en: "My sister has prepared eggs with cheese" }
+            ]
+        },
+        {
+            prompt_fr: "Ont-ils réussi à comprendre leurs problèmes ?",
+            prompt_en: "Have they managed to understand their problems?",
+            expected_responses: [
+                { fr: "oui ils ont discuté pendant une heure", en: "Yes, they have conversed for an hour" },
+                { fr: "cependant ils ont besoin de changer de stratégie", en: "However they need to change their strategy" },
+                { fr: "pas encore c'est une situation difficile", en: "Not yet, it is a difficult situation" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu prévu d'annuler ton voyage en avion ?",
+            prompt_en: "Have you planned to cancel your plane trip?",
+            expected_responses: [
+                { fr: "oui j'ai dû annuler le voyage aujourd'hui", en: "Yes, I have had to cancel the trip today" },
+                { fr: "non je veux aller à l'hôtel ce mois-ci", en: "No, I want to go to the hotel this month" },
+                { fr: "pas encore j'espère vérifier les informations avant", en: "Not yet, I hope to review the information before" }
+            ]
+        },
+        {
+            prompt_fr: "Quelles compétences as-tu apprises dans ton nouveau travail ?",
+            prompt_en: "What skills have you learned in your new job?",
+            expected_responses: [
+                { fr: "j'ai appris à améliorer ma communication quotidienne", en: "I have learned to improve my daily communication" },
+                { fr: "j'ai appris à préparer de la nourriture", en: "I have been learning to prepare food" },
+                { fr: "j'ai encore besoin de continuer à en apprendre plus", en: "I still need to continue learning more" }
+            ]
+        },
+        {
+            prompt_fr: "Ont-ils lu leurs livres pendant l'après-midi ?",
+            prompt_en: "Have they been reading their books during the afternoon?",
+            expected_responses: [
+                { fr: "oui ils ont lu des choses sur les expériences passées", en: "Yes, they have been reading about past experiences" },
+                { fr: "non ils préfèrent écouter de la musique ou regarder la télévision", en: "No, they prefer to listen to music or watch TV" },
+                { fr: "pendant qu'ils se reposent je cuisine le dîner", en: "While they rest I cook dinner" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu continuer la conversation au restaurant ?",
+            prompt_en: "Do you want to continue the conversation at the restaurant?",
+            expected_responses: [
+                { fr: "oui nous pouvons demander le menu et déjeuner", en: "Yes, we can ask for the menu and have lunch" },
+                { fr: "non je préfère rentrer à la maison pour me reposer maintenant", en: "No, I prefer to go home to rest now" },
+                { fr: "après avoir vérifié la facture de l'hôtel nous pourrons y aller", en: "After reviewing the hotel bill we can go" }
+            ]
+        },
+        {
+            prompt_fr: "Ton frère a-t-il trouvé un nouvel endroit où vivre ?",
+            prompt_en: "Has your brother gotten a new place to live?",
+            expected_responses: [
+                { fr: "oui il a trouvé une très bonne petite maison", en: "Yes, he has found a very good small house" },
+                { fr: "il habite encore chez ses parents ce mois-ci", en: "He is still living with his parents this month" },
+                { fr: "il veut déménager après cette année", en: "He wants to move house after this year" }
+            ]
+        },
+        {
+            prompt_fr: "Qu'est-ce que tu as préparé pendant le mois ?",
+            prompt_en: "What have you been preparing during the month?",
+            expected_responses: [
+                { fr: "j'ai préparé mon voyage en avion", en: "I have been preparing my plane trip" },
+                { fr: "j'ai préparé un nouveau plan pour le travail", en: "I have prepared a new plan for work" },
+                { fr: "j'ai besoin de préparer les devoirs de l'école", en: "I need to prepare the school homework" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu essayé de suivre leurs conversations quotidiennes ?",
+            prompt_en: "Have you tried to follow their daily conversations?",
+            expected_responses: [
+                { fr: "oui mais ils parlent très vite au restaurant", en: "Yes, but they talk very fast at the restaurant" },
+                { fr: "cela m'aide à comprendre et à améliorer mes compétences", en: "It helps me understand and improve my skills" },
+                { fr: "cependant je préfère lire des livres à la maison", en: "However I prefer to read books at home" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi as-tu amené ton ami chez moi ?",
+            prompt_en: "Why have you brought your friend to my house?",
+            expected_responses: [
+                { fr: "parce que nous voulons étudier et faire nos devoirs ensemble", en: "Because we want to study and do homework together" },
+                { fr: "pour avoir une conversation sur les vacances", en: "To have a conversation about the vacation" },
+                { fr: "il veut rencontrer ma famille aujourd'hui", en: "He wants to meet my family today" }
+            ]
+        },
+        {
+            prompt_fr: "Ont-ils réussi à vérifier l'addition du restaurant ?",
+            prompt_en: "Have they managed to review the restaurant bill?",
+            expected_responses: [
+                { fr: "oui ils ont vérifié l'addition avant de payer", en: "Yes, they have reviewed the bill before paying" },
+                { fr: "pas encore l'addition a des problèmes aujourd'hui", en: "Not yet, the bill has problems today" },
+                { fr: "mon père a déjà payé l'addition du déjeuner", en: "My father has already paid the lunch bill" }
+            ]
+        },
+        {
+            prompt_fr: "Veux-tu nous rejoindre pour dîner plus tard ?",
+            prompt_en: "Do you want to join us for dinner later?",
+            expected_responses: [
+                { fr: "oui je veux rejoindre votre table après le travail", en: "Yes, I want to join your table after working" },
+                { fr: "désolé j'ai déjà mangé du poisson chez moi", en: "I am sorry, I already ate fish at my house" },
+                { fr: "tant que je dois étudier je ne peux pas sortir", en: "As long as I have to study I cannot go out" }
+            ]
+        }
+    ],
+    B2: [
+        {
+            prompt_fr: "Comment prévois-tu d'optimiser le nouveau processus du système ?",
+            prompt_en: "How do you plan to optimize the new system process?",
+            expected_responses: [
+                { fr: "nous devons analyser les performances attentivement", en: "We need to analyze the performance carefully" },
+                { fr: "avec une stratégie efficace nous pouvons obtenir des résultats", en: "With an effective strategy we can achieve results" },
+                { fr: "même si c'est compliqué nous pouvons mettre à jour l'approche", en: "Although it is complicated, we can update the approach" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu évalué les risques de cette stratégie professionnelle ?",
+            prompt_en: "Have you evaluated the risks of this professional strategy?",
+            expected_responses: [
+                { fr: "oui j'ai évalué chaque risque possible", en: "Yes, I have evaluated every possible risk" },
+                { fr: "par conséquent il est nécessaire de changer d'approche", en: "Therefore it is necessary to change the approach" },
+                { fr: "il existe une possibilité d'avoir des problèmes", en: "There is a possibility of having problems" }
+            ]
+        },
+        {
+            prompt_fr: "Quels résultats ont-ils analysés pendant la réunion ?",
+            prompt_en: "What results have they analyzed in the meeting?",
+            expected_responses: [
+                { fr: "ils ont analysé des performances très positives", en: "They have analyzed a very positive performance" },
+                { fr: "de plus ils ont optimisé le concept de travail", en: "In addition they have optimized the concept of work" },
+                { fr: "les résultats montrent que le système fonctionne", en: "The results show that the system works" }
+            ]
+        },
+        {
+            prompt_fr: "Comment pouvons-nous gérer cette situation compliquée ?",
+            prompt_en: "How can we coordinate this complicated situation?",
+            expected_responses: [
+                { fr: "nous devons coordonner les étapes attentivement", en: "We must coordinate the steps carefully" },
+                { fr: "malgré les problèmes l'approche est réaliste", en: "Despite the problems, the approach is realistic" },
+                { fr: "je veux discuter d'une nouvelle stratégie aujourd'hui", en: "I want to discuss a new strategy today" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu clarifié les attentes pour le futur voyage ?",
+            prompt_en: "Have you clarified the expectations for the future trip?",
+            expected_responses: [
+                { fr: "oui j'ai tout clarifié avec mes parents", en: "Yes, I have clarified everything with my parents" },
+                { fr: "bien que ce soit à long terme le plan est bon", en: "Although it is long term, the plan is good" },
+                { fr: "j'ai encore besoin d'explorer un endroit éloigné", en: "I still need to explore a remote place" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi ont-ils insisté pour mettre à jour le système ?",
+            prompt_en: "Why have they insisted on updating the system?",
+            expected_responses: [
+                { fr: "pour accroître la communication au sein de la société", en: "To increase communication in society" },
+                { fr: "ils ont insisté parce que la stratégie a changé", en: "They have insisted because the strategy has changed" },
+                { fr: "même avec des problèmes il est nécessaire d'avancer", en: "Even with problems, it is necessary to move forward" }
+            ]
+        },
+        {
+            prompt_fr: "De quelle motivation as-tu besoin pour atteindre tes objectifs ?",
+            prompt_en: "What motivation do you need to achieve your goals?",
+            expected_responses: [
+                { fr: "ma famille est ma plus grande motivation", en: "My family is my biggest motivation" },
+                { fr: "j'ai besoin de renforcer mes compétences professionnelles", en: "I need to strengthen my professional skills" },
+                { fr: "une approche positive aide à changer la situation", en: "A positive approach helps to change the situation" }
+            ]
+        },
+        {
+            prompt_fr: "Comment ta culture s'adapte-t-elle à ces défis ?",
+            prompt_en: "How does your culture adapt to these challenges?",
+            expected_responses: [
+                { fr: "notre société sait s'adapter aux changements", en: "Our society knows how to adapt to changes" },
+                { fr: "c'est un processus compliqué mais positif", en: "It is a complicated but positive process" },
+                { fr: "discuter des défis aide à renforcer la culture", en: "Discussing challenges helps to strengthen culture" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu exploré la possibilité de réduire le risque ?",
+            prompt_en: "Have you explored the possibility of reducing the risk?",
+            expected_responses: [
+                { fr: "oui j'ai exploré une stratégie plus réaliste", en: "Yes, I have explored a more realistic strategy" },
+                { fr: "par conséquent nous avons réduit le risque aujourd'hui", en: "Therefore we have reduced the risk today" },
+                { fr: "il est encore nécessaire d'analyser le concept", en: "It is still necessary to analyze the concept" }
+            ]
+        },
+        {
+            prompt_fr: "Est-il possible d'atteindre une performance efficace maintenant ?",
+            prompt_en: "Is it possible to achieve an effective performance now?",
+            expected_responses: [
+                { fr: "oui avec un système innovant c'est possible", en: "Yes, with an innovative system it is possible" },
+                { fr: "nous avons optimisé l'approche pour y parvenir", en: "We have optimized the approach to achieve it" },
+                { fr: "cependant la situation actuelle est difficile", en: "However the current situation is difficult" }
+            ]
+        },
+        {
+            prompt_fr: "Ont-ils discuté de la nouvelle stratégie de communication ?",
+            prompt_en: "Have they discussed the new communication strategy?",
+            expected_responses: [
+                { fr: "oui ils ont discuté de la stratégie attentivement", en: "Yes, they have discussed the strategy carefully" },
+                { fr: "de plus ils ont clarifié toutes les attentes", en: "In addition they have clarified all expectations" },
+                { fr: "par conséquent le processus est plus clair aujourd'hui", en: "Therefore the process is clearer today" }
+            ]
+        },
+        {
+            prompt_fr: "Est-il nécessaire de changer l'approche à long terme ?",
+            prompt_en: "Is it necessary to change the long term approach?",
+            expected_responses: [
+                { fr: "oui une approche réaliste est nécessaire aujourd'hui", en: "Yes, a realistic approach is necessary today" },
+                { fr: "malgré les résultats je préfère attendre", en: "Despite the results, I prefer to wait" },
+                { fr: "bien que ce soit difficile l'avenir est positif", en: "Although it is difficult, the future is positive" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu mis à jour les informations sur le système ?",
+            prompt_en: "Have you updated the system information?",
+            expected_responses: [
+                { fr: "oui j'ai mis à jour les informations aujourd'hui", en: "Yes, I have updated the information today" },
+                { fr: "j'ai besoin d'optimiser le processus avant de changer", en: "I need to optimize the process before changing" },
+                { fr: "même sans aide j'ai réussi à tout mettre à jour", en: "Even without help, I achieved updating everything" }
+            ]
+        },
+        {
+            prompt_fr: "Quels défis notre société actuelle rencontre-t-elle ?",
+            prompt_en: "What challenges does our current society have?",
+            expected_responses: [
+                { fr: "nous devons renforcer la culture et l'éducation", en: "We must strengthen culture and education" },
+                { fr: "la situation est un processus compliqué", en: "The situation is a complicated process" },
+                { fr: "par conséquent la motivation est très nécessaire", en: "Therefore motivation is very necessary" }
+            ]
+        },
+        {
+            prompt_fr: "Ont-ils évalué la performance des transports ?",
+            prompt_en: "Have they evaluated the transport performance?",
+            expected_responses: [
+                { fr: "oui ils ont évalué le système de trains", en: "Yes, they have evaluated the train system" },
+                { fr: "la performance a été réduite ce mois-ci", en: "The performance has been reduced this month" },
+                { fr: "il est possible de coordonner un meilleur transport", en: "It is possible to coordinate better transport" }
+            ]
+        },
+        {
+            prompt_fr: "Comment as-tu réussi à coordonner la réunion au restaurant ?",
+            prompt_en: "How did you manage to coordinate the restaurant meeting?",
+            expected_responses: [
+                { fr: "coordonner la réunion a été un processus facile", en: "Coordinating the meeting was an easy process" },
+                { fr: "en ayant discuté du menu avant tout a été rapide", en: "Having discussed the menu before, everything was fast" },
+                { fr: "apporter l'addition à temps a beaucoup aidé", en: "Bringing the bill on time helped a lot" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu analysé la possibilité d'un voyage lointain ?",
+            prompt_en: "Have you analyzed the possibility of a remote trip?",
+            expected_responses: [
+                { fr: "oui c'est une possibilité à long terme", en: "Yes, it is a long-term possibility" },
+                { fr: "je veux explorer un endroit éloigné à l'avenir", en: "I want to explore a remote place in the future" },
+                { fr: "malgré les risques le voyage est positif", en: "Despite the risks, the trip is positive" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi as-tu insisté sur une stratégie innovante ?",
+            prompt_en: "Why have you insisted on an innovative strategy?",
+            expected_responses: [
+                { fr: "parce que nous voulons optimiser les résultats", en: "Because we want to optimize the results" },
+                { fr: "une stratégie innovante renforce le travail", en: "An innovative strategy strengthens work" },
+                { fr: "bien que ce soit compliqué cela aide à accroître la performance", en: "Although it is complicated, it helps to increase performance" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu clarifié le concept de risque avec ton équipe ?",
+            prompt_en: "Have you clarified the risk concept with your team?",
+            expected_responses: [
+                { fr: "oui le concept a été clarifié aujourd'hui", en: "Yes, the concept has been clarified today" },
+                { fr: "par conséquent tout le monde comprend la situation", en: "Therefore everyone understands the situation" },
+                { fr: "nous avons encore besoin d'évaluer certaines choses", en: "We still need to evaluate some things" }
+            ]
+        },
+        {
+            prompt_fr: "Est-il réaliste d'attendre un changement positif maintenant ?",
+            prompt_en: "Is it realistic to expect a positive change now?",
+            expected_responses: [
+                { fr: "oui avec une approche professionnelle c'est réaliste", en: "Yes, with a professional approach it is realistic" },
+                { fr: "nous avons élargi la stratégie pour y parvenir", en: "We have expanded the strategy to achieve it" },
+                { fr: "cependant la situation est très difficile", en: "However the situation is very difficult" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu réussi à adapter la stratégie pour améliorer le processus ?",
+            prompt_en: "Have you achieved adapting the strategy to improve the process?",
+            expected_responses: [
+                { fr: "oui je me suis adapté à la nouvelle situation", en: "Yes, I have adapted to the new situation" },
+                { fr: "nous avons optimisé la performance du système", en: "We have optimized the system performance" },
+                { fr: "par conséquent les résultats sont très positifs", en: "Therefore the results are very positive" }
+            ]
+        },
+        {
+            prompt_fr: "Quelles attentes as-tu concernant la culture de la société ?",
+            prompt_en: "What expectations do you have about the culture of society?",
+            expected_responses: [
+                { fr: "je veux mieux comprendre leur société et leur culture", en: "I want to understand their society and culture better" },
+                { fr: "de plus j'ai des attentes élevées pour l'avenir", en: "In addition I have high expectations for the future" },
+                { fr: "c'est un processus nécessaire pour renforcer l'union", en: "It is a necessary process to strengthen the union" }
+            ]
+        },
+        {
+            prompt_fr: "Ont-ils analysé les risques de l'approche actuelle ?",
+            prompt_en: "Have they analyzed the risks of the current approach?",
+            expected_responses: [
+                { fr: "oui ils ont analysé chaque risque attentivement", en: "Yes, they have analyzed every risk carefully" },
+                { fr: "bien que ce soit compliqué l'approche est réaliste", en: "Although it is complicated, the approach is realistic" },
+                { fr: "par conséquent ils préfèrent changer de stratégie aujourd'hui", en: "Therefore they prefer to change the strategy today" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi as-tu insisté pour évaluer de nouveau la performance ?",
+            prompt_en: "Why have you insisted on evaluating the performance again?",
+            expected_responses: [
+                { fr: "parce que les résultats passés n'étaient pas bons", en: "Because past results were not good" },
+                { fr: "nous devons tout évaluer pour optimiser le système", en: "We need to evaluate everything to optimize the system" },
+                { fr: "même avec des problèmes je préfère vérifier les informations", en: "Even with problems, I prefer to review the information" }
+            ]
+        },
+        {
+            prompt_fr: "Est-il possible de coordonner les transports à long terme ?",
+            prompt_en: "Is it possible to coordinate long term transport?",
+            expected_responses: [
+                { fr: "oui c'est une possibilité que nous explorons", en: "Yes, it is a possibility that we are exploring" },
+                { fr: "malgré les défis nous pouvons y parvenir aujourd'hui", en: "Despite the challenges, we can achieve it today" },
+                { fr: "nous devons d'abord coordonner avec l'aéroport", en: "We need to coordinate with the airport before" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu clarifié le concept innovant avec ta famille ?",
+            prompt_en: "Have you clarified the innovative concept with your family?",
+            expected_responses: [
+                { fr: "oui le concept a été clarifié à la maison", en: "Yes, the concept has been clarified at home" },
+                { fr: "ils ont une motivation très positive aujourd'hui", en: "They have a very positive motivation today" },
+                { fr: "bien que ce soit difficile à comprendre ils aiment ça", en: "Although it is difficult to understand, they like it" }
+            ]
+        },
+        {
+            prompt_fr: "Comment pouvons-nous renforcer la stratégie professionnelle ?",
+            prompt_en: "How can we strengthen the professional strategy?",
+            expected_responses: [
+                { fr: "nous devons mettre à jour le système et les compétences", en: "We must update the system and the skills" },
+                { fr: "de plus il est nécessaire d'accroître la communication", en: "In addition it is necessary to increase communication" },
+                { fr: "une approche professionnelle aide à réduire les risques", en: "A professional approach helps to reduce risks" }
+            ]
+        },
+        {
+            prompt_fr: "Ont-ils exploré un endroit éloigné pendant leur voyage ?",
+            prompt_en: "Have they explored a remote place during their trip?",
+            expected_responses: [
+                { fr: "oui ils ont exploré un endroit très éloigné", en: "Yes, they have explored a very remote place" },
+                { fr: "leur voyage à long terme a été positif", en: "Their long term trip has been positive" },
+                { fr: "cependant y parvenir a été un processus compliqué", en: "However it was a complicated process to get there" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu par conséquent décidé de mettre à jour les informations ?",
+            prompt_en: "Therefore have you decided to update the information?",
+            expected_responses: [
+                { fr: "oui j'ai mis à jour les résultats du processus", en: "Yes, I have updated the process results" },
+                { fr: "j'ai déjà analysé la situation attentivement", en: "I have already analyzed the situation carefully" },
+                { fr: "j'ai encore besoin d'en discuter avec mon ami", en: "I still need to discuss this with my friend" }
+            ]
+        },
+        {
+            prompt_fr: "Est-il compliqué d'obtenir une approche réaliste aujourd'hui ?",
+            prompt_en: "Is it complicated to achieve a realistic approach today?",
+            expected_responses: [
+                { fr: "oui la situation actuelle est très compliquée", en: "Yes, the current situation is very complicated" },
+                { fr: "bien que ce soit difficile c'est possible avec du travail", en: "Although it is difficult, with work it is possible" },
+                { fr: "nous avons élargi la stratégie pour obtenir des résultats", en: "We have expanded the strategy to achieve results" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu réussi à optimiser la performance du restaurant ?",
+            prompt_en: "Have you achieved optimizing the performance of the restaurant?",
+            expected_responses: [
+                { fr: "oui nous avons optimisé le processus de la cuisine", en: "Yes, we have optimized the kitchen process" },
+                { fr: "par conséquent les résultats sont très positifs aujourd'hui", en: "Therefore the results are very positive today" },
+                { fr: "bien que ce soit compliqué nous avons réussi à changer d'approche", en: "Although it was complicated, we achieved changing the approach" }
+            ]
+        },
+        {
+            prompt_fr: "Quelle stratégie professionnelle as-tu pour l'avenir ?",
+            prompt_en: "What professional strategy do you have for the future?",
+            expected_responses: [
+                { fr: "je prévois de renforcer mes compétences à long terme", en: "I plan to strengthen my skills long term" },
+                { fr: "de plus je veux explorer une approche innovante", en: "In addition I want to explore an innovative approach" },
+                { fr: "ma stratégie consiste à réduire le risque du processus", en: "My strategy is to reduce the risk of the process" }
+            ]
+        },
+        {
+            prompt_fr: "Ont-ils coordonné les informations du déménagement ?",
+            prompt_en: "Have they coordinated the information of the move?",
+            expected_responses: [
+                { fr: "oui la situation a été coordonnée attentivement", en: "Yes, the situation has been coordinated carefully" },
+                { fr: "nous avons mis à jour les plans de voyage aujourd'hui", en: "We have updated the trip plans today" },
+                { fr: "même avec des problèmes il est possible de déménager bientôt", en: "Even with problems, it is possible to move soon" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi as-tu discuté des défis avec la famille ?",
+            prompt_en: "Why have you discussed the challenges with the family?",
+            expected_responses: [
+                { fr: "parce que leurs attentes sont très élevées", en: "Because their expectations are very high" },
+                { fr: "discuter des problèmes aide à la motivation", en: "Discussing the problems helps motivation" },
+                { fr: "nous voulons nous adapter ensemble à la nouvelle situation", en: "We want to adapt together to the new situation" }
+            ]
+        },
+        {
+            prompt_fr: "Est-il nécessaire d'évaluer le système de transport ?",
+            prompt_en: "Is it necessary to evaluate the transport system?",
+            expected_responses: [
+                { fr: "oui pour réduire le risque à la gare", en: "Yes, to reduce the risk at the station" },
+                { fr: "nous avons déjà évalué la performance du bus avant", en: "We have evaluated the bus performance before" },
+                { fr: "par conséquent une approche réaliste est possible aujourd'hui", en: "Therefore a realistic approach is possible today" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu clarifié le concept de société avec tes amis ?",
+            prompt_en: "Have you clarified the concept of society with your friends?",
+            expected_responses: [
+                { fr: "oui nous avons analysé sa culture attentivement", en: "Yes, we have analyzed its culture carefully" },
+                { fr: "c'est un concept compliqué mais très positif", en: "It is a complicated but very positive concept" },
+                { fr: "de plus cela aide à comprendre les expériences passées", en: "In addition it helps to understand past experiences" }
+            ]
+        },
+        {
+            prompt_fr: "Les résultats de ton travail ont-ils augmenté ?",
+            prompt_en: "Have the results of your work increased?",
+            expected_responses: [
+                { fr: "oui j'ai réussi à augmenter ma performance ce mois-ci", en: "Yes, I have achieved increasing my performance this month" },
+                { fr: "avec une stratégie efficace tout est possible", en: "With an effective strategy everything is possible" },
+                { fr: "cependant la situation actuelle est difficile", en: "However the current situation is difficult" }
+            ]
+        },
+        {
+            prompt_fr: "Comment pouvons-nous obtenir une approche réaliste pour le voyage ?",
+            prompt_en: "How can we achieve a realistic approach for the trip?",
+            expected_responses: [
+                { fr: "nous devons planifier les étapes du voyage avant", en: "We must plan the trip steps before" },
+                { fr: "malgré la distance c'est un bon endroit éloigné", en: "Despite the distance, it is a good remote place" },
+                { fr: "bien que ce soit à long terme le plan est efficace", en: "Although it is long term, the plan is effective" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi as-tu soutenu que le risque est élevé ?",
+            prompt_en: "Why have you argued that the risk is high?",
+            expected_responses: [
+                { fr: "parce que j'ai déjà évalué la situation de nouveau", en: "Because I have already evaluated the situation again" },
+                { fr: "le processus actuel présente de nombreux défis", en: "The current process has many challenges" },
+                { fr: "par conséquent il est nécessaire de changer de stratégie", en: "Therefore it is necessary to change the strategy" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu exploré un système plus innovant cette année ?",
+            prompt_en: "Have you explored a more innovative system this year?",
+            expected_responses: [
+                { fr: "oui j'ai exploré un nouveau système professionnel", en: "Yes, I have explored a new professional system" },
+                { fr: "nous avons élargi l'approche pour optimiser les résultats", en: "We have expanded the approach to optimize results" },
+                { fr: "j'ai encore besoin d'en discuter avec mon équipe", en: "I still need to discuss this with my team" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu réussi à coordonner les attentes avec ta famille ?",
+            prompt_en: "Have you achieved coordinating the expectations with your family?",
+            expected_responses: [
+                { fr: "oui les attentes ont été clarifiées aujourd'hui", en: "Yes, the expectations have been clarified today" },
+                { fr: "nous avons une motivation positive pour l'avenir", en: "We have a positive motivation for the future" },
+                { fr: "bien que ce fût un processus difficile nous avons réussi à avancer", en: "Although it was a difficult process, we achieved moving forward" }
+            ]
+        },
+        {
+            prompt_fr: "Pourquoi veux-tu mettre à jour la stratégie du système ?",
+            prompt_en: "Why do you want to update the system strategy?",
+            expected_responses: [
+                { fr: "parce que nous voulons optimiser la performance quotidienne", en: "Because we want to optimize the daily performance" },
+                { fr: "pour réduire le risque de la situation actuelle", en: "To reduce the risk of the current situation" },
+                { fr: "une stratégie efficace augmente les chances de réussite", en: "An effective strategy increases the possibility of success" }
+            ]
+        },
+        {
+            prompt_fr: "Quels résultats as-tu évalués au travail ?",
+            prompt_en: "What results have you evaluated at work?",
+            expected_responses: [
+                { fr: "j'ai évalué une performance très positive aujourd'hui", en: "I have evaluated a very positive performance today" },
+                { fr: "de plus les résultats du processus sont réalistes", en: "In addition the process results are realistic" },
+                { fr: "j'ai encore besoin d'analyser certaines informations avant", en: "I still need to analyze some information before" }
+            ]
+        },
+        {
+            prompt_fr: "Est-il possible de s'adapter à cette culture différente ?",
+            prompt_en: "Is it possible to adapt to this different culture?",
+            expected_responses: [
+                { fr: "oui je me suis adapté rapidement à leur société", en: "Yes, I have adapted to their society quickly" },
+                { fr: "bien que ce soit compliqué la culture est bonne", en: "Although it is complicated, the culture is good" },
+                { fr: "malgré les défis l'approche est positive", en: "Despite the challenges, the approach is positive" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu par conséquent décidé d'annuler le voyage lointain ?",
+            prompt_en: "Therefore have you decided to cancel the remote trip?",
+            expected_responses: [
+                { fr: "oui le voyage à long terme est très coûteux", en: "Yes, the long term trip is very expensive" },
+                { fr: "non je veux explorer cet endroit à l'avenir", en: "No, I want to explore that place in the future" },
+                { fr: "j'attends encore la confirmation du transport", en: "I am still waiting for the transport confirmation" }
+            ]
+        },
+        {
+            prompt_fr: "Quel concept professionnel veux-tu discuter aujourd'hui ?",
+            prompt_en: "What professional concept do you want to discuss today?",
+            expected_responses: [
+                { fr: "je veux discuter de la stratégie pour atteindre les objectifs", en: "I want to discuss the strategy to achieve goals" },
+                { fr: "le concept d'approche réaliste du système", en: "The concept of realistic system approach" },
+                { fr: "nous devons d'abord clarifier les résultats du mois", en: "We need to clarify the results of the month before" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu insisté pour renforcer la communication quotidienne ?",
+            prompt_en: "Have you insisted on strengthening daily communication?",
+            expected_responses: [
+                { fr: "oui pour optimiser les conversations de l'équipe", en: "Yes, to optimize team conversations" },
+                { fr: "une bonne communication réduit le risque de problèmes", en: "Good communication reduces the risk of problems" },
+                { fr: "même avec peu de temps il est nécessaire de parler", en: "Even with little time, it is necessary to talk" }
+            ]
+        },
+        {
+            prompt_fr: "Bien que la situation soit difficile, l'approche est-elle efficace ?",
+            prompt_en: "Although the situation is difficult, is the approach effective?",
+            expected_responses: [
+                { fr: "oui nous avons obtenu des résultats très positifs", en: "Yes, we have achieved very positive results" },
+                { fr: "par conséquent nous voulons continuer avec ce plan", en: "Therefore we want to continue with this plan" },
+                { fr: "nous devons évaluer la performance une fois de plus", en: "We need to evaluate the performance once more" }
+            ]
+        },
+        {
+            prompt_fr: "Comment prévois-tu d'accroître la motivation de la société ?",
+            prompt_en: "How do you plan to increase the motivation of society?",
+            expected_responses: [
+                { fr: "accroître la motivation est un processus à long terme", en: "Increasing motivation is a long-term process" },
+                { fr: "avec un système innovant et une approche positive", en: "With an innovative system and a positive approach" },
+                { fr: "discuter des défis aide à y parvenir", en: "Discussing the challenges helps to achieve it" }
+            ]
+        },
+        {
+            prompt_fr: "As-tu analysé attentivement les informations du voyage ?",
+            prompt_en: "Have you carefully analyzed the trip information?",
+            expected_responses: [
+                { fr: "oui j'ai vérifié les billets et l'hôtel avant", en: "Yes, I have reviewed the tickets and the hotel before" },
+                { fr: "le voyage vers cet endroit éloigné comporte ses risques", en: "The trip to this remote place has its risks" },
+                { fr: "j'ai déjà tout préparé pour le mois prochain", en: "I have already prepared everything for next month" }
+            ]
+        }
+    ]
+};
 
