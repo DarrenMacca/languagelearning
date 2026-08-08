@@ -1,0 +1,162 @@
+/* ============================================================
+   LISTEN VOCAB — A1 → B2 (Category → Word List)
+   ============================================================ */
+const LISTEN_VOCAB = {
+A1: {
+    "Daily Life": [
+        "vivre","travailler","étudier","lire","livres","heure",
+        "se lever","musique","télévision","nettoyer","cuisiner",
+        "ouvrir","terminer","écrire","apprendre","aller","faire",
+        "voir","écouter","sortir","se reposer","chaud","froid",
+        "heureux","nouveau","bonjour",
+        "au revoir",
+        "merci",
+        "désolé / je ressens",
+        "tu es",
+        "prêts",
+        "réveillé",
+        "temps",
+        "problèmes",
+        "changement"
+    ],
+    "Family": [
+        "famille","mère","père","fils","fille","ami","amie",
+        "sœur","frères","sœurs","grand-mère","faim",
+        "nous avons","ils ont"
+    ],
+    "Food & Drink": [
+        "eau","nourriture","café","thé","lait","pain","bière","steak","frites",
+        "œuf","fruit","pomme","orange","banane","poulet",
+        "poisson","soupe","salade","riz","haricots","fromage","sel"
+    ],
+    "Travel": [
+        "bus","train","billet","gare","aéroport",
+        "maison","école","hôtel","toilettes","endroit"
+    ],
+    "Connectors": [
+        "et","ou","avec","sans","plus","peu","seulement","très",
+        "près","pour","à","dans","quoi",
+        "qui",
+        "quand",
+        "comment",
+        "quel",
+        "où",
+        "non",
+        "il y a",
+        "autre",
+        "malgré",
+        "faveur",
+        "est",
+        "aime",
+        "aiment",
+        "voudrait",
+        "apprenant",
+        "réparant",
+        "bon",
+        "difficile",
+        "clair",
+        "facile",
+        "mauvais",
+        "petit",
+        "ils",
+        "son / sa / leur"
+    ],
+
+    "Numbers": [
+        "un","deux","trois","quatre","cinq","six","sept","huit",
+        "neuf","dix"
+    ]
+},
+
+A2: {
+    "Daily Life": [
+        "petit-déjeuner","déjeuner","dîner","tôt","tard","hier soir",
+        "maintenant","minutes","devoirs","message","information",
+        "film","fenêtre","cuisine","chaussures","voyage","essayer",
+        "oublier","attendre","conduire","réparer","partir","arriver"
+    ],
+    "Family": [
+        "parents","grand-mère","amie"
+    ],
+    "Food & Drink": [
+        "petit-déjeuner","déjeuner","dîner"
+    ],
+    "Travel": [
+        "avion","visiter","transport"
+    ],
+    "Connectors": [
+        "souvent","avant","déjà","encore","normalement","a soutenu"
+    ],
+    "Numbers": [
+        "onze",
+        "douze",
+        "treize",
+        "quatorze",
+        "quinze",
+        "seize",
+        "dix-sept",
+        "dix-huit",
+        "dix-neuf",
+        "vingt"
+    ]
+},
+
+B1: {
+    "Daily Life": [
+        "ai","as","a","avons","avez","ont",
+        "été","appris","travaillant","étudiant",
+        "lisant","vivant","quotidiennes",
+        "communication","conversations","améliorer",
+        "compétences","réviser","continuer","changer",
+        "suivre","préparer","obtenir","comprendre"
+    ],
+    "Family": [
+        "expériences","passées"
+    ],
+    "Food & Drink": [
+        "restaurant","menu","addition"
+    ],
+    "Travel": [
+        "trouver","annuler","apporter","planifier",
+        "déménager","rejoindre"
+    ],
+    "Connectors": [
+        "pendant que","cependant","sur","quand",
+        "après","pendant"
+    ],
+    "Numbers": [
+        "mois","années"
+    ]
+},
+
+B2: {
+    "Daily Life": [
+        "processus","tâche","résultats","performance",
+        "stratégie","système","approche","concept",
+        "risque","possibilité","situation",
+        "optimiser","coordonner","augmenter","mettre à jour",
+        "analyser","évaluer","discuter","clarifier",
+        "renforcer","s'adapter","réaliser",
+        "compliqué","nécessaire","possible","efficace",
+        "réaliste","innovant","professionnel","positif",
+        "analysé","évalué","argumenté","élargi",
+        "adapté","réduit","insisté","exploré",
+        "clarifié","renforcé","discuté","mis à jour",
+        "optimisé"
+    ],
+    "Family": [
+        "société","culture","motivation",
+        "défis","attentes"
+    ],
+    "Food & Drink": [],
+    "Travel": [
+        "éloigné","avenir","à long terme"
+    ],
+    "Connectors": [
+        "de plus","par conséquent","malgré",
+        "bien que","même","encore une fois","soigneusement"
+    ],
+    "Numbers": []
+}
+};
+
