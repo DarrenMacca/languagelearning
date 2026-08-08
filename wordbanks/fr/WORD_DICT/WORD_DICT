@@ -1,0 +1,590 @@
+/* ============================================================
+   WORD-BY-WORD DICTIONARY — CEFR A1 → B2 (Categorized)
+   ============================================================ */
+
+const WORD_DICT = {
+
+    /* ============================
+       A1 — Connectors
+       ============================ */
+
+"et": "and",
+"ou": "or",
+"avec": "with",
+"sans": "without",
+"plus": "more",
+"peu": "little",
+"seulement": "only / alone",
+"très": "very",
+"près": "near",
+"pour": "for",
+"à": "to",
+"dans": "in",
+"par": "for/by",
+"de": "of/from",
+"au": "to the",
+"du": "of the",
+"mais": "but",
+"parce que": "because",
+"aussi": "also",
+"alors": "then",
+"quoi": "what",
+"qui": "who",
+"quand": "when",
+"comment": "how",
+"quel": "which",
+"où": "where",
+"non": "no / not",
+"il y a": "there is / there are",
+"autre": "other / another",
+"malgré": "despite",
+"faveur": "favor (por favor)",
+
+/* ============================
+   A1 — Numbers
+   ============================ */
+
+"un": "one",
+"deux": "two",
+"dix": "ten",
+"neuf": "nine",
+
+/* ============================
+   A1 — Articles
+   ============================ */
+
+"le": "the",
+"la": "the",
+"les": "the",
+"les": "the",
+"un": "a",
+"une": "a",
+
+/* ============================
+   A1 — Pronouns
+   ============================ */
+
+"me": "me",
+"te": "you",
+"lui": "to him/her",
+"nous": "us",
+"leur": "to them",
+"le": "it (masc.)",
+"la": "it (fem.)",
+"les": "them (masc.)",
+"les": "them (fem.)",
+"que": "that/which",
+"il": "he",
+"mon": "my",
+"mes": "my (plural)",
+"leurs": "his/her/their",
+"tu": "you (informal)",
+"je": "I",
+
+/* ============================
+   A1 — Daily Life
+   ============================ */
+
+"vivre": "to live",
+"travailler": "to work",
+"étudier": "to study",
+"lire": "to read",
+"livres": "books",
+"heure": "hour",
+"se lever": "to get up",
+"musique": "music",
+"télévision": "television",
+"nettoyer": "to clean",
+"cuisiner": "to cook",
+"ouvrir": "to open",
+"terminer": "to finish",
+"écrire": "to write",
+"apprendre": "to learn",
+"aller": "to go",
+"faire": "to do",
+"voir": "to see",
+"écouter": "to listen",
+"sortir": "to go out",
+"se reposer": "to rest",
+"chaud": "hot",
+"froid": "cold",
+"heureux": "happy",
+"nouveau": "new",
+"nouvelle": "new (fem.)",
+"nouveaux": "new (plural)",
+"nouvelles": "new (fem. plural)",
+"j'ai besoin": "I need",
+"a besoin": "he/she needs",
+"ont besoin": "they need",
+"je veux": "I want",
+"veut": "he/she wants",
+"nous voulons": "we want",
+"ils veulent": "they want",
+"j'habite": "I live",
+"travaille": "he/she works",
+"je suis": "I am",
+"est": "he/she is",
+"sont": "they are",
+"nous sommes": "we are",
+"je suis": "I am",
+"tu es": "you are",
+"sont": "they are",
+"j'ai": "I have",
+"a": "he/she has",
+"nous sommes": "we are",
+"aide": "help",
+"fatigué": "tired",
+"grand": "tall",
+"bonjour": "hello",
+"au revoir": "goodbye",
+"merci": "thank you",
+"désolé / je ressens": "sorry / I feel",
+"tu es": "you are",
+"prêts": "ready",
+"réveillé": "awake",
+"temps": "time",
+"problèmes": "problems",
+"changement": "change",
+"est": "is",
+"aime": "likes",
+"aiment": "they like",
+"voudrait": "would like",
+"apprenant": "learning",
+"réparant": "fixing",
+"bon": "good",
+"difficile": "difficult",
+"claire": "clear",
+"facile": "easy",
+"mauvais": "bad",
+"petit": "small",
+"ils": "they",
+"son / sa / leur": "his / her / their",
+
+/* ============================
+   A1 — Family
+   ============================ */
+
+"famille": "family",
+"mère": "mother",
+"père": "father",
+"fils": "son",
+"fille": "daughter",
+"ami": "friend",
+"amie": "friend (female)",
+"sœur": "sister",
+"frères": "brothers",
+"sœurs": "sisters",
+"grand-mère": "grandmother",
+"faim": "hunger",
+"nous avons": "we have",
+"ils ont": "they have",
+"elles": "they (fem.)",
+"nous": "we",
+"vous": "you all",
+
+/* ============================
+   A1 — Food
+   ============================ */
+
+"eau": "water",
+"nourriture": "food",
+"café": "coffee",
+"thé": "tea",
+"lait": "milk",
+"pain": "bread",
+"bière": "beer",
+"œuf": "egg",
+"fruit": "fruit",
+"steak": "steak",
+"frites": "french fries",
+"pomme": "apple",
+"orange": "orange",
+"banane": "banana",
+"poulet": "chicken",
+"poisson": "fish",
+"soupe": "soup",
+"salade": "salad",
+"riz": "rice",
+"haricots": "beans",
+"fromage": "cheese",
+"sel": "salt",
+
+/* ============================
+   A1 — Travel
+   ============================ */
+
+"bus": "bus",
+"train": "train",
+"billet": "ticket",
+"gare": "station",
+"aéroport": "airport",
+"maison": "house",
+"école": "school",
+"hôtel": "hotel",
+"toilettes": "bathroom",
+"endroit": "place",
+"arrive": "arrives",
+"nous sommes arrivés": "we arrived",
+
+/* ============================
+   A1 — Extra from CEFR_SENTENCES
+   ============================ */
+
+"magasin": "store",
+"ouvre": "opens",
+"petite": "small (fem.)",
+"froide": "cold (fem.)",
+"grand": "big",
+"gentil": "kind",
+"délicieuse": "delicious (fem.)",
+"propre": "clean (fem.)",
+"rouge": "red (fem.)",
+"en retard": "delayed",
+"voiture": "car",
+"sac": "bag",
+"temps": "weather",
+"chambre": "room",
+"médecin": "doctor",
+"sports": "sports",
+"aujourd'hui": "today",
+"table": "table",
+"livre": "book",
+"stylo": "pen",
+"rue": "street",
+"ville": "city",
+"nuit": "night",
+"quelque chose": "something",
+"fois": "time / occurrence",
+
+
+/* ============================
+       A2 — Daily Life
+   ============================ */
+
+"petit-déjeuner": "breakfast",
+"déjeuner": "lunch",
+"dîner": "dinner",
+"tôt": "early",
+"tard": "late",
+"hier soir": "last night",
+"maintenant": "now",
+"minutes": "minutes",
+"devoirs": "homework",
+"message": "message",
+"information": "information",
+"film": "movie",
+"fenêtre": "window",
+"cuisine": "kitchen",
+"chaussures": "shoes",
+"voyage": "trip",
+"essayer": "to try",
+"oublier": "to forget",
+"attendre": "to wait",
+"conduire": "to drive",
+"réparer": "to fix",
+"partir": "to leave",
+"arriver": "to arrive",
+"nous sommes arrivés": "we arrived",
+"ils arriveront": "they will arrive",
+"nous mangerons": "we will eat",
+"partir": "to leave",
+"écoutant": "listening",
+"planifiant": "planning",
+"cuisinant": "cooking",
+"conduisant": "driving",
+"nous devons": "we need",
+"ils ont besoin": "they need",
+"j'ai acheté": "I bought",
+"j'ai nettoyé": "I cleaned",
+"j'ai écrit": "I wrote",
+
+/* ============================
+   A2 — Extra from Sentences
+   ============================ */
+
+"marché": "market",
+"réunion": "meeting",
+"clés": "keys",
+"téléphone": "phone",
+"dehors": "outside",
+"nuit": "night",
+"quelque chose": "something",
+"fois": "time / occurrence",
+"leurs": "their",
+"mes": "my (plural)",
+"cette": "this (fem.)",
+"ce": "that",
+"ce": "this",
+"prochain": "next",
+"emploi du temps": "schedule",
+
+/* ============================
+   A2 — Verbs from Sentences
+   ============================ */
+
+"a acheté": "bought",
+"acheter": "to buy",
+"a visité": "visited",
+"j'étudierai": "I will study",
+"a oublié": "forgot",
+"attendant": "waiting",
+"regardant": "watching",
+"parlant": "talking",
+"prenant le petit-déjeuner": "eating breakfast",
+"veut": "he/she wants",
+"veulent": "they want",
+"je préfère": "I prefer",
+"tu peux": "you can",
+"nous allons": "we go / let's go",
+"planifiant": "planning",
+"a appelé": "he/she called",
+"travaille": "he/she works",
+"est": "he/she is",
+"sont": "they are",
+"je crois": "I believe",
+"nous devons": "we must",
+"nous pouvons": "we can",
+"nous parlons": "we speak",
+
+/* ============================
+   A2 — Connectors
+   ============================ */
+
+"souvent": "often",
+"avant": "before",
+"déjà": "already",
+"encore": "still",
+"normalement": "normally",
+"mais": "but",
+"parce que": "because",
+"aussi": "also",
+"alors": "then",
+"si": "if",
+"a soutenu": "argued",
+
+/* ============================
+   A2 — Multi-word Phrases
+   ============================ */
+
+"s'il vous plaît": "please",
+"plus tard": "later",
+"ce soir": "tonight",
+"à neuf heures": "at nine",
+"encore une fois": "again",
+"en détail": "in detail",
+
+/* ============================
+   B1 — Verbs
+   ============================ */
+
+"organiser": "to organize",
+"améliorer": "to improve",
+"espère": "hopes",
+"trouver": "to find",
+"ont décidé": "decided",
+"annuler": "to cancel",
+"parler": "to talk",
+"apporter": "to bring",
+"j'appellerai": "I will call",
+"j'arrive": "I arrive (subj.)",
+"voyager": "to travel",
+"terminer": "to finish",
+"a expliqué": "explained",
+"résoudre": "to solve",
+"a demandé": "asked",
+"aide": "help (subj.)",
+"prévoient": "they plan",
+"déménager": "to move",
+"suivre": "to follow",
+"nous devrions": "we should",
+"nous continuerons": "we will continue",
+"obtenir": "to get",
+"j'aiderai": "I will help",
+"je crois": "I believe",
+"nous devons": "we must",
+"nous pouvons": "we can",
+"nous parlons": "we speak",
+"semble": "it seems",
+"croit": "he/she believes",
+"espèrent": "they wait",
+"ont discuté": "they discussed",
+"a terminé": "completed",
+"était": "was",
+"était": "was",
+
+/* ============================
+   B1 — Nouns
+   ============================ */
+
+"espagnol": "Spanish",
+"emploi": "job",
+"problème": "problem",
+"documents": "documents",
+"année": "year",
+"projet": "project",
+"situation": "situation",
+"règles": "rules",
+"rapport": "report",
+"objectifs": "goals",
+"plan": "plan",
+"vêtements": "clothes",
+"détails": "details",
+"problèmes": "problems",
+"détail": "detail",
+"heures": "hours",
+"efforts": "efforts",
+"succès": "success",
+"nuit": "night",
+"fois": "time / occurrence",
+
+/* ============================
+   B1 — Adverbs
+   ============================ */
+
+"clairement": "clearly",
+"bientôt": "soon",
+"demain": "tomorrow",
+"maintenant": "now",
+"lentement": "slowly",
+"hier": "yesterday",
+"rapide": "fast",
+"lent": "slow",
+"toujours": "always",
+"jamais": "never",
+
+/* ============================
+   B1 — Determiners
+   ============================ */
+
+"nos": "our (fem. plural)",
+"tout": "everything",
+"toutes": "all (fem.)",
+"ce": "this",
+"ce": "that",
+"cela": "this (neutral)",
+
+/* ============================
+   B1 — Extra B1 Words
+   ============================ */
+
+"meilleur": "better",
+"excellent": "excellent",
+"important": "important",
+"différent": "different",
+"possibles": "possible",
+"nos": "our",
+"prochain": "next",
+"emploi du temps": "schedule",
+
+
+/* ============================
+   B2 — Verbs
+   ============================ */
+
+"analyser": "to analyze",
+"considérer": "to consider",
+"a suggéré": "suggested",
+"terminer": "to complete",
+"évaluer": "to evaluate",
+"ont soutenu": "argued",
+"élargir": "to expand",
+"continuer": "to continue",
+"ont terminé": "they finished",
+"nous adapter": "to adapt",
+"réduire": "to reduce",
+"a insisté": "insisted",
+"réaliser": "to achieve",
+"explorer": "to explore",
+"clarifier": "to clarify",
+"renforcer": "to strengthen",
+"mettre à jour": "to update",
+"augmenter": "to increase",
+"préparer": "to prepare",
+"développer": "to expand",
+"coordonner": "to coordinate",
+"optimiser": "to optimize",
+"aura": "he/she will have",
+"seront": "they will be",
+"nous préparer": "to prepare ourselves",
+
+/* ============================
+   B2 — Nouns
+   ============================ */
+
+"possibilités": "possibilities",
+"communication": "communication",
+"processus": "process",
+"tâche": "task",
+"risques": "risks",
+"problèmes": "problems",
+"expérience": "experience",
+"défis": "challenges",
+"concept": "concept",
+"manière": "way",
+"instructions": "instructions",
+"idée": "idea",
+"dépenses": "expenses",
+"données": "data",
+"compétences": "skills",
+"performance": "performance",
+"sujet": "topic",
+"approche": "approach",
+"système": "system",
+"changements": "changes",
+"entreprise": "business",
+"flux": "flow",
+"équipe": "team",
+"opportunités": "opportunities",
+"productivité": "productivity",
+"stratégie": "strategy",
+"efforts": "efforts",
+"heures": "hours",
+"détail": "detail",
+"meilleurs": "better / best",
+"possibles": "possible",
+"prochain": "next",
+"emploi du temps": "schedule",
+"succès": "success",
+
+/* ============================
+   B2 — Adjectives
+   ============================ */
+
+"difficile": "difficult",
+"réaliste": "realistic",
+"professionnel": "professional",
+"innovante": "innovative",
+"inutiles": "unnecessary",
+"possible": "possible",
+"risquée": "risky",
+"capable": "capable",
+"efficace": "effective",
+"positif": "positive",
+"compliqué": "complicated",
+"important": "important",
+"différent": "different",
+"meilleur": "better",
+"excellent": "excellent",
+"toutes": "all (fem.)",
+"nos": "our",
+"positifs": "positive",
+
+/* ============================
+   B2 — Adverbs / Connectors
+   ============================ */
+
+"soigneusement": "carefully",
+"même": "even",
+"encore une fois": "again",
+"en détail": "in detail",
+"lentement": "slowly",
+"hier": "yesterday",
+"rapide": "fast",
+"lent": "slow",
+"toujours": "always",
+"jamais": "never",
+"parce que": "because",
+"mais": "but",
+"aussi": "also",
+"alors": "then"
+}
