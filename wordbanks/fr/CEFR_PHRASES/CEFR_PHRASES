@@ -1,0 +1,51 @@
+/* ============================================================
+   MULTI-WORD PHRASES (CEFR-aligned)
+   ============================================================ */
+const CEFR_PHRASES = {
+
+// A1
+"comment vas-tu": "how are you",
+"où habites-tu": "where do you live",
+"quelle heure est-il": "what time is it",
+"tu aimes le café": "you like coffee",
+"j'aime la musique": "I like music",
+"j'habite en ville": "I live in the city",
+"je travaille dans un hôtel": "I work in a hotel",
+"je veux manger": "I want to eat",
+"je veux boire": "I want to drink",
+"où sont les toilettes": "where is the bathroom",
+"elle court vite": "she runs fast",
+"elle est rapide": "she is fast",
+"elle va vite": "she goes fast",
+
+// A2
+"qu'as-tu fait hier": "what did you do yesterday",
+"es-tu allé au supermarché": "did you go to the supermarket",
+"tu voyages souvent": "you travel often",
+"qu'as-tu acheté": "what did you buy",
+"que fais-tu": "what are you doing",
+"tu manges habituellement tôt": "you usually eat early",
+"j'ai besoin d'aide": "I need help",
+"je veux faire une réservation": "I want to make a reservation",
+"où est la gare": "where is the station",
+
+// B1
+"j'apprends l'espagnol depuis un certain temps": "I have been learning Spanish",
+"j'aime voyager": "I enjoy traveling",
+"je veux améliorer mes compétences": "I want to improve my skills",
+"que penses-tu de la ville": "what do you think of the city",
+"comment maintiens-tu une vie saine": "how do you maintain a healthy life",
+"qu'as-tu appris récemment": "what did you learn recently",
+"quels sont tes objectifs": "what are your goals",
+"quelles expériences passées as-tu": "what past experiences do you have",
+
+// B2
+"comment gères-tu les situations stressantes": "how do you handle stressful situations",
+"quelle est ton opinion sur la technologie": "what is your opinion on technology",
+"comment ta vie a-t-elle changé": "how has your life changed",
+"à quels défis fais-tu face": "what challenges do you face",
+"qu'espères-tu accomplir": "what do you hope to achieve",
+"que penses-tu de l'avenir": "what do you think about the future",
+"comment vois-tu la société actuelle": "how do you see modern society",
+"quelle est ta perspective": "what is your perspective"
+};
