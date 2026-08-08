@@ -1,0 +1,352 @@
+/* ============================================================
+   CEFR LEVELS — A1 → B2 Vocabulary (Spanish → English)
+   ============================================================ */
+
+const CEFR_LEVELS = {
+A1: [
+    // Daily Life
+    { spanish: "vivre", english: "to live", category: "Daily Life" },
+    { spanish: "travailler", english: "to work", category: "Daily Life" },
+    { spanish: "étudier", english: "to study", category: "Daily Life" },
+    { spanish: "lire", english: "to read", category: "Daily Life" },
+    { spanish: "livres", english: "books", category: "Daily Life" },
+    { spanish: "heure", english: "hour", category: "Daily Life" },
+    { spanish: "se lever", english: "to get up", category: "Daily Life" },
+    { spanish: "musique", english: "music", category: "Daily Life" },
+    { spanish: "télévision", english: "television", category: "Daily Life" },
+    { spanish: "nettoyer", english: "to clean", category: "Daily Life" },
+    { spanish: "cuisiner", english: "to cook", category: "Daily Life" },
+    { spanish: "ouvrir", english: "to open", category: "Daily Life" },
+    { spanish: "terminer", english: "to finish", category: "Daily Life" },
+    { spanish: "écrire", english: "to write", category: "Daily Life" },
+    { spanish: "apprendre", english: "to learn", category: "Daily Life" },
+    { spanish: "aller", english: "to go", category: "Daily Life" },
+    { spanish: "faire", english: "to do", category: "Daily Life" },
+    { spanish: "voir", english: "to see", category: "Daily Life" },
+    { spanish: "écouter", english: "to listen", category: "Daily Life" },
+    { spanish: "sortir", english: "to go out", category: "Daily Life" },
+    { spanish: "se reposer", english: "to rest", category: "Daily Life" },
+    { spanish: "chaud", english: "hot", category: "Daily Life" },
+    { spanish: "froid", english: "cold", category: "Daily Life" },
+    { spanish: "heureux", english: "happy", category: "Daily Life" },
+    { spanish: "nouveau", english: "new", category: "Daily Life" },
+    { english: "hello", spanish: "bonjour", category: "Daily Life" },
+    { english: "goodbye", spanish: "au revoir", category: "Daily Life" },
+    { english: "thank you", spanish: "merci", category: "Daily Life" },
+    { english: "sorry / I feel", spanish: "désolé / je ressens", category: "Daily Life" },
+    { english: "you are", spanish: "tu es", category: "Daily Life" },
+    { english: "ready", spanish: "prêts", category: "Daily Life" },
+    { english: "awake", spanish: "réveillé", category: "Daily Life" },
+    { english: "time", spanish: "temps", category: "Daily Life" },
+    { english: "problems", spanish: "problèmes", category: "Daily Life" },
+    { english: "change", spanish: "changement", category: "Daily Life" },
+
+    // Family
+    { spanish: "famille", english: "family", category: "Family" },
+    { spanish: "mère", english: "mother", category: "Family" },
+    { spanish: "père", english: "father", category: "Family" },
+    { spanish: "fils", english: "son", category: "Family" },
+    { spanish: "fille", english: "daughter", category: "Family" },
+    { spanish: "ami", english: "friend", category: "Family" },
+    { spanish: "amie", english: "friend (female)", category: "Family" },
+    { spanish: "sœur", english: "sister", category: "Family" },
+    { spanish: "frères", english: "brothers", category: "Family" },
+    { spanish: "sœurs", english: "sisters", category: "Family" },
+    { spanish: "grand-mère", english: "grandmother", category: "Family" },
+    { spanish: "faim", english: "hunger", category: "Family" },
+    { spanish: "nous avons", english: "we have", category: "Family" },
+    { spanish: "ils ont", english: "they have", category: "Family" },
+
+    // Food & Drink
+    { spanish: "eau", english: "water", category: "Food & Drink" },
+    { spanish: "nourriture", english: "food", category: "Food & Drink" },
+    { spanish: "café", english: "coffee", category: "Food & Drink" },
+    { spanish: "thé", english: "tea", category: "Food & Drink" },
+    { spanish: "lait", english: "milk", category: "Food & Drink" },
+    { spanish: "steak", english: "steak", category: "Food & Drink" },
+    { spanish: "frites", english: "french fries", category: "Food & Drink" },
+    { spanish: "pain", english: "bread", category: "Food & Drink" },
+    { spanish: "bière", english: "beer", category: "Food & Drink" },
+    { spanish: "œuf", english: "egg", category: "Food & Drink" },
+    { spanish: "fruit", english: "fruit", category: "Food & Drink" },
+    { spanish: "pomme", english: "apple", category: "Food & Drink" },
+    { spanish: "orange", english: "orange", category: "Food & Drink" },
+    { spanish: "banane", english: "banana", category: "Food & Drink" },
+    { spanish: "poulet", english: "chicken", category: "Food & Drink" },
+    { spanish: "poisson", english: "fish", category: "Food & Drink" },
+    { spanish: "soupe", english: "soup", category: "Food & Drink" },
+    { spanish: "salade", english: "salad", category: "Food & Drink" },
+    { spanish: "riz", english: "rice", category: "Food & Drink" },
+    { spanish: "haricots", english: "beans", category: "Food & Drink" },
+    { spanish: "fromage", english: "cheese", category: "Food & Drink" },
+    { spanish: "sel", english: "salt", category: "Food & Drink" },
+
+    // Travel
+    { spanish: "bus", english: "bus", category: "Travel" },
+    { spanish: "train", english: "train", category: "Travel" },
+    { spanish: "billet", english: "ticket", category: "Travel" },
+    { spanish: "gare", english: "station", category: "Travel" },
+    { spanish: "aéroport", english: "airport", category: "Travel" },
+    { spanish: "maison", english: "house", category: "Travel" },
+    { spanish: "école", english: "school", category: "Travel" },
+    { spanish: "hôtel", english: "hotel", category: "Travel" },
+    { spanish: "toilettes", english: "bathroom", category: "Travel" },
+    { spanish: "endroit", english: "place", category: "Travel" },
+
+    // Connectors
+    { spanish: "et", english: "and", category: "Connectors" },
+    { spanish: "ou", english: "or", category: "Connectors" },
+    { spanish: "avec", english: "with", category: "Connectors" },
+    { spanish: "sans", english: "without", category: "Connectors" },
+    { spanish: "plus", english: "more", category: "Connectors" },
+    { spanish: "peu", english: "little", category: "Connectors" },
+    { spanish: "seulement", english: "only", category: "Connectors" },
+    { spanish: "très", english: "very", category: "Connectors" },
+    { spanish: "près", english: "near", category: "Connectors" },
+    { spanish: "pour", english: "for", category: "Connectors" },
+    { spanish: "à", english: "to", category: "Connectors" },
+    { spanish: "dans", english: "in", category: "Connectors" },
+    { spanish: "elle", english: "she", category: "Connectors" },
+    { spanish: "il", english: "he", category: "Connectors" },
+    { spanish: "rapide", english: "fast", category: "Connectors" },
+    { english: "what", spanish: "quoi", category: "connectors" },
+    { english: "who", spanish: "qui", category: "connectors" },
+    { english: "when", spanish: "quand", category: "connectors" },
+    { english: "how", spanish: "comment", category: "connectors" },
+    { english: "which", spanish: "quel", category: "connectors" },
+    { english: "where", spanish: "où", category: "connectors" },
+    { english: "no / not", spanish: "non / ne ... pas", category: "connectors" },
+    { english: "there is / there are", spanish: "il y a", category: "connectors" },
+    { english: "other / another", spanish: "autre", category: "connectors" },
+    { english: "despite", spanish: "malgré", category: "connectors" },
+    { english: "favor (por favor)", spanish: "faveur", category: "connectors" },
+    { english: "they", spanish: "ils", category: "connectors" },
+    { english: "his / her / their", spanish: "son / sa / leur", category: "connectors" },
+
+    // VERBS
+    { english: "is", spanish: "est", category: "connectors" },
+    { english: "likes", spanish: "aime", category: "connectors" },
+    { english: "they like", spanish: "aiment", category: "connectors" },
+    { english: "would like", spanish: "voudrait", category: "connectors" },
+    { english: "learning", spanish: "apprenant", category: "connectors" },
+    { english: "fixing", spanish: "réparant", category: "connectors" },
+
+    // ADJECTIVES
+    { english: "good", spanish: "bon", category: "connectors" },
+    { english: "difficult", spanish: "difficile", category: "connectors" },
+    { english: "clear", spanish: "clair", category: "connectors" },
+    { english: "easy", spanish: "facile", category: "connectors" },
+    { english: "bad", spanish: "mauvais", category: "connectors" },
+    { english: "small", spanish: "petit", category: "connectors" },
+
+    // Numbers
+    { english: "one", spanish: "un", category: "Numbers" },
+    { english: "two", spanish: "deux", category: "Numbers" },
+    { english: "three", spanish: "trois", category: "Numbers" },
+    { english: "four", spanish: "quatre", category: "Numbers" },
+    { english: "five", spanish: "cinq", category: "Numbers" },
+    { english: "six", spanish: "six", category: "Numbers" },
+    { english: "seven", spanish: "sept", category: "Numbers" },
+    { english: "eight", spanish: "huit", category: "Numbers" },
+    { english: "nine", spanish: "neuf", category: "Numbers" },
+    { english: "ten", spanish: "dix", category: "Numbers" }
+],
+
+A2: [
+    // Daily Life
+    { spanish: "petit-déjeuner", english: "breakfast", category: "Daily Life" },
+    { spanish: "déjeuner", english: "lunch", category: "DailyLife" },
+    { spanish: "dîner", english: "dinner", category: "Daily Life" },
+    { spanish: "tôt", english: "early", category: "Daily Life" },
+    { spanish: "tard", english: "late", category: "Daily Life" },
+    { spanish: "hier soir", english: "last night", category: "Daily Life" },
+    { spanish: "maintenant", english: "now", category: "Daily Life" },
+    { spanish: "minutes", english: "minutes", category: "Daily Life" },
+    { spanish: "devoirs", english: "homework", category: "Daily Life" },
+    { spanish: "message", english: "message", category: "Daily Life" },
+    { spanish: "information", english: "information", category: "Daily Life" },
+    { spanish: "film", english: "movie", category: "Daily Life" },
+    { spanish: "fenêtre", english: "window", category: "Daily Life" },
+    { spanish: "cuisine", english: "kitchen", category: "Daily Life" },
+    { spanish: "chaussures", english: "shoes", category: "Daily Life" },
+    { spanish: "voyage", english: "trip", category: "Daily Life" },
+    { spanish: "essayer", english: "to try", category: "Daily Life" },
+    { spanish: "oublier", english: "to forget", category: "Daily Life" },
+    { spanish: "attendre", english: "to wait", category: "Daily Life" },
+    { spanish: "conduire", english: "to drive", category: "Daily Life" },
+    { spanish: "réparer", english: "to fix", category: "Daily Life" },
+    { spanish: "partir", english: "to leave", category: "Daily Life" },
+    { spanish: "arriver", english: "to arrive", category: "Daily Life" },
+
+    // Family
+    { spanish: "parents", english: "parents", category: "Family" },
+    { spanish: "grand-mère", english: "grandmother", category: "Family" },
+    { spanish: "amie", english: "friend (female)", category: "Family" },
+
+    // Food & Drink
+    { spanish: "petit-déjeuner", english: "breakfast", category: "Food & Drink" },
+    { spanish: "déjeuner", english: "lunch", category: "Food & Drink" },
+    { spanish: "dîner", english: "dinner", category: "Food & Drink" },
+
+    // Travel
+    { spanish: "avion", english: "plane", category: "Travel" },
+    { spanish: "visiter", english: "to visit", category: "Travel" },
+    { spanish: "transport", english: "transport", category: "Travel" },
+
+    // Connectors
+    { spanish: "souvent", english: "often", category: "Connectors" },
+    { spanish: "avant", english: "before", category: "Connectors" },
+    { spanish: "déjà", english: "already", category: "Connectors" },
+    { spanish: "encore", english: "still", category: "Connectors" },
+    { spanish: "normalement", english: "normally", category: "Connectors" },
+    { english: "argued", spanish: "a soutenu", category: "Connectors" },
+
+    { english: "eleven", spanish: "onze", category: "Numbers" },
+    { english: "twelve", spanish: "douze", category: "Numbers" },
+    { english: "thirteen", spanish: "treize", category: "Numbers" },
+    { english: "fourteen", spanish: "quatorze", category: "Numbers" },
+    { english: "fifteen", spanish: "quinze", category: "Numbers" },
+    { english: "sixteen", spanish: "seize", category: "Numbers" },
+    { english: "seventeen", spanish: "dix-sept", category: "Numbers" },
+    { english: "eighteen", spanish: "dix-huit", category: "Numbers" },
+    { english: "nineteen", spanish: "dix-neuf", category: "Numbers" },
+    { english: "twenty", spanish: "vingt", category: "Numbers" }
+],
+
+B1: [
+    // Daily Life — auxiliary verbs
+    { spanish: "ai", english: "I have (auxiliary)", category: "Daily Life" },
+    { spanish: "as", english: "you have (auxiliary)", category: "Daily Life" },
+    { spanish: "a", english: "he/she has (auxiliary)", category: "Daily Life" },
+    { spanish: "avons", english: "we have (auxiliary)", category: "Daily Life" },
+    { spanish: "avez", english: "you (plural) have (auxiliary)", category: "Daily Life" },
+    { spanish: "ont", english: "they have (auxiliary)", category: "Daily Life" },
+
+    // Daily Life — participles
+    { spanish: "été", english: "been", category: "Daily Life" },
+    { spanish: "appris", english: "learned", category: "Daily Life" },
+    { spanish: "travaillant", english: "working", category: "Daily Life" },
+    { spanish: "étudiant", english: "studying", category: "Daily Life" },
+    { spanish: "lisant", english: "reading", category: "Daily Life" },
+    { spanish: "vivant", english: "living", category: "Daily Life" },
+    { spanish: "quotidiennes", english: "daily", category: "Daily Life" },
+
+    // Daily Life — verbs & nouns
+    { spanish: "communication", english: "communication", category: "Daily Life" },
+    { spanish: "conversations", english: "conversations", category: "Daily Life" },
+    { spanish: "améliorer", english: "to improve", category: "Daily Life" },
+    { spanish: "compétences", english: "skills", category: "Daily Life" },
+    { spanish: "réviser", english: "to review", category: "Daily Life" },
+    { spanish: "continuer", english: "to continue", category: "Daily Life" },
+    { spanish: "changer", english: "to change", category: "Daily Life" },
+    { spanish: "suivre", english: "to follow", category: "Daily Life" },
+    { spanish: "préparer", english: "to prepare", category: "Daily Life" },
+    { spanish: "obtenir", english: "to get", category: "Daily Life" },
+    { spanish: "comprendre", english: "to understand", category: "Daily Life" },
+
+    // Family
+    { spanish: "expériences", english: "experiences", category: "Family" },
+    { spanish: "passées", english: "past", category: "Family" },
+
+    // Food & Drink
+    { spanish: "restaurant", english: "restaurant", category: "Food & Drink" },
+    { spanish: "menu", english: "menu", category: "Food & Drink" },
+    { spanish: "addition", english: "bill", category: "Food & Drink" },
+
+    // Travel
+    { spanish: "trouver", english: "to find", category: "Travel" },
+    { spanish: "annuler", english: "to cancel", category: "Travel" },
+    { spanish: "apporter", english: "to bring", category: "Travel" },
+    { spanish: "planifier", english: "to plan", category: "Travel" },
+    { spanish: "déménager", english: "to move (house)", category: "Travel" },
+    { spanish: "rejoindre", english: "to join", category: "Travel" },
+
+    // Connectors
+    { spanish: "pendant que", english: "while", category: "Connectors" },
+    { spanish: "cependant", english: "however", category: "Connectors" },
+    { spanish: "sur", english: "about", category: "Connectors" },
+    { spanish: "quand", english: "when", category: "Connectors" },
+    { spanish: "après", english: "after", category: "Connectors" },
+    { spanish: "pendant", english: "during", category: "Connectors" },
+
+    // Numbers
+    { spanish: "mois", english: "month", category: "Numbers" },
+    { spanish: "années", english: "years", category: "Numbers" }
+],
+
+B2: [
+    // Daily Life — abstract nouns & professional vocabulary
+    { spanish: "processus", english: "process", category: "Daily Life" },
+    { spanish: "tâche", english: "task", category: "Daily Life" },
+    { spanish: "résultats", english: "results", category: "Daily Life" },
+    { spanish: "performance", english: "performance", category: "Daily Life" },
+    { spanish: "stratégie", english: "strategy", category: "Daily Life" },
+    { spanish: "système", english: "system", category: "Daily Life" },
+    { spanish: "approche", english: "approach", category: "Daily Life" },
+    { spanish: "concept", english: "concept", category: "Daily Life" },
+    { spanish: "risque", english: "risk", category: "Daily Life" },
+    { spanish: "possibilité", english: "possibility", category: "Daily Life" },
+    { spanish: "situation", english: "situation", category: "Daily Life" },
+
+    // Daily Life — advanced verbs
+    { spanish: "optimiser", english: "to optimize", category: "Daily Life" },
+    { spanish: "coordonner", english: "to coordinate", category: "Daily Life" },
+    { spanish: "augmenter", english: "to increase", category: "Daily Life" },
+    { spanish: "mettre à jour", english: "to update", category: "Daily Life" },
+    { spanish: "analyser", english: "to analyze", category: "Daily Life" },
+    { spanish: "évaluer", english: "to evaluate", category: "Daily Life" },
+    { spanish: "discuter", english: "to discuss", category: "Daily Life" },
+    { spanish: "clarifier", english: "to clarify", category: "Daily Life" },
+    { spanish: "renforcer", english: "to strengthen", category: "Daily Life" },
+    { spanish: "s'adapter", english: "to adapt", category: "Daily Life" },
+    { spanish: "réaliser", english: "to achieve", category: "Daily Life" },
+
+    // Daily Life — B2 adjectives
+    { spanish: "compliqué", english: "complicated", category: "Daily Life" },
+    { spanish: "nécessaire", english: "necessary", category: "Daily Life" },
+    { spanish: "possible", english: "possible", category: "Daily Life" },
+    { spanish: "efficace", english: "effective", category: "Daily Life" },
+    { spanish: "réaliste", english: "realistic", category: "Daily Life" },
+    { spanish: "innovant", english: "innovative", category: "Daily Life" },
+    { spanish: "professionnel", english: "professional", category: "Daily Life" },
+    { spanish: "positif", english: "positive", category: "Daily Life" },
+
+    // Daily Life — participles used in B2 sentences
+    { spanish: "analysé", english: "analyzed", category: "Daily Life" },
+    { spanish: "évalué", english: "evaluated", category: "Daily Life" },
+    { spanish: "argumenté", english: "argued", category: "Daily Life" },
+    { spanish: "élargi", english: "expanded", category: "Daily Life" },
+    { spanish: "adapté", english: "adapted", category: "Daily Life" },
+    { spanish: "réduit", english: "reduced", category: "Daily Life" },
+    { spanish: "insisté", english: "insisted", category: "Daily Life" },
+    { spanish: "exploré", english: "explored", category: "Daily Life" },
+    { spanish: "clarifié", english: "clarified", category: "Daily Life" },
+    { spanish: "renforcé", english: "strengthened", category: "Daily Life" },
+    { spanish: "discuté", english: "discussed", category: "Daily Life" },
+    { spanish: "mis à jour", english: "updated", category: "Daily Life" },
+    { spanish: "optimisé", english: "optimized", category: "Daily Life" },
+
+    // Family — abstract B2 concepts
+    { spanish: "société", english: "society", category: "Family" },
+    { spanish: "culture", english: "culture", category: "Family" },
+    { spanish: "motivation", english: "motivation", category: "Family" },
+    { spanish: "défis", english: "challenges", category: "Family" },
+    { spanish: "attentes", english: "expectations", category: "Family" },
+
+    // Travel — B2 abstract travel concepts
+    { spanish: "éloigné", english: "remote", category: "Travel" },
+    { spanish: "avenir", english: "future", category: "Travel" },
+    { spanish: "à long terme", english: "long term", category: "Travel" },
+
+    // Connectors — B2 logical connectors
+    { spanish: "de plus", english: "in addition", category: "Connectors" },
+    { spanish: "par conséquent", english: "therefore", category: "Connectors" },
+    { spanish: "malgré", english: "despite", category: "Connectors" },
+    { spanish: "bien que", english: "although", category: "Connectors" },
+    { spanish: "même", english: "even", category: "Connectors" },
+    { spanish: "encore une fois", english: "again", category: "Connectors" },
+    { spanish: "soigneusement", english: "carefully", category: "Connectors" },
+
+    // Numbers — B2 has no new number vocabulary
+]
+};
