@@ -372,6 +372,127 @@ function setupQuizEvents() {
 }
 
 // ===============================
+// SENTENCE TAB — Multiple Choice
+// ===============================
+
+function generateSentenceForLevel(level) {
+  const bank = LANG.sentenceChoices[level];
+  if (!bank || !bank.length) return null;
+
+  const item = bank[Math.floor(Math.random() * bank.length)];
+
+  // Expected structure in wordbanks/es/CEFR_SENTENCE_CHOICES.js:
+  // {
+  //   english: "I am going to the store.",
+  //   foreignCorrect: "Voy a la tienda.",
+  //   foreignOptions: ["Voy a la tienda.", "Voy al parque.", "Voy a la escuela."],
+  //   level: "A1"
+  // }
+
+  const options = [...item.foreignOptions].sort(() => Math.random() - 0.5);
+
+  return {
+    english: item.english,
+    correct: item.foreignCorrect,
+    options,
+    level: item.level || level
+  };
+}
+
+function renderSentenceTab() {
+  const container = document.getElementById("sentence-content");
+  if (!container) return;
+
+  const level = appState.currentLevel;
+  const q = generateSentenceForLevel(level);
+
+  if (!q) {
+    container.innerHTML = `
+      <div class="glass-panel sentence-card">
+        <p>No sentence choices found for level ${level}.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="glass-panel sentence-card">
+      <h2>Sentence — Level ${level}</h2>
+      <p>Select the correct ${LANG.rules.languageName} translation.</p>
+
+      <div class="sentence-english">
+        <strong>English:</strong> ${q.english}
+      </div>
+
+      <div id="sentence-options" class="sentence-options">
+        ${q.options.map(opt => `
+          <button class="pill" data-opt="${opt}">${opt}</button>
+        `).join("")}
+      </div>
+
+      <div id="sentence-feedback"></div>
+
+      <div class="sentence-controls">
+        <button id="sentence-next" class="pill">Next</button>
+      </div>
+    </div>
+  `;
+
+  setupSentenceEvents(q);
+}
+
+function setupSentenceEvents(q) {
+  const buttons = document.querySelectorAll("#sentence-options .pill");
+  const feedback = document.getElementById("sentence-feedback");
+  const nextBtn = document.getElementById("sentence-next");
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const chosen = btn.dataset.opt;
+
+      if (chosen === q.correct) {
+        feedback.innerHTML = `
+          <span style="color:#4ade80;font-weight:600;">Correct! 🎉</span><br>
+          <div class="sentence-selected">
+            <strong>You selected:</strong> ${chosen}
+          </div>
+        `;
+
+        const stats = appState.levelStats[appState.currentLevel] || (appState.levelStats[appState.currentLevel] = {});
+        stats.sentenceCompleted = (stats.sentenceCompleted || 0) + 1;
+
+        appState.totalXP += 15;
+        appState.globalScore += 10;
+
+        updateBadges();
+        updateProgressMeters();
+        speak(q.correct);
+      } else {
+        feedback.innerHTML = `
+          <span style="color:#f87171;font-weight:600;">Incorrect.</span><br>
+          Correct answer: <strong>${q.correct}</strong><br>
+          <div class="sentence-selected">
+            <strong>You selected:</strong> ${chosen}
+          </div>
+        `;
+
+        const mistakeSentenceString = `${q.english} ➔ ${q.correct}`;
+        addIncorrectWord(mistakeSentenceString);
+        speak(q.correct);
+      }
+
+      buttons.forEach(b => b.disabled = true);
+      saveState();
+    });
+  });
+
+  nextBtn.addEventListener("click", () => {
+    renderSentenceTab();
+  });
+}
+
+
+// ===============================
 // REVIEW LIST (condensed)
 // ===============================
 window.reviewList = [];
@@ -461,11 +582,10 @@ function updateProgressMeters() {
 function renderAllTabs() {
   renderFlashcardsTab();
   renderQuizTab();
-  // renderSentenceTab();
-  // renderConversationTab();
-  // renderMiningReferencesTab();
+  renderSentenceTab();
   renderReviewList();
 }
+
 
 // ===============================
 // STARTUP
