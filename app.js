@@ -899,6 +899,84 @@ function renderBadges() {
 }
 
 // ============================================================
+//  CERTIFICATE GENERATOR PAGE — PART 1
+// ============================================================
+
+let certificateHistory = [];
+
+// 1. Generate certificate preview
+function generateCertificatePreview() {
+  const name = $("certGenNameInput").value.trim() || "Student";
+  const level = $("certGenLevelSelect").value;
+
+  const previewEl = $("certGenPreview");
+  if (!previewEl) return;
+
+  previewEl.innerHTML = `
+    <div class="ui-certificate">
+      <div class="ui-cert-header">
+        <div class="ui-cert-title">Certificate of Achievement</div>
+        <div class="ui-cert-subtitle">CEFR Level ${level}</div>
+      </div>
+
+      <div class="ui-cert-layout">
+        <div class="ui-cert-body">
+          This certifies that <strong>${name}</strong> has successfully
+          completed all requirements for CEFR Level ${level}.
+          <br><br>
+          Awarded on: ${new Date().toLocaleDateString()}
+        </div>
+
+        <div class="ui-cert-seal">CEFR</div>
+      </div>
+
+      <div class="ui-cert-signature">
+        Instructor Signature<br>
+        ______________________
+      </div>
+    </div>
+  `;
+}
+
+// 2. Save certificate to history
+function saveCertificateToHistory(name, level) {
+  certificateHistory.push({
+    name,
+    level,
+    date: new Date().toLocaleDateString()
+  });
+
+  renderCertificateHistory();
+}
+
+// 3. Render certificate history
+function renderCertificateHistory() {
+  const listEl = $("certGenHistoryList");
+  if (!listEl) return;
+
+  listEl.innerHTML = "";
+
+  if (certificateHistory.length === 0) {
+    listEl.textContent = "No certificates generated yet.";
+    return;
+  }
+
+  certificateHistory.forEach(cert => {
+    const div = document.createElement("div");
+    div.className = "ui-card";
+
+    div.innerHTML = `
+      <strong>${cert.name}</strong><br>
+      Level: ${cert.level}<br>
+      Date: ${cert.date}
+    `;
+
+    listEl.appendChild(div);
+  });
+}
+
+
+// ============================================================
 //  CERTIFICATE SYSTEM — CONSOLIDATED (PART 5)
 // ============================================================
 
