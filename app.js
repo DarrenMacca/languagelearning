@@ -1,6 +1,6 @@
 // ============================================================
-//  LANGUAGE LEARNING APP — CONSOLIDATED CORE (PART 1)
-//  State, helpers, mode selector, boot
+//  LANGUAGE LEARNING APP — FULL CONSOLIDATED JS (PART 1)
+//  Core state, helpers, mode selector, certificate storage
 // ============================================================
 
 // ----------------------------
@@ -70,6 +70,9 @@ let levelUpNotifications = [];
 // Scoring
 let score = 0;
 
+// Certificates
+let certificateHistory = [];
+
 // ----------------------------
 // 4. DOM helper
 // ----------------------------
@@ -93,7 +96,18 @@ function speak(text) {
 }
 
 // ----------------------------
-// 6. Mode selector (single source of truth)
+// 6. Section visibility
+// ----------------------------
+function showSection(id) {
+  const sections = document.querySelectorAll(".appSection");
+  sections.forEach(sec => sec.style.display = "none");
+
+  const target = $(id);
+  if (target) target.style.display = "block";
+}
+
+// ----------------------------
+// 7. Mode selector (single source of truth)
 // ----------------------------
 function setupModeSelector() {
   const select = $("modeSelect");
@@ -104,7 +118,8 @@ function setupModeSelector() {
     { id: "conversation", label: "Conversation" },
     { id: "mining", label: "Mining" },
     { id: "dictionary", label: "Dictionary" },
-    { id: "review", label: "Review" }
+    { id: "review", label: "Review" },
+    { id: "certificates", label: "Certificates" }
   ];
 
   select.innerHTML = "";
@@ -129,23 +144,12 @@ function setupModeSelector() {
       switchToMiningTab();
     } else if (currentMode === "dictionary") {
       switchToDictionaryTab();
-      setupDictionaryUI();
     } else if (currentMode === "review") {
       switchToReviewMode();
-      setupReviewUI();
+    } else if (currentMode === "certificates") {
+      switchToCertificatePage();
     }
   });
-}
-
-// ----------------------------
-// 7. Section visibility helper
-// ----------------------------
-function showSection(id) {
-  const sections = document.querySelectorAll(".appSection");
-  sections.forEach(sec => sec.style.display = "none");
-
-  const target = $(id);
-  if (target) target.style.display = "block";
 }
 
 // ----------------------------
@@ -160,32 +164,11 @@ function sanityCheck() {
   console.log("=========================");
 }
 
-// ----------------------------
-// 9. Boot the app
-// ----------------------------
-function initApp() {
-  setupLanguageSelector();
-  setupLevelSelector();
-  setupModeSelector();
-
-  loadCurrentSet();
-  renderCurrentItem();
-  setupSentenceUI();
-  setupDictionaryUI();
-  setupReviewUI();
-
-  sanityCheck();
-}
-
-document.addEventListener("DOMContentLoaded", initApp);
-
 // ============================================================
-//  SENTENCE MODE — CONSOLIDATED (PART 2)
+//  SENTENCE MODE — FULL CONSOLIDATED (PART 2)
 // ============================================================
 
-// ----------------------------
 // 1. Load CEFR items for current language + level
-// ----------------------------
 function loadCurrentSet() {
   const langBundle = WORD_BANKS[currentLanguage];
   if (!langBundle) {
@@ -207,9 +190,7 @@ function loadCurrentSet() {
   updateProgress();
 }
 
-// ----------------------------
 // 2. Render the current item
-// ----------------------------
 function renderCurrentItem() {
   const promptEl = $("promptText");
   const optionsEl = $("optionsContainer");
@@ -243,9 +224,7 @@ function renderCurrentItem() {
   });
 }
 
-// ----------------------------
 // 3. Unified sentence answer handler
-// ----------------------------
 function handleSentenceAnswer(selectedText) {
   const feedbackEl = $("feedbackText");
   if (!feedbackEl || !currentItem) return;
@@ -257,16 +236,12 @@ function handleSentenceAnswer(selectedText) {
     feedbackEl.textContent = "Correct!";
     feedbackEl.style.color = "green";
     speak(correct);
-
-    // Level progress reward
     addLevelProgress(10);
   } else {
     feedbackEl.textContent = `Incorrect — correct answer: ${correct}`;
     feedbackEl.style.color = "red";
     addMistake(currentItem);
     speak(correct);
-
-    // Small penalty
     addLevelProgress(2);
   }
 
@@ -279,9 +254,7 @@ function handleSentenceAnswer(selectedText) {
   goToNextSentenceItem();
 }
 
-// ----------------------------
 // 4. Move to next item
-// ----------------------------
 function goToNextSentenceItem() {
   if (!currentItems || currentItems.length === 0) return;
 
@@ -294,9 +267,7 @@ function goToNextSentenceItem() {
   renderCurrentItem();
 }
 
-// ----------------------------
 // 5. Scoring
-// ----------------------------
 function updateScore(isCorrect) {
   if (isCorrect) {
     score += 10;
@@ -311,9 +282,7 @@ function updateScore(isCorrect) {
   }
 }
 
-// ----------------------------
 // 6. Progress tracking
-// ----------------------------
 function updateProgress() {
   const progressEl = $("progressDisplay");
   if (!progressEl || currentItems.length === 0) return;
@@ -322,9 +291,7 @@ function updateProgress() {
   progressEl.textContent = `Progress: ${percent}%`;
 }
 
-// ----------------------------
 // 7. Mistake tracking
-// ----------------------------
 function addMistake(item) {
   mistakes.push({
     english: item.english,
@@ -353,9 +320,7 @@ function renderMistakeList() {
   });
 }
 
-// ----------------------------
 // 8. Badge rules (sentence mode)
-// ----------------------------
 function badgeRule_firstCorrect(isCorrect) {
   if (isCorrect) {
     awardBadge(
@@ -381,9 +346,7 @@ function badgeRule_tenCorrect(isCorrect) {
   }
 }
 
-// ----------------------------
 // 9. Level-up system
-// ----------------------------
 function addLevelProgress(amount) {
   levelProgress += amount;
 
@@ -396,14 +359,17 @@ function addLevelProgress(amount) {
 }
 
 function promoteUserLevel() {
-  const currentIndex = CEFR_LEVELS.indexOf(currentLevel);
+  const currentIdx = CEFR_LEVELS.indexOf(currentLevel);
 
-  if (currentIndex < CEFR_LEVELS.length - 1) {
-    const newLevel = CEFR_LEVELS[currentIndex + 1];
+  if (currentIdx < CEFR_LEVELS.length - 1) {
+    const newLevel = CEFR_LEVELS[currentIdx + 1];
     currentLevel = newLevel;
 
     levelUpNotifications.push(`You advanced to ${newLevel}!`);
     renderLevelUpNotifications();
+
+    // Auto-create certificate entry
+    addCertificateToHistory("Auto", newLevel);
 
     if (currentMode === "sentences") loadCurrentSet();
     if (currentMode === "conversation") loadConversationSet();
@@ -432,12 +398,10 @@ function renderLevelUpNotifications() {
 }
 
 // ============================================================
-//  CONVERSATION ENGINE — CONSOLIDATED (PART 3)
+//  CONVERSATION MODE — FULL CONSOLIDATED (PART 3)
 // ============================================================
 
-// ----------------------------
 // 1. Load conversation set
-// ----------------------------
 function loadConversationSet() {
   const langBundle = WORD_BANKS[currentLanguage];
   if (!langBundle) {
@@ -458,9 +422,7 @@ function loadConversationSet() {
   renderConversationItem();
 }
 
-// ----------------------------
 // 2. Render conversation item
-// ----------------------------
 function renderConversationItem() {
   const promptEl = $("conversationPrompt");
   const replyEl = $("conversationReplies");
@@ -492,9 +454,7 @@ function renderConversationItem() {
   });
 }
 
-// ----------------------------
 // 3. Handle conversation reply
-// ----------------------------
 function handleConversationReply(reply) {
   const feedbackEl = $("conversationFeedback");
   if (!feedbackEl || !convoItem) return;
@@ -504,10 +464,8 @@ function handleConversationReply(reply) {
 
   speak(reply);
 
-  // Optional: mine this conversation turn
   mineConversation(convoItem.prompt, reply);
 
-  // Advance conversation
   convoIndex++;
   if (convoIndex >= convoHistory.length) {
     convoIndex = 0;
@@ -517,36 +475,18 @@ function handleConversationReply(reply) {
   setTimeout(() => renderConversationItem(), 500);
 }
 
-// ----------------------------
 // 4. Switch to conversation mode
-// ----------------------------
 function switchToConversationMode() {
   currentMode = "conversation";
   loadConversationSet();
   showSection("conversationSection");
 }
 
-// ----------------------------
-// 5. Mining integration (conversation)
-// ----------------------------
-function mineConversation(prompt, reply) {
-  miningList.push({
-    english: prompt,
-    foreign: reply,
-    source: "conversation"
-  });
-
-  badgeRule_firstMine();
-  renderMiningList();
-}
-
 // ============================================================
-//  MINING — CONSOLIDATED (PART 4)
+//  MINING — FULL CONSOLIDATED (PART 3)
 // ============================================================
 
-// ----------------------------
 // 1. Render mining list
-// ----------------------------
 function renderMiningList() {
   const listEl = $("miningList");
   if (!listEl) return;
@@ -582,17 +522,13 @@ function renderMiningList() {
   });
 }
 
-// ----------------------------
 // 2. Switch to mining tab
-// ----------------------------
 function switchToMiningTab() {
   showSection("miningSection");
   renderMiningList();
 }
 
-// ----------------------------
 // 3. Mining buttons
-// ----------------------------
 function addMiningButtonToSentenceUI() {
   const mineBtn = $("mineSentenceButton");
   if (!mineBtn) return;
@@ -626,13 +562,21 @@ function addMiningButtonToConversationUI() {
   });
 }
 
+function mineConversation(prompt, reply) {
+  miningList.push({
+    english: prompt,
+    foreign: reply,
+    source: "conversation"
+  });
+
+  badgeRule_firstMine();
+  renderMiningList();
+}
+
 // ============================================================
-//  DICTIONARY — CONSOLIDATED (PART 4)
+//  DICTIONARY — FULL CONSOLIDATED (PART 3)
 // ============================================================
 
-// ----------------------------
-// 1. Simple dictionary lookup
-// ----------------------------
 const SIMPLE_DICTIONARY = {
   es: {
     hola: "A greeting meaning 'hello'.",
@@ -654,9 +598,6 @@ function lookupWord(word) {
   return dict[word.toLowerCase()] || "No definition found.";
 }
 
-// ----------------------------
-// 2. Add dictionary entry
-// ----------------------------
 function addDictionaryEntry(word, definition) {
   dictionaryEntries.push({
     word,
@@ -668,9 +609,6 @@ function addDictionaryEntry(word, definition) {
   renderDictionaryList();
 }
 
-// ----------------------------
-// 3. Render dictionary result
-// ----------------------------
 function renderDictionaryResult(word, definition) {
   const resultEl = $("dictionaryResult");
   if (!resultEl) return;
@@ -681,9 +619,6 @@ function renderDictionaryResult(word, definition) {
   `;
 }
 
-// ----------------------------
-// 4. Render dictionary list
-// ----------------------------
 function renderDictionaryList() {
   const listEl = $("dictionaryList");
   if (!listEl) return;
@@ -719,17 +654,11 @@ function renderDictionaryList() {
   });
 }
 
-// ----------------------------
-// 5. Switch to dictionary tab
-// ----------------------------
 function switchToDictionaryTab() {
   showSection("dictionarySection");
   renderDictionaryList();
 }
 
-// ----------------------------
-// 6. Dictionary UI setup
-// ----------------------------
 function setupDictionaryUI() {
   const lookupBtn = $("dictionaryLookupButton");
   const input = $("dictionaryInput");
@@ -757,12 +686,9 @@ function setupDictionaryUI() {
 }
 
 // ============================================================
-//  REVIEW MODE — CONSOLIDATED (PART 4)
+//  REVIEW MODE — FULL CONSOLIDATED (PART 3)
 // ============================================================
 
-// ----------------------------
-// 1. Render review item
-// ----------------------------
 function renderReviewItem() {
   const promptEl = $("reviewPrompt");
   const inputEl = $("reviewInput");
@@ -782,9 +708,6 @@ function renderReviewItem() {
   promptEl.textContent = reviewItem.english;
 }
 
-// ----------------------------
-// 2. Handle review answer
-// ----------------------------
 function handleReviewAnswer() {
   const inputEl = $("reviewInput");
   const feedbackEl = $("reviewFeedback");
@@ -812,18 +735,12 @@ function handleReviewAnswer() {
   setTimeout(() => renderReviewItem(), 600);
 }
 
-// ----------------------------
-// 3. Switch to review mode
-// ----------------------------
 function switchToReviewMode() {
   showSection("reviewSection");
   reviewIndex = 0;
   renderReviewItem();
 }
 
-// ----------------------------
-// 4. Review UI setup
-// ----------------------------
 function setupReviewUI() {
   const retryBtn = $("reviewRetryButton");
   if (!retryBtn) return;
@@ -832,12 +749,9 @@ function setupReviewUI() {
 }
 
 // ============================================================
-//  BADGES — CONSOLIDATED (PART 4)
+//  BADGES — FULL CONSOLIDATED (PART 3)
 // ============================================================
 
-// ----------------------------
-// 1. Award badge
-// ----------------------------
 function awardBadge(id, name, description, icon) {
   if (badges.some(b => b.id === id)) return;
 
@@ -845,9 +759,6 @@ function awardBadge(id, name, description, icon) {
   renderBadges();
 }
 
-// ----------------------------
-// 2. Badge rules
-// ----------------------------
 function badgeRule_firstMine() {
   if (miningList.length === 1) {
     awardBadge(
@@ -870,9 +781,6 @@ function badgeRule_firstDictionarySave() {
   }
 }
 
-// ----------------------------
-// 3. Render badges
-// ----------------------------
 function renderBadges() {
   const badgeEl = $("badgeList");
   if (!badgeEl) return;
@@ -899,20 +807,12 @@ function renderBadges() {
 }
 
 // ============================================================
-//  CERTIFICATE GENERATOR PAGE — PART 1
+//  CERTIFICATES — FULL CONSOLIDATED (PART 4)
 // ============================================================
 
-let certificateHistory = [];
-
-// 1. Generate certificate preview
-function generateCertificatePreview() {
-  const name = $("certGenNameInput").value.trim() || "Student";
-  const level = $("certGenLevelSelect").value;
-
-  const previewEl = $("certGenPreview");
-  if (!previewEl) return;
-
-  previewEl.innerHTML = `
+// 1. Core certificate rendering (single design)
+function renderCertificateHTML(name, level, date) {
+  return `
     <div class="ui-certificate">
       <div class="ui-cert-header">
         <div class="ui-cert-title">Certificate of Achievement</div>
@@ -924,7 +824,7 @@ function generateCertificatePreview() {
           This certifies that <strong>${name}</strong> has successfully
           completed all requirements for CEFR Level ${level}.
           <br><br>
-          Awarded on: ${new Date().toLocaleDateString()}
+          Awarded on: ${date}
         </div>
 
         <div class="ui-cert-seal">CEFR</div>
@@ -938,117 +838,139 @@ function generateCertificatePreview() {
   `;
 }
 
-// 2. Save certificate to history
-function saveCertificateToHistory(name, level) {
+// 2. Add certificate to history (no delete)
+function addCertificateToHistory(name, level) {
+  const date = new Date().toLocaleDateString();
+
   certificateHistory.push({
     name,
     level,
-    date: new Date().toLocaleDateString()
+    date,
+    html: renderCertificateHTML(name, level, date)
   });
 
-  renderCertificateHistory();
+  renderCertificateHistoryGallery();
 }
 
-// 3. Render certificate history
-function renderCertificateHistory() {
-  const listEl = $("certGenHistoryList");
+// 3. Certificate gallery rendering
+function renderCertificateHistoryGallery() {
+  const listEl = $("certGalleryList");
   if (!listEl) return;
 
   listEl.innerHTML = "";
 
   if (certificateHistory.length === 0) {
-    listEl.textContent = "No certificates generated yet.";
+    listEl.textContent = "No certificates earned yet.";
     return;
   }
 
-  certificateHistory.forEach(cert => {
-    const div = document.createElement("div");
-    div.className = "ui-card";
+  certificateHistory.forEach((cert, index) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "ui-card";
 
-    div.innerHTML = `
+    wrapper.innerHTML = `
       <strong>${cert.name}</strong><br>
       Level: ${cert.level}<br>
       Date: ${cert.date}
     `;
 
-    listEl.appendChild(div);
+    const viewBtn = document.createElement("button");
+    viewBtn.className = "ui-pill";
+    viewBtn.textContent = "View";
+
+    viewBtn.addEventListener("click", () => {
+      renderCertificatePreviewFromHistory(index);
+    });
+
+    const downloadBtn = document.createElement("button");
+    downloadBtn.className = "ui-pill ui-pill-glow";
+    downloadBtn.textContent = "Download PDF";
+
+    downloadBtn.addEventListener("click", () => {
+      downloadCertificateFromHistory(index);
+    });
+
+    wrapper.appendChild(document.createElement("br"));
+    wrapper.appendChild(viewBtn);
+    wrapper.appendChild(downloadBtn);
+
+    listEl.appendChild(wrapper);
   });
 }
 
+// 4. Render preview from history
+function renderCertificatePreviewFromHistory(index) {
+  const cert = certificateHistory[index];
+  const previewEl = $("certGenPreview");
+  if (!cert || !previewEl) return;
 
-// ============================================================
-//  CERTIFICATE SYSTEM — CONSOLIDATED (PART 5)
-// ============================================================
-
-// ----------------------------
-// 1. Certificate rendering
-// ----------------------------
-function renderCertificate(level, name) {
-  const certEl = $("certificateContainer");
-  if (!certEl) return;
-
-  certEl.innerHTML = `
-    <div class="ui-certificate">
-      <div class="ui-cert-header">
-        <div class="ui-cert-title">Certificate of Achievement</div>
-        <div class="ui-cert-subtitle">CEFR Level ${level}</div>
-      </div>
-
-      <div class="ui-cert-layout">
-        <div class="ui-cert-body">
-          This certifies that <strong>${name}</strong> has successfully
-          completed all requirements for CEFR Level ${level}.
-          <br><br>
-          Awarded on: ${new Date().toLocaleDateString()}
-        </div>
-
-        <div class="ui-cert-seal">CEFR</div>
-      </div>
-
-      <div class="ui-cert-signature">
-        Instructor Signature<br>
-        ______________________
-      </div>
-    </div>
-  `;
+  previewEl.innerHTML = cert.html;
 }
 
-// ----------------------------
-// 2. Trigger certificate unlock
-// ----------------------------
-function unlockCertificate(level) {
-  const name = $("studentNameInput")?.value || "Student";
-  renderCertificate(level, name);
-  showSection("certificateSection");
+// 5. Download certificate from history
+function downloadCertificateFromHistory(index) {
+  const cert = certificateHistory[index];
+  if (!cert) return;
+
+  const tempContainer = document.createElement("div");
+  tempContainer.innerHTML = cert.html;
+
+  exportCertificateAsPDF(tempContainer);
 }
 
-// ----------------------------
-// 3. Auto-unlock when leveling up
-// ----------------------------
-function promoteUserLevel() {
-  const currentIndex = CEFR_LEVELS.indexOf(currentLevel);
+// 6. Certificate generator preview
+function generateCertificatePreview() {
+  const name = $("certGenNameInput").value.trim() || "Student";
+  const level = $("certGenLevelSelect").value;
+  const date = new Date().toLocaleDateString();
 
-  if (currentIndex < CEFR_LEVELS.length - 1) {
-    const newLevel = CEFR_LEVELS[currentIndex + 1];
-    currentLevel = newLevel;
+  const previewEl = $("certGenPreview");
+  if (!previewEl) return;
 
-    levelUpNotifications.push(`You advanced to ${newLevel}!`);
-    renderLevelUpNotifications();
+  previewEl.innerHTML = renderCertificateHTML(name, level, date);
+}
 
-    unlockCertificate(newLevel);
+// 7. Download current generated certificate
+function downloadGeneratedCertificate() {
+  const previewEl = $("certGenPreview");
+  if (!previewEl) return;
 
-    if (currentMode === "sentences") loadCurrentSet();
-    if (currentMode === "conversation") loadConversationSet();
+  exportCertificateAsPDF(previewEl);
+}
+
+// 8. Certificate generator + gallery UI setup
+function setupCertificateGeneratorPage() {
+  const genBtn = $("certGenGenerateButton");
+  const dlBtn = $("certGenDownloadButton");
+
+  if (genBtn) {
+    genBtn.addEventListener("click", () => {
+      const name = $("certGenNameInput").value.trim() || "Student";
+      const level = $("certGenLevelSelect").value;
+
+      generateCertificatePreview();
+      addCertificateToHistory(name, level);
+    });
   }
+
+  if (dlBtn) {
+    dlBtn.addEventListener("click", downloadGeneratedCertificate);
+  }
+
+  renderCertificateHistoryGallery();
+}
+
+// 9. Switch to certificate page
+function switchToCertificatePage() {
+  showSection("certificateGeneratorPage");
+  renderCertificateHistoryGallery();
 }
 
 // ============================================================
-//  UI HELPERS — CONSOLIDATED (PART 5)
+//  UI HELPERS, THEME, TABS, FINAL GLUE — FULL CONSOLIDATED (PART 5)
 // ============================================================
 
-// ----------------------------
-// 1. Flash highlight
-// ----------------------------
+// 1. UI helpers
 function flashElement(el) {
   if (!el) return;
   el.style.transition = "background-color 0.3s";
@@ -1058,9 +980,6 @@ function flashElement(el) {
   }, 300);
 }
 
-// ----------------------------
-// 2. Smooth fade-in
-// ----------------------------
 function fadeIn(el) {
   if (!el) return;
   el.style.opacity = 0;
@@ -1070,33 +989,19 @@ function fadeIn(el) {
   });
 }
 
-// ============================================================
-//  THEME SYSTEM — CONSOLIDATED (PART 5)
-// ============================================================
-
-// ----------------------------
-// 1. Toggle dark/light
-// ----------------------------
+// 2. Theme system
 function toggleTheme() {
   const root = document.documentElement;
   const current = root.dataset.theme;
-
   root.dataset.theme = current === "light" ? "dark" : "light";
 }
 
-// ----------------------------
-// 2. Toggle high contrast
-// ----------------------------
 function toggleContrast() {
   const root = document.documentElement;
   const current = root.dataset.theme;
-
   root.dataset.theme = current === "contrast" ? "dark" : "contrast";
 }
 
-// ----------------------------
-// 3. Theme buttons
-// ----------------------------
 function setupThemeButtons() {
   const themeBtn = $("themeToggleButton");
   const contrastBtn = $("contrastToggleButton");
@@ -1105,13 +1010,7 @@ function setupThemeButtons() {
   if (contrastBtn) contrastBtn.addEventListener("click", toggleContrast);
 }
 
-// ============================================================
-//  TAB SYSTEM — CONSOLIDATED (PART 5)
-// ============================================================
-
-// ----------------------------
-// 1. Activate tab
-// ----------------------------
+// 3. Tabs
 function activateTab(tabId) {
   const tabs = document.querySelectorAll(".ui-tab");
   const sections = document.querySelectorAll(".appSection");
@@ -1129,9 +1028,6 @@ function activateTab(tabId) {
   }
 }
 
-// ----------------------------
-// 2. Setup tab listeners
-// ----------------------------
 function setupTabs() {
   const tabs = document.querySelectorAll(".ui-tab");
 
@@ -1142,27 +1038,31 @@ function setupTabs() {
 
       currentMode = target;
 
-      if (target === "sentences") {
+      if (target === "sentenceSection" || target === "sentences") {
+        currentMode = "sentences";
         loadCurrentSet();
-      } else if (target === "conversation") {
+        showSection("sentenceSection");
+      } else if (target === "conversationSection" || target === "conversation") {
+        currentMode = "conversation";
         switchToConversationMode();
-      } else if (target === "mining") {
+      } else if (target === "miningSection" || target === "mining") {
+        currentMode = "mining";
         switchToMiningTab();
-      } else if (target === "dictionary") {
+      } else if (target === "dictionarySection" || target === "dictionary") {
+        currentMode = "dictionary";
         switchToDictionaryTab();
-      } else if (target === "review") {
+      } else if (target === "reviewSection" || target === "review") {
+        currentMode = "review";
         switchToReviewMode();
-      } else if (target === "certificateSection") {
-        unlockCertificate(currentLevel);
+      } else if (target === "certificateGeneratorPage" || target === "certificates") {
+        currentMode = "certificates";
+        switchToCertificatePage();
       }
     });
   });
 }
 
-// ============================================================
-//  FINAL GLUE — CONSOLIDATED (PART 5)
-// ============================================================
-
+// 4. Sentence UI setup
 function setupSentenceUI() {
   const nextBtn = $("nextButton");
   if (nextBtn) nextBtn.addEventListener("click", goToNextSentenceItem);
@@ -1170,6 +1070,50 @@ function setupSentenceUI() {
   addMiningButtonToSentenceUI();
 }
 
+// 5. Language + level selectors (simple versions)
+function setupLanguageSelector() {
+  const select = $("languageSelect");
+  if (!select) return;
+
+  select.innerHTML = "";
+
+  Object.values(LANGUAGES).forEach(lang => {
+    const opt = document.createElement("option");
+    opt.value = lang.code;
+    opt.textContent = lang.name;
+    if (lang.code === currentLanguage) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener("change", e => {
+    currentLanguage = e.target.value;
+    if (currentMode === "sentences") loadCurrentSet();
+    if (currentMode === "conversation") loadConversationSet();
+  });
+}
+
+function setupLevelSelector() {
+  const select = $("levelSelect");
+  if (!select) return;
+
+  select.innerHTML = "";
+
+  CEFR_LEVELS.forEach(level => {
+    const opt = document.createElement("option");
+    opt.value = level;
+    opt.textContent = level;
+    if (level === currentLevel) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener("change", e => {
+    currentLevel = e.target.value;
+    if (currentMode === "sentences") loadCurrentSet();
+    if (currentMode === "conversation") loadConversationSet();
+  });
+}
+
+// 6. Final init
 function initApp() {
   setupLanguageSelector();
   setupLevelSelector();
@@ -1182,8 +1126,17 @@ function initApp() {
   setupSentenceUI();
   setupDictionaryUI();
   setupReviewUI();
+  setupCertificateGeneratorPage();
+
+  renderBadges();
+  renderMiningList();
+  renderDictionaryList();
+  renderMistakeList();
+  renderCertificateHistoryGallery();
+  renderLevelProgress();
 
   sanityCheck();
 }
 
 document.addEventListener("DOMContentLoaded", initApp);
+
