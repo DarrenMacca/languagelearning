@@ -1,608 +1,1397 @@
-// ===============================
-// GLOBAL APP STATE
-// ===============================
-let appState = {
-  currentLevel: "A1",
-  activeLanguage: localStorage.getItem("activeLanguage") || "es",
-  levelStats: {},
-  totalXP: 0,
-  globalScore: 0,
-  badges: [],
-  speechRate: 1.0,
-  studentName: ""
+// ============================================================
+//  LANGUAGE LEARNING APP — CLEAN REWRITE (PART 1)
+//  Core configuration, state, and utilities
+// ============================================================
+
+// ----------------------------
+// 1. Supported languages
+// ----------------------------
+const LANGUAGES = {
+  es: { code: "es", name: "Spanish" },
+  fr: { code: "fr", name: "French" },
+  nl: { code: "nl", name: "Dutch" }
 };
 
-// Filled by loadLanguagePack()
-let LANG = {
-  levels: {},           // CEFR_LEVELS
-  sentences: {},        // CEFR_SENTENCES
-  sentenceChoices: {},  // CEFR_SENTENCE_CHOICES
-  convoPrompts: {},     // CEFR_CONVERSATION_PROMPTS
-  convoAudio: [],       // CEFR_CONVERSATION_AUDIO
-  phrases: {},          // CEFR_PHRASES
-  disruptors: {},       // DISRUPTORS
-  listenVocab: {},      // LISTEN_VOCAB
-  wordDict: {},         // WORD_DICT
-  mining: {},           // MINING_REFERENCES
-  rules: {              // rules.json
-    languageName: "Spanish",
-    ttsLang: "es-ES",
-    normalize: { stripAccents: true },
-    fallbackWords: { the: "el/la", far: "lejos" }
+// ----------------------------
+// 2. Wordbank registry
+// ----------------------------
+// Each language folder (wordbanks/<lang>/) must define its own
+// CEFR_SENTENCE_CHOICES.js which exposes CEFR_SENTENCE_CHOICES.
+
+const WORD_BANKS = {
+  es: {
+    sentences: CEFR_SENTENCE_CHOICES
+  },
+  fr: {
+    sentences: {}   // placeholder for future French
+  },
+  nl: {
+    sentences: {}   // placeholder for future Dutch
   }
 };
 
-// ===============================
-// PERSISTENCE
-// ===============================
-function saveState() {
-  localStorage.setItem("appState", JSON.stringify(appState));
+// ----------------------------
+// 3. Global app state
+// ----------------------------
+let currentLanguage = "es";      // default language
+let currentLevel = "A1";         // default CEFR level
+let currentMode = "sentences";   // later: "phrases", "conversation", etc.
+
+let currentItems = [];           // active question set
+let currentIndex = 0;            // index in currentItems
+let currentItem = null;          // currently displayed item
+
+// ----------------------------
+// 4. DOM helper
+// ----------------------------
+function $(id) {
+  return document.getElementById(id);
 }
 
-function loadState() {
-  const raw = localStorage.getItem("appState");
-  if (!raw) return;
-  try {
-    const parsed = JSON.parse(raw);
-    appState = { ...appState, ...parsed };
-  } catch (e) {
-    console.error("Error loading appState:", e);
+// ============================================================
+//  LANGUAGE LEARNING APP — CLEAN REWRITE (PART 2)
+//  Initialisation, selectors, and loading CEFR sets
+// ============================================================
+
+// ----------------------------
+// 5. Initialise the app
+// ----------------------------
+function initApp() {
+  setupLanguageSelector();
+  setupLevelSelector();
+  setupModeSelector();
+
+  loadCurrentSet();
+  renderCurrentItem();
+
+  const nextBtn = $("nextButton");
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      goToNextItem();
+    });
   }
 }
 
-// ===============================
-// LANGUAGE PACK LOADER
-// ===============================
-async function loadLanguagePack(lang) {
-  const base = `wordbanks/${lang}`;
-
-  const [
-    levelsModule,
-    sentencesModule,
-    sentenceChoicesModule,
-    convoPromptsModule,
-    convoAudioModule,
-    phrasesModule,
-    disruptorsModule,
-    listenVocabModule,
-    wordDictModule,
-    miningModule,
-    rules
-  ] = await Promise.all([
-    import(`./${base}/CEFR_LEVELS.js`),
-    import(`./${base}/CEFR_SENTENCES.js`),
-    import(`./${base}/CEFR_SENTENCE_CHOICES.js`),
-    import(`./${base}/CEFR_CONVERSATION_PROMPTS.js`),
-    import(`./${base}/CEFR_CONVERSATION_AUDIO.js`),
-    import(`./${base}/CEFR_PHRASES.js`),
-    import(`./${base}/DISRUPTORS.js`),
-    import(`./${base}/LISTEN_VOCAB.js`),
-    import(`./${base}/WORD_DICT.js`),
-    import(`./${base}/mining_references.js`),
-    fetch(`${base}/rules.json`).then(r => r.json())
-  ]);
-
-  LANG = {
-    levels: levelsModule.CEFR_LEVELS,
-    sentences: sentencesModule.CEFR_SENTENCES,
-    sentenceChoices: sentenceChoicesModule.CEFR_SENTENCE_CHOICES,
-    convoPrompts: convoPromptsModule.CEFR_CONVERSATION_PROMPTS,
-    convoAudio: convoAudioModule.CEFR_CONVERSATION_AUDIO,
-    phrases: phrasesModule.CEFR_PHRASES,
-    disruptors: disruptorsModule.DISRUPTORS,
-    listenVocab: listenVocabModule.LISTEN_VOCAB,
-    wordDict: wordDictModule.WORD_DICT,
-    mining: miningModule.MINING_REFERENCES,
-    rules
-  };
-}
-
-// ===============================
-// NORMALIZATION & TTS
-// ===============================
-function normalizeEnglish(str) {
-  if (!str) return "";
-  return str
-    .toLowerCase()
-    .replace(/[-_.,?!¡¿]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function normalizeForeign(str) {
-  if (!str) return "";
-  const cfg = LANG.rules.normalize || {};
-  let s = str.normalize("NFD");
-  if (cfg.stripAccents !== false) s = s.replace(/[\u0300-\u036f]/g, "");
-  s = s.replace(/-/g, "").replace(/\s+/g, " ").trim().toLowerCase();
-  return s;
-}
-
-function speak(text) {
-  if (!text) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = LANG.rules.ttsLang || "es-ES";
-  u.rate = appState.speechRate;
-  window.speechSynthesis.speak(u);
-}
-
-// ===============================
-// GLOBAL LOOKUP (English ↔ Foreign)
-// ===============================
-function globalLookup(word) {
-  const qEng = normalizeEnglish(word);
-  const qFor = normalizeForeign(word);
-  if (!qEng && !qFor) return null;
-
-  const levels = ["A1", "A2", "B1", "B2"];
-
-  // 1. CEFR Vocabulary
-  for (const lvl of levels) {
-    const vocab = LANG.levels[lvl];
-    if (!vocab) continue;
-
-    const match = vocab.find(item =>
-      (item.english && normalizeEnglish(item.english) === qEng) ||
-      (item.foreign && normalizeForeign(item.foreign) === qFor)
-    );
-    if (match) {
-      const isForeignInput = match.foreign && normalizeForeign(match.foreign) === qFor;
-      return {
-        translation: isForeignInput ? match.english : match.foreign,
-        label: isForeignInput ? "English" : LANG.rules.languageName,
-        speakText: match.foreign,
-        source: "CEFR Vocabulary",
-        level: lvl
-      };
-    }
-  }
-
-  // You can extend this pattern to sentences, sentenceChoices, phrases, mining, etc.
-  return null;
-}
-
-// ===============================
-// LANGUAGE SELECTOR
-// ===============================
-async function initLanguageSelector() {
-  const select = document.getElementById("language-select");
+// ----------------------------
+// 6. Language selector
+// ----------------------------
+function setupLanguageSelector() {
+  const select = $("languageSelect");
   if (!select) return;
 
-  select.value = appState.activeLanguage;
+  select.innerHTML = "";
 
-  select.addEventListener("change", async () => {
-    appState.activeLanguage = select.value;
-    localStorage.setItem("activeLanguage", appState.activeLanguage);
-    await loadLanguagePack(appState.activeLanguage);
-    renderAllTabs();
-    updateBadges();
-    updateProgressMeters();
+  Object.values(LANGUAGES).forEach(lang => {
+    const opt = document.createElement("option");
+    opt.value = lang.code;
+    opt.textContent = lang.name;
+    if (lang.code === currentLanguage) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener("change", e => {
+    currentLanguage = e.target.value;
+    loadCurrentSet();
   });
 }
 
-// ===============================
-// FLASHCARDS (EXAMPLE TAB)
-// ===============================
-function groupByCategory(words) {
-  const out = {};
-  words.forEach(w => {
-    const cat = w.category || "Other";
-    if (!out[cat]) out[cat] = [];
-    out[cat].push(w);
-  });
-  return out;
-}
+// ----------------------------
+// 7. Level selector
+// ----------------------------
+function setupLevelSelector() {
+  const select = $("levelSelect");
+  if (!select) return;
 
-function renderFlashcardsTab() {
-  const container = document.getElementById("flash-content");
-  if (!container) return;
+  const levels = ["A1", "A2", "B1", "B2"];
+  select.innerHTML = "";
 
-  const words = LANG.levels[appState.currentLevel] || [];
-  const grouped = groupByCategory(words);
-
-  let html = `
-    <div class="glass-panel">
-      <h2>Flashcards — Level ${appState.currentLevel}</h2>
-      <p>Translate the English word, then flip to see and hear the ${LANG.rules.languageName} word.</p>
-    </div>
-  `;
-
-  Object.keys(grouped).forEach(cat => {
-    html += `
-      <div class="glass-panel">
-        <div class="flash-category-header">
-          <span class="listen-category-title">${cat.toUpperCase()}</span>
-          <span class="listen-arrow">▶</span>
-        </div>
-        <div class="flash-category-content">
-          <div class="fc-grid">
-            ${grouped[cat].map(item => `
-              <div class="fc-card">
-                <div class="fc-inner">
-                  <div class="fc-front pill">${item.english}</div>
-                  <div class="fc-back pill">${item.foreign}</div>
-                </div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-      </div>
-    `;
+  levels.forEach(level => {
+    const opt = document.createElement("option");
+    opt.value = level;
+    opt.textContent = level;
+    if (level === currentLevel) opt.selected = true;
+    select.appendChild(opt);
   });
 
-  container.innerHTML = html;
-
-  container.querySelectorAll(".flash-category-header").forEach(header => {
-    const content = header.nextElementSibling;
-    const arrow = header.querySelector(".listen-arrow");
-    header.addEventListener("click", () => {
-      const open = content.classList.toggle("open");
-      arrow.classList.toggle("open", open);
-    });
-  });
-
-  container.querySelectorAll(".fc-card").forEach(card => {
-    card.addEventListener("click", () => {
-      const inner = card.querySelector(".fc-inner");
-      const flipped = inner.classList.toggle("fc-flipped");
-      const foreign = inner.querySelector(".fc-back").textContent.trim();
-      if (flipped) {
-        speak(foreign);
-        const stats = appState.levelStats[appState.currentLevel] || (appState.levelStats[appState.currentLevel] = {});
-        stats.flashSeen = (stats.flashSeen || 0) + 1;
-        saveState();
-        updateBadges();
-        updateProgressMeters();
-      } else {
-        window.speechSynthesis.cancel();
-      }
-    });
+  select.addEventListener("change", e => {
+    currentLevel = e.target.value;
+    loadCurrentSet();
   });
 }
 
-// ===============================
-// QUIZ (English → Foreign, condensed)
-// ===============================
-const quizState = { currentWord: null, options: [], harderMode: false };
+// ----------------------------
+// 8. Mode selector
+// ----------------------------
+function setupModeSelector() {
+  const select = $("modeSelect");
+  if (!select) return;
 
-function generateQuizOptions(words, correctWord) {
-  const opts = [correctWord.foreign];
-  const count = quizState.harderMode ? 5 : 3;
+  const modes = [
+    { id: "sentences", label: "Sentences" }
+    // later: phrases, conversation, mining, etc.
+  ];
 
-  while (opts.length < count) {
-    const w = words[Math.floor(Math.random() * words.length)];
-    if (!opts.includes(w.foreign)) opts.push(w.foreign);
-  }
+  select.innerHTML = "";
 
-  return opts.sort(() => Math.random() - 0.5);
+  modes.forEach(m => {
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = m.label;
+    if (m.id === currentMode) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener("change", e => {
+    currentMode = e.target.value;
+    loadCurrentSet();
+  });
 }
 
-function renderQuizTab() {
-  const container = document.getElementById("quiz-content");
-  if (!container) return;
-
-  const words = LANG.levels[appState.currentLevel] || [];
-  if (!words.length) {
-    container.innerHTML = `<div class="glass-panel quiz-card"><p>No words found for this level.</p></div>`;
+// ----------------------------
+// 9. Load CEFR items for current language + level
+// ----------------------------
+function loadCurrentSet() {
+  const langBundle = WORD_BANKS[currentLanguage];
+  if (!langBundle) {
+    currentItems = [];
+    currentIndex = 0;
+    currentItem = null;
+    renderCurrentItem();
     return;
   }
 
-  quizState.currentWord = words[Math.floor(Math.random() * words.length)];
-  quizState.options = generateQuizOptions(words, quizState.currentWord);
+  if (currentMode === "sentences") {
+    const pack = langBundle.sentences || {};
+    const levelArray = pack[currentLevel] || [];
+    currentItems = levelArray.slice(); // shallow copy
+  } else {
+    currentItems = [];
+  }
 
-  container.innerHTML = `
-    <div class="glass-panel quiz-card">
-      <h2>Quiz — Level ${appState.currentLevel}</h2>
-      <p>Select the correct ${LANG.rules.languageName} word.</p>
-
-      <div><strong>English:</strong> ${quizState.currentWord.english}</div>
-
-      <div id="qb-grid" class="sb-grid">
-        ${quizState.options.map(opt => `<button class="pill" data-foreign="${opt}">${opt}</button>`).join("")}
-      </div>
-
-      <div id="qb-answer"></div>
-      <div class="sb-controls quiz-controls-tight">
-        <button id="qb-submit">Check</button>
-        <button id="qb-next">Next</button>
-        <button id="qb-harder" class="${quizState.harderMode ? "active" : ""}">Harder</button>
-      </div>
-      <div id="qb-feedback"></div>
-    </div>
-  `;
-
-  setupQuizEvents();
+  currentIndex = 0;
+  currentItem = currentItems.length > 0 ? currentItems[0] : null;
+  renderCurrentItem();
 }
 
-function setupQuizEvents() {
-  const grid = document.getElementById("qb-grid");
-  const submitBtn = document.getElementById("qb-submit");
-  const nextBtn = document.getElementById("qb-next");
-  const harderBtn = document.getElementById("qb-harder");
-  const feedback = document.getElementById("qb-feedback");
-  const answerBox = document.getElementById("qb-answer");
+// ============================================================
+//  LANGUAGE LEARNING APP — CLEAN REWRITE (PART 3)
+//  Rendering questions, handling answers, navigation
+// ============================================================
 
-  let selected = null;
+// ----------------------------
+// 10. Render the current item
+// ----------------------------
+function renderCurrentItem() {
+  const promptEl = $("promptText");
+  const optionsEl = $("optionsContainer");
+  const feedbackEl = $("feedbackText");
 
-  grid.querySelectorAll(".pill").forEach(btn => {
+  if (!promptEl || !optionsEl || !feedbackEl) return;
+
+  // Clear previous content
+  optionsEl.innerHTML = "";
+  feedbackEl.textContent = "";
+
+  if (!currentItem) {
+    promptEl.textContent = "No items available for this language and level.";
+    return;
+  }
+
+  // Show English prompt
+  promptEl.textContent = currentItem.english;
+
+  // Build multiple-choice options
+  const opts = currentItem.foreignOptions || [];
+
+  opts.forEach(optionText => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "optionButton";
+    btn.textContent = optionText;
+
     btn.addEventListener("click", () => {
-      grid.querySelectorAll(".pill").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      selected = btn.dataset.foreign;
-      answerBox.textContent = selected;
+      handleAnswer(optionText);
     });
-  });
 
-  submitBtn.addEventListener("click", () => {
-    if (!selected) {
-      feedback.textContent = "Choose an answer first.";
-      return;
-    }
-
-    const correct = quizState.currentWord.foreign;
-    const stats = appState.levelStats[appState.currentLevel] || (appState.levelStats[appState.currentLevel] = {});
-
-    if (selected === correct) {
-      feedback.innerHTML = `<div class="quiz-correct">Correct! 🎉</div>`;
-      stats.quizScore = (stats.quizScore || 0) + 1;
-      stats.quizCompleted = (stats.quizCompleted || 0) + 1;
-      appState.totalXP += 10;
-      appState.globalScore += 5;
-      updateBadges();
-      updateProgressMeters();
-      speak(correct);
-    } else {
-      feedback.innerHTML = `<div class="quiz-incorrect">Incorrect — correct answer: ${correct}</div>`;
-      const mistakeString = `${quizState.currentWord.english} ➔ ${correct}`;
-      addIncorrectWord(mistakeString);
-      speak(correct);
-    }
-
-    saveState();
-  });
-
-  nextBtn.addEventListener("click", () => renderQuizTab());
-
-  harderBtn.addEventListener("click", () => {
-    quizState.harderMode = !quizState.harderMode;
-    harderBtn.classList.toggle("active");
-    renderQuizTab();
+    optionsEl.appendChild(btn);
   });
 }
 
-// ===============================
-// SENTENCE TAB — Multiple Choice
-// ===============================
+// ----------------------------
+// 11. Handle answer selection
+// ----------------------------
+function handleAnswer(selectedText) {
+  const feedbackEl = $("feedbackText");
+  if (!feedbackEl || !currentItem) return;
 
-function generateSentenceForLevel(level) {
-  const bank = LANG.sentenceChoices[level];
-  if (!bank || !bank.length) return null;
+  const correct = currentItem.foreignCorrect;
+  const isCorrect = selectedText === correct;
 
-  const item = bank[Math.floor(Math.random() * bank.length)];
+  if (isCorrect) {
+    feedbackEl.textContent = "Correct!";
+    feedbackEl.style.color = "green";
+  } else {
+    feedbackEl.textContent = `Incorrect — correct answer: ${correct}`;
+    feedbackEl.style.color = "red";
+  }
+}
 
-  // Expected structure in wordbanks/es/CEFR_SENTENCE_CHOICES.js:
-  // {
-  //   english: "I am going to the store.",
-  //   foreignCorrect: "Voy a la tienda.",
-  //   foreignOptions: ["Voy a la tienda.", "Voy al parque.", "Voy a la escuela."],
-  //   level: "A1"
-  // }
+// ----------------------------
+// 12. Move to next item
+// ----------------------------
+function goToNextItem() {
+  if (!currentItems || currentItems.length === 0) return;
 
-  const options = [...item.foreignOptions].sort(() => Math.random() - 0.5);
+  currentIndex++;
 
-  return {
+  // Loop back to start
+  if (currentIndex >= currentItems.length) {
+    currentIndex = 0;
+  }
+
+  currentItem = currentItems[currentIndex];
+  renderCurrentItem();
+}
+
+// ============================================================
+//  LANGUAGE LEARNING APP — CLEAN REWRITE (PART 4)
+//  Speech synthesis, scoring, progress, mistake review
+// ============================================================
+
+// ----------------------------
+// 13. Speech synthesis (optional)
+// ----------------------------
+function speak(text) {
+  if (!window.speechSynthesis) return;
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = currentLanguage === "es" ? "es-ES" :
+               currentLanguage === "fr" ? "fr-FR" :
+               currentLanguage === "nl" ? "nl-NL" : "en-US";
+
+  window.speechSynthesis.speak(utter);
+}
+
+// ----------------------------
+// 14. Scoring system (optional)
+// ----------------------------
+let score = 0;
+
+function updateScore(isCorrect) {
+  if (isCorrect) {
+    score += 10;
+  } else {
+    score -= 2;
+    if (score < 0) score = 0;
+  }
+
+  const scoreEl = $("scoreDisplay");
+  if (scoreEl) {
+    scoreEl.textContent = `Score: ${score}`;
+  }
+}
+
+// ----------------------------
+// 15. Progress tracking (optional)
+// ----------------------------
+function updateProgress() {
+  const progressEl = $("progressDisplay");
+  if (!progressEl || currentItems.length === 0) return;
+
+  const percent = Math.round((currentIndex + 1) / currentItems.length * 100);
+  progressEl.textContent = `Progress: ${percent}%`;
+}
+
+// ----------------------------
+// 16. Mistake review list (optional)
+// ----------------------------
+let mistakes = [];
+
+function addMistake(item) {
+  mistakes.push({
     english: item.english,
-    correct: item.foreignCorrect,
-    options,
-    level: item.level || level
-  };
+    correct: item.foreignCorrect
+  });
+
+  renderMistakeList();
 }
 
-function renderSentenceTab() {
-  const container = document.getElementById("sentence-content");
-  if (!container) return;
+function renderMistakeList() {
+  const listEl = $("mistakeList");
+  if (!listEl) return;
 
-  const level = appState.currentLevel;
-  const q = generateSentenceForLevel(level);
+  listEl.innerHTML = "";
 
-  if (!q) {
-    container.innerHTML = `
-      <div class="glass-panel sentence-card">
-        <p>No sentence choices found for level ${level}.</p>
-      </div>
-    `;
+  mistakes.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "mistakeItem";
+    div.textContent = `${m.english} → ${m.correct}`;
+    listEl.appendChild(div);
+  });
+}
+
+// ----------------------------
+// 17. Integrate scoring + mistakes into answer handling
+// ----------------------------
+function handleAnswer(selectedText) {
+  const feedbackEl = $("feedbackText");
+  if (!feedbackEl || !currentItem) return;
+
+  const correct = currentItem.foreignCorrect;
+  const isCorrect = selectedText === correct;
+
+  if (isCorrect) {
+    feedbackEl.textContent = "Correct!";
+    feedbackEl.style.color = "green";
+    speak(correct);
+  } else {
+    feedbackEl.textContent = `Incorrect — correct answer: ${correct}`;
+    feedbackEl.style.color = "red";
+    addMistake(currentItem);
+    speak(correct);
+  }
+
+  updateScore(isCorrect);
+  updateProgress();
+}
+
+// ============================================================
+//  LANGUAGE LEARNING APP — CLEAN REWRITE (PART 5)
+//  Boot sequence + final DOMContentLoaded hook
+// ============================================================
+
+// ----------------------------
+// 18. Optional UI helpers
+// ----------------------------
+function showSection(id) {
+  const sections = document.querySelectorAll(".appSection");
+  sections.forEach(sec => sec.style.display = "none");
+
+  const target = $(id);
+  if (target) target.style.display = "block";
+}
+
+function flashElement(el) {
+  if (!el) return;
+  el.style.transition = "background-color 0.3s";
+  el.style.backgroundColor = "#ffe9a8";
+  setTimeout(() => {
+    el.style.backgroundColor = "";
+  }, 300);
+}
+
+// ----------------------------
+// 19. End-to-end sanity check
+// ----------------------------
+function sanityCheck() {
+  console.log("=== APP SANITY CHECK ===");
+  console.log("Language:", currentLanguage);
+  console.log("Level:", currentLevel);
+  console.log("Mode:", currentMode);
+  console.log("Items loaded:", currentItems.length);
+  console.log("=========================");
+}
+
+// ----------------------------
+// 20. Boot the entire app
+// ----------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  initApp();
+  sanityCheck();
+});
+
+// ============================================================
+//  CONVERSATION ENGINE — PART 1
+//  Core structure + state + wordbank registry
+// ============================================================
+
+// ----------------------------
+// 1. Conversation state
+// ----------------------------
+let convoHistory = [];
+let convoIndex = 0;
+let convoItem = null;
+
+// ----------------------------
+// 2. Conversation wordbanks
+// ----------------------------
+// Each language folder will contain CEFR_CONVERSATION.js
+// with structure:
+// {
+//   A1: [ { prompt: "...", replies: ["...", "..."] }, ... ],
+//   A2: [...],
+//   B1: [...],
+//   B2: [...]
+// }
+
+const CONVO_BANKS = {
+  es: {
+    conversation: CEFR_CONVERSATION
+  },
+  fr: {
+    conversation: {}
+  },
+  nl: {
+    conversation: {}
+  }
+};
+
+// ----------------------------
+// 3. Switch mode to conversation
+// ----------------------------
+function loadConversationSet() {
+  const langBundle = CONVO_BANKS[currentLanguage];
+  if (!langBundle) {
+    convoHistory = [];
+    convoIndex = 0;
+    convoItem = null;
+    renderConversationItem();
     return;
   }
 
-  container.innerHTML = `
-    <div class="glass-panel sentence-card">
-      <h2>Sentence — Level ${level}</h2>
-      <p>Select the correct ${LANG.rules.languageName} translation.</p>
+  const pack = langBundle.conversation || {};
+  const levelArray = pack[currentLevel] || [];
 
-      <div class="sentence-english">
-        <strong>English:</strong> ${q.english}
-      </div>
+  convoHistory = levelArray.slice();
+  convoIndex = 0;
+  convoItem = convoHistory.length > 0 ? convoHistory[0] : null;
 
-      <div id="sentence-options" class="sentence-options">
-        ${q.options.map(opt => `
-          <button class="pill" data-opt="${opt}">${opt}</button>
-        `).join("")}
-      </div>
-
-      <div id="sentence-feedback"></div>
-
-      <div class="sentence-controls">
-        <button id="sentence-next" class="pill">Next</button>
-      </div>
-    </div>
-  `;
-
-  setupSentenceEvents(q);
+  renderConversationItem();
 }
 
-function setupSentenceEvents(q) {
-  const buttons = document.querySelectorAll("#sentence-options .pill");
-  const feedback = document.getElementById("sentence-feedback");
-  const nextBtn = document.getElementById("sentence-next");
+// ============================================================
+//  CONVERSATION ENGINE — PART 2
+//  Rendering conversation prompts + reply options
+// ============================================================
 
-  buttons.forEach(btn => {
+function renderConversationItem() {
+  const promptEl = $("conversationPrompt");
+  const replyEl = $("conversationReplies");
+  const feedbackEl = $("conversationFeedback");
+
+  if (!promptEl || !replyEl || !feedbackEl) return;
+
+  replyEl.innerHTML = "";
+  feedbackEl.textContent = "";
+
+  if (!convoItem) {
+    promptEl.textContent = "No conversation items available.";
+    return;
+  }
+
+  // Show the conversation prompt
+  promptEl.textContent = convoItem.prompt;
+
+  // Build reply buttons
+  convoItem.replies.forEach(reply => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "replyButton";
+    btn.textContent = reply;
+
     btn.addEventListener("click", () => {
-      const chosen = btn.dataset.opt;
-
-      if (chosen === q.correct) {
-        feedback.innerHTML = `
-          <span style="color:#4ade80;font-weight:600;">Correct! 🎉</span><br>
-          <div class="sentence-selected">
-            <strong>You selected:</strong> ${chosen}
-          </div>
-        `;
-
-        const stats = appState.levelStats[appState.currentLevel] || (appState.levelStats[appState.currentLevel] = {});
-        stats.sentenceCompleted = (stats.sentenceCompleted || 0) + 1;
-
-        appState.totalXP += 15;
-        appState.globalScore += 10;
-
-        updateBadges();
-        updateProgressMeters();
-        speak(q.correct);
-      } else {
-        feedback.innerHTML = `
-          <span style="color:#f87171;font-weight:600;">Incorrect.</span><br>
-          Correct answer: <strong>${q.correct}</strong><br>
-          <div class="sentence-selected">
-            <strong>You selected:</strong> ${chosen}
-          </div>
-        `;
-
-        const mistakeSentenceString = `${q.english} ➔ ${q.correct}`;
-        addIncorrectWord(mistakeSentenceString);
-        speak(q.correct);
-      }
-
-      buttons.forEach(b => b.disabled = true);
-      saveState();
+      handleConversationReply(reply);
     });
-  });
 
-  nextBtn.addEventListener("click", () => {
-    renderSentenceTab();
+    replyEl.appendChild(btn);
   });
 }
 
+// ============================================================
+//  CONVERSATION ENGINE — PART 3
+//  Handling replies + advancing conversation
+// ============================================================
 
-// ===============================
-// REVIEW LIST (condensed)
-// ===============================
-window.reviewList = [];
-try {
-  const savedReview = localStorage.getItem("reviewList");
-  if (savedReview) window.reviewList = JSON.parse(savedReview);
-} catch (e) {
-  console.error("Error reading saved mistake logs:", e);
-  window.reviewList = [];
-}
+function handleConversationReply(reply) {
+  const feedbackEl = $("conversationFeedback");
+  if (!feedbackEl || !convoItem) return;
 
-function addIncorrectWord(word) {
-  if (!word) return;
-  if (!window.reviewList.includes(word)) {
-    window.reviewList.push(word);
-    localStorage.setItem("reviewList", JSON.stringify(window.reviewList));
-    renderReviewList();
-    updateProgressMeters();
-  }
-}
+  // For now, all replies are valid — conversation is free-flowing
+  feedbackEl.textContent = `You said: ${reply}`;
+  feedbackEl.style.color = "blue";
 
-function clearWordFromReview(word) {
-  window.reviewList = window.reviewList.filter(w => w !== word);
-  localStorage.setItem("reviewList", JSON.stringify(window.reviewList));
-  renderReviewList();
-  updateProgressMeters();
-}
+  // Optional: speak the reply
+  speak(reply);
 
-function renderReviewList() {
-  const listContainer = document.getElementById("review-words-list");
-  if (!listContainer) return;
-
-  listContainer.innerHTML = "";
-
-  if (!window.reviewList.length) {
-    listContainer.innerHTML = '<p class="review-empty-msg">🎉 Great job! No words to review.</p>';
-    return;
+  // Move to next conversation item
+  convoIndex++;
+  if (convoIndex >= convoHistory.length) {
+    convoIndex = 0; // loop
   }
 
-  window.reviewList.forEach(word => {
-    const card = document.createElement("div");
-    card.className = "review-card";
-    card.style.display = "flex";
-    card.style.alignItems = "center";
-    card.style.margin = "10px 0";
+  convoItem = convoHistory[convoIndex];
+  setTimeout(() => renderConversationItem(), 500);
+}
 
-    let foreignText = word;
-    if (word.includes("➔") || word.includes("→")) {
-      const parts = word.split(/➔|→/);
-      foreignText = (parts[1] || "").trim();
+// ============================================================
+//  CONVERSATION ENGINE — PART 4
+//  Integrating conversation mode into main app
+// ============================================================
+
+function switchToConversationMode() {
+  currentMode = "conversation";
+  loadConversationSet();
+  showSection("conversationSection");
+}
+
+// Modify mode selector to include conversation
+function setupModeSelector() {
+  const select = $("modeSelect");
+  if (!select) return;
+
+  const modes = [
+    { id: "sentences", label: "Sentences" },
+    { id: "conversation", label: "Conversation" }
+  ];
+
+  select.innerHTML = "";
+
+  modes.forEach(m => {
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = m.label;
+    if (m.id === currentMode) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener("change", e => {
+    currentMode = e.target.value;
+
+    if (currentMode === "sentences") {
+      loadCurrentSet();
+      showSection("sentenceSection");
     }
 
-    card.innerHTML = `
-      <span class="review-word-text">${word}</span>
-      <div class="review-card-actions" style="display:flex;align-items:center;gap:12px;margin-left:auto;">
-        <button class="pill review-play-btn" style="min-width:45px;padding:10px 14px;">🔊 Play</button>
-        <button class="pill got-it-btn">Got it!</button>
-      </div>
-    `;
-
-    card.querySelector(".review-play-btn").addEventListener("click", () => {
-      speak(foreignText);
-    });
-
-    card.querySelector(".got-it-btn").addEventListener("click", () => {
-      clearWordFromReview(word);
-    });
-
-    listContainer.appendChild(card);
+    if (currentMode === "conversation") {
+      switchToConversationMode();
+    }
   });
 }
 
-// ===============================
-// BADGES & PROGRESS (you can keep your existing logic)
-// ===============================
-function updateBadges() {
-  // reuse your existing badge logic, but based on appState.levelStats
+// ============================================================
+//  MINING TAB — PART 1
+//  Core structure + mining state
+// ============================================================
+
+// Mining list stores user‑saved items
+let miningList = [];
+
+// Mining item structure:
+// {
+//   english: "...",
+//   foreign: "...",
+//   source: "sentence" | "conversation" | "manual"
+// }
+
+// ============================================================
+//  MINING TAB — PART 2
+//  Functions to add items to the mining list
+// ============================================================
+
+function mineSentence(item) {
+  miningList.push({
+    english: item.english,
+    foreign: item.foreignCorrect,
+    source: "sentence"
+  });
+  renderMiningList();
 }
 
-function updateProgressMeters() {
-  // reuse your existing progress logic, but based on appState.levelStats, totalXP, globalScore, reviewList.length
+function mineConversation(prompt, reply) {
+  miningList.push({
+    english: prompt,
+    foreign: reply,
+    source: "conversation"
+  });
+  renderMiningList();
 }
 
-// ===============================
-// RENDER ALL TABS (helper)
-// ===============================
-function renderAllTabs() {
-  renderFlashcardsTab();
-  renderQuizTab();
-  renderSentenceTab();
-  renderReviewList();
+function mineManual(english, foreign) {
+  miningList.push({
+    english,
+    foreign,
+    source: "manual"
+  });
+  renderMiningList();
+}
+
+// ============================================================
+//  MINING TAB — PART 3
+//  Rendering the mining list
+// ============================================================
+
+function renderMiningList() {
+  const listEl = $("miningList");
+  if (!listEl) return;
+
+  listEl.innerHTML = "";
+
+  if (miningList.length === 0) {
+    listEl.textContent = "No mined items yet.";
+    return;
+  }
+
+  miningList.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.className = "minedItem";
+
+    div.innerHTML = `
+      <strong>${item.english}</strong><br>
+      ${item.foreign}<br>
+      <small>Source: ${item.source}</small>
+    `;
+
+    // Delete button
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "Remove";
+    delBtn.className = "deleteMineButton";
+    delBtn.addEventListener("click", () => {
+      miningList.splice(index, 1);
+      renderMiningList();
+    });
+
+    div.appendChild(delBtn);
+    listEl.appendChild(div);
+  });
+}
+
+// ============================================================
+//  MINING TAB — PART 4
+//  Integration with main app
+// ============================================================
+
+function switchToMiningTab() {
+  showSection("miningSection");
+  renderMiningList();
+}
+
+// Add mining buttons to sentence mode
+function addMiningButtonToSentenceUI() {
+  const mineBtn = $("mineSentenceButton");
+  if (!mineBtn) return;
+
+  mineBtn.addEventListener("click", () => {
+    if (currentItem) {
+      mineSentence(currentItem);
+    }
+  });
+}
+
+// Add mining buttons to conversation mode
+function addMiningButtonToConversationUI() {
+  const mineBtn = $("mineConversationButton");
+  if (!mineBtn) return;
+
+  mineBtn.addEventListener("click", () => {
+    if (convoItem) {
+      mineConversation(convoItem.prompt, "Your reply here");
+    }
+  });
+}
+
+// Modify mode selector to include mining
+function setupModeSelector() {
+  const select = $("modeSelect");
+  if (!select) return;
+
+  const modes = [
+    { id: "sentences", label: "Sentences" },
+    { id: "conversation", label: "Conversation" },
+    { id: "mining", label: "Mining" }
+  ];
+
+  select.innerHTML = "";
+
+  modes.forEach(m => {
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = m.label;
+    if (m.id === currentMode) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener("change", e => {
+    currentMode = e.target.value;
+
+    if (currentMode === "sentences") {
+      loadCurrentSet();
+      showSection("sentenceSection");
+    }
+
+    if (currentMode === "conversation") {
+      switchToConversationMode();
+    }
+
+    if (currentMode === "mining") {
+      switchToMiningTab();
+    }
+  });
+}
+
+// ============================================================
+//  DICTIONARY TAB — PART 1
+//  Core structure + dictionary state
+// ============================================================
+
+// Dictionary entries stored by the user
+let dictionaryEntries = [];
+
+// Dictionary entry structure:
+// {
+//   word: "...",
+//   definition: "...",
+//   language: "es" | "fr" | "nl"
+// }
+
+// ============================================================
+//  DICTIONARY TAB — PART 2
+//  Lookup functions
+// ============================================================
+
+// Simple placeholder dictionary
+// You can replace this with a real API later.
+const SIMPLE_DICTIONARY = {
+  es: {
+    hola: "A greeting meaning 'hello'.",
+    casa: "A building where people live.",
+    comida: "Food; something you eat."
+  },
+  fr: {
+    bonjour: "A greeting meaning 'hello'.",
+    maison: "A building where people live."
+  },
+  nl: {
+    hallo: "A greeting meaning 'hello'.",
+    huis: "A building where people live."
+  }
+};
+
+function lookupWord(word) {
+  const dict = SIMPLE_DICTIONARY[currentLanguage] || {};
+  return dict[word.toLowerCase()] || "No definition found.";
+}
+
+function addDictionaryEntry(word, definition) {
+  dictionaryEntries.push({
+    word,
+    definition,
+    language: currentLanguage
+  });
+  renderDictionaryList();
+}
+
+// ============================================================
+//  DICTIONARY TAB — PART 3
+//  Rendering dictionary results + saved entries
+// ============================================================
+
+function renderDictionaryResult(word, definition) {
+  const resultEl = $("dictionaryResult");
+  if (!resultEl) return;
+
+  resultEl.innerHTML = `
+    <strong>${word}</strong><br>
+    ${definition}
+  `;
+}
+
+function renderDictionaryList() {
+  const listEl = $("dictionaryList");
+  if (!listEl) return;
+
+  listEl.innerHTML = "";
+
+  if (dictionaryEntries.length === 0) {
+    listEl.textContent = "No saved dictionary entries.";
+    return;
+  }
+
+  dictionaryEntries.forEach((entry, index) => {
+    const div = document.createElement("div");
+    div.className = "dictionaryEntry";
+
+    div.innerHTML = `
+      <strong>${entry.word}</strong><br>
+      ${entry.definition}<br>
+      <small>Language: ${entry.language}</small>
+    `;
+
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "Remove";
+    delBtn.className = "deleteDictionaryButton";
+    delBtn.addEventListener("click", () => {
+      dictionaryEntries.splice(index, 1);
+      renderDictionaryList();
+    });
+
+    div.appendChild(delBtn);
+    listEl.appendChild(div);
+  });
+}
+
+// ============================================================
+//  DICTIONARY TAB — PART 4
+//  Integration with main app
+// ============================================================
+
+function switchToDictionaryTab() {
+  showSection("dictionarySection");
+  renderDictionaryList();
+}
+
+function setupDictionaryUI() {
+  const lookupBtn = $("dictionaryLookupButton");
+  const input = $("dictionaryInput");
+
+  if (!lookupBtn || !input) return;
+
+  lookupBtn.addEventListener("click", () => {
+    const word = input.value.trim();
+    if (!word) return;
+
+    const definition = lookupWord(word);
+    renderDictionaryResult(word, definition);
+  });
+
+  const saveBtn = $("dictionarySaveButton");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", () => {
+      const word = input.value.trim();
+      if (!word) return;
+
+      const definition = lookupWord(word);
+      addDictionaryEntry(word, definition);
+    });
+  }
+}
+
+// Modify mode selector to include dictionary
+function setupModeSelector() {
+  const select = $("modeSelect");
+  if (!select) return;
+
+  const modes = [
+    { id: "sentences", label: "Sentences" },
+    { id: "conversation", label: "Conversation" },
+    { id: "mining", label: "Mining" },
+    { id: "dictionary", label: "Dictionary" }
+  ];
+
+  select.innerHTML = "";
+
+  modes.forEach(m => {
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = m.label;
+    if (m.id === currentMode) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener("change", e => {
+    currentMode = e.target.value;
+
+    if (currentMode === "sentences") {
+      loadCurrentSet();
+      showSection("sentenceSection");
+    }
+
+    if (currentMode === "conversation") {
+      switchToConversationMode();
+    }
+
+    if (currentMode === "mining") {
+      switchToMiningTab();
+    }
+
+    if (currentMode === "dictionary") {
+      switchToDictionaryTab();
+      setupDictionaryUI();
+    }
+  });
+}
+
+// ============================================================
+//  REVIEW MODE — PART 1
+//  Core structure + review state
+// ============================================================
+
+// Review list is derived from mistakes[] created earlier
+let reviewIndex = 0;
+let reviewItem = null;
+
+// Review item structure:
+// {
+//   english: "...",
+//   correct: "..."
+// }
+
+// ============================================================
+//  REVIEW MODE — PART 2
+//  Rendering review items
+// ============================================================
+
+function renderReviewItem() {
+  const promptEl = $("reviewPrompt");
+  const inputEl = $("reviewInput");
+  const feedbackEl = $("reviewFeedback");
+
+  if (!promptEl || !inputEl || !feedbackEl) return;
+
+  feedbackEl.textContent = "";
+  inputEl.value = "";
+
+  if (mistakes.length === 0) {
+    promptEl.textContent = "No mistakes to review.";
+    return;
+  }
+
+  reviewItem = mistakes[reviewIndex];
+  promptEl.textContent = reviewItem.english;
+}
+
+// ============================================================
+//  REVIEW MODE — PART 3
+//  Handling retry answers
+// ============================================================
+
+function handleReviewAnswer() {
+  const inputEl = $("reviewInput");
+  const feedbackEl = $("reviewFeedback");
+
+  if (!inputEl || !feedbackEl || !reviewItem) return;
+
+  const userAnswer = inputEl.value.trim();
+  const correct = reviewItem.correct;
+
+  if (userAnswer === correct) {
+    feedbackEl.textContent = "Correct!";
+    feedbackEl.style.color = "green";
+    speak(correct);
+  } else {
+    feedbackEl.textContent = `Incorrect — correct answer: ${correct}`;
+    feedbackEl.style.color = "red";
+    speak(correct);
+  }
+
+  // Move to next review item
+  reviewIndex++;
+  if (reviewIndex >= mistakes.length) {
+    reviewIndex = 0; // loop
+  }
+
+  setTimeout(() => renderReviewItem(), 600);
+}
+
+// ============================================================
+//  REVIEW MODE — PART 4
+//  Integration with main app
+// ============================================================
+
+function switchToReviewMode() {
+  showSection("reviewSection");
+  reviewIndex = 0;
+  renderReviewItem();
+}
+
+function setupReviewUI() {
+  const retryBtn = $("reviewRetryButton");
+  if (!retryBtn) return;
+
+  retryBtn.addEventListener("click", () => {
+    handleReviewAnswer();
+  });
+}
+
+// Modify mode selector to include review mode
+function setupModeSelector() {
+  const select = $("modeSelect");
+  if (!select) return;
+
+  const modes = [
+    { id: "sentences", label: "Sentences" },
+    { id: "conversation", label: "Conversation" },
+    { id: "mining", label: "Mining" },
+    { id: "dictionary", label: "Dictionary" },
+    { id: "review", label: "Review" }
+  ];
+
+  select.innerHTML = "";
+
+  modes.forEach(m => {
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = m.label;
+    if (m.id === currentMode) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener("change", e => {
+    currentMode = e.target.value;
+
+    if (currentMode === "sentences") {
+      loadCurrentSet();
+      showSection("sentenceSection");
+    }
+
+    if (currentMode === "conversation") {
+      switchToConversationMode();
+    }
+
+    if (currentMode === "mining") {
+      switchToMiningTab();
+    }
+
+    if (currentMode === "dictionary") {
+      switchToDictionaryTab();
+      setupDictionaryUI();
+    }
+
+    if (currentMode === "review") {
+      switchToReviewMode();
+      setupReviewUI();
+    }
+  });
+}
+
+// ============================================================
+//  BADGE SYSTEM — PART 1
+//  Core structure + badge state
+// ============================================================
+
+// All earned badges
+let badges = [];
+
+// Badge structure:
+// {
+//   id: "first_correct",
+//   name: "First Correct Answer",
+//   description: "Awarded for getting your first correct answer.",
+//   icon: "🏅"
+// }
+
+// ============================================================
+//  BADGE SYSTEM — PART 2
+//  Badge earning rules
+// ============================================================
+
+function awardBadge(id, name, description, icon) {
+  // Prevent duplicates
+  if (badges.some(b => b.id === id)) return;
+
+  badges.push({ id, name, description, icon });
+  renderBadges();
+}
+
+// Rule: first correct answer
+function badgeRule_firstCorrect(isCorrect) {
+  if (isCorrect) {
+    awardBadge(
+      "first_correct",
+      "First Correct Answer",
+      "Awarded for getting your first correct answer.",
+      "🥇"
+    );
+  }
+}
+
+// Rule: 10 correct answers total
+let totalCorrectAnswers = 0;
+
+function badgeRule_tenCorrect(isCorrect) {
+  if (isCorrect) {
+    totalCorrectAnswers++;
+    if (totalCorrectAnswers === 10) {
+      awardBadge(
+        "ten_correct",
+        "Ten Correct Answers",
+        "Awarded for answering ten questions correctly.",
+        "🏆"
+      );
+    }
+  }
+}
+
+// Rule: first mined item
+function badgeRule_firstMine() {
+  if (miningList.length === 1) {
+    awardBadge(
+      "first_mine",
+      "First Mined Item",
+      "Awarded for saving your first mined item.",
+      "⛏️"
+    );
+  }
+}
+
+// Rule: first dictionary save
+function badgeRule_firstDictionarySave() {
+  if (dictionaryEntries.length === 1) {
+    awardBadge(
+      "first_dictionary",
+      "First Dictionary Save",
+      "Awarded for saving your first dictionary entry.",
+      "📘"
+    );
+  }
+}
+
+// ============================================================
+//  BADGE SYSTEM — PART 3
+//  Rendering badges
+// ============================================================
+
+function renderBadges() {
+  const badgeEl = $("badgeList");
+  if (!badgeEl) return;
+
+  badgeEl.innerHTML = "";
+
+  if (badges.length === 0) {
+    badgeEl.textContent = "No badges earned yet.";
+    return;
+  }
+
+  badges.forEach(b => {
+    const div = document.createElement("div");
+    div.className = "badgeItem";
+
+    div.innerHTML = `
+      <span class="badgeIcon">${b.icon}</span>
+      <strong>${b.name}</strong><br>
+      <small>${b.description}</small>
+    `;
+
+    badgeEl.appendChild(div);
+  });
+}
+
+// ============================================================
+//  BADGE SYSTEM — PART 4
+//  Integration with main app
+// ============================================================
+
+// Hook into sentence answer handling
+function handleAnswer(selectedText) {
+  const feedbackEl = $("feedbackText");
+  if (!feedbackEl || !currentItem) return;
+
+  const correct = currentItem.foreignCorrect;
+  const isCorrect = selectedText === correct;
+
+  if (isCorrect) {
+    feedbackEl.textContent = "Correct!";
+    feedbackEl.style.color = "green";
+    speak(correct);
+  } else {
+    feedbackEl.textContent = `Incorrect — correct answer: ${correct}`;
+    feedbackEl.style.color = "red";
+    addMistake(currentItem);
+    speak(correct);
+  }
+
+  // Scoring + progress
+  updateScore(isCorrect);
+  updateProgress();
+
+  // Badge rules
+  badgeRule_firstCorrect(isCorrect);
+  badgeRule_tenCorrect(isCorrect);
+
+  // Move to next item
+  goToNextItem();
+}
+
+// Hook into mining
+function mineSentence(item) {
+  miningList.push({
+    english: item.english,
+    foreign: item.foreignCorrect,
+    source: "sentence"
+  });
+
+  badgeRule_firstMine();
+  renderMiningList();
+}
+
+// Hook into dictionary
+function addDictionaryEntry(word, definition) {
+  dictionaryEntries.push({
+    word,
+    definition,
+    language: currentLanguage
+  });
+
+  badgeRule_firstDictionarySave();
+  renderDictionaryList();
+}
+
+// ============================================================
+//  LEVEL-UP SYSTEM — PART 1
+//  Core structure + level-up state
+// ============================================================
+
+// CEFR order
+const CEFR_LEVELS = ["A1", "A2", "B1", "B2"];
+
+// Track user progress toward next level
+let levelProgress = 0;
+
+// How much progress is needed to level up
+const LEVEL_UP_THRESHOLD = 100;
+
+// Level-up notification queue
+let levelUpNotifications = [];
+
+// ============================================================
+//  LEVEL-UP SYSTEM — PART 2
+//  Level-up rules
+// ============================================================
+
+function addLevelProgress(amount) {
+  levelProgress += amount;
+
+  if (levelProgress >= LEVEL_UP_THRESHOLD) {
+    levelProgress = 0;
+    promoteUserLevel();
+  }
+
+  renderLevelProgress();
+}
+
+function promoteUserLevel() {
+  const currentIndex = CEFR_LEVELS.indexOf(currentLevel);
+
+  if (currentIndex < CEFR_LEVELS.length - 1) {
+    const newLevel = CEFR_LEVELS[currentIndex + 1];
+    currentLevel = newLevel;
+
+    levelUpNotifications.push(`You advanced to ${newLevel}!`);
+    renderLevelUpNotifications();
+
+    // Reload content for new level
+    if (currentMode === "sentences") loadCurrentSet();
+    if (currentMode === "conversation") loadConversationSet();
+  }
+}
+
+function renderLevelProgress() {
+  const el = $("levelProgressDisplay");
+  if (!el) return;
+
+  el.textContent = `Level Progress: ${levelProgress}/${LEVEL_UP_THRESHOLD}`;
+}
+
+// ============================================================
+//  LEVEL-UP SYSTEM — PART 3
+//  Rendering level-up notifications
+// ============================================================
+
+function renderLevelUpNotifications() {
+  const el = $("levelUpNotifications");
+  if (!el) return;
+
+  el.innerHTML = "";
+
+  levelUpNotifications.forEach(msg => {
+    const div = document.createElement("div");
+    div.className = "levelUpMessage";
+    div.textContent = msg;
+    el.appendChild(div);
+  });
+}
+
+// ============================================================
+//  LEVEL-UP SYSTEM — PART 4
+//  Integration with main app
+// ============================================================
+
+// Modify sentence answer handling to include level progress
+function handleAnswer(selectedText) {
+  const feedbackEl = $("feedbackText");
+  if (!feedbackEl || !currentItem) return;
+
+  const correct = currentItem.foreignCorrect;
+  const isCorrect = selectedText === correct;
+
+  if (isCorrect) {
+    feedbackEl.textContent = "Correct!";
+    feedbackEl.style.color = "green";
+    speak(correct);
+
+    // Level progress reward
+    addLevelProgress(10);
+  } else {
+    feedbackEl.textContent = `Incorrect — correct answer: ${correct}`;
+    feedbackEl.style.color = "red";
+    addMistake(currentItem);
+    speak(correct);
+
+    // Small penalty
+    addLevelProgress(2);
+  }
+
+  updateScore(isCorrect);
+  updateProgress();
+
+  badgeRule_firstCorrect(isCorrect);
+  badgeRule_tenCorrect(isCorrect);
+
+  goToNextItem();
 }
 
 
-// ===============================
-// STARTUP
-// ===============================
-document.addEventListener("DOMContentLoaded", async () => {
-  loadState();
-  await loadLanguagePack(appState.activeLanguage);
 
-  initLanguageSelector();
-  // initTabNavigation(); // your existing tab system
-  // activateTab("dashboard");
-  // initRateControl();
-  // initNameBox();
-  // initDictionarySearch();
-  // initFreePracticeSandbox();
 
-  renderAllTabs();
-  updateBadges();
-  updateProgressMeters();
-});
+// ============================================================
+//  Language Learning App — JSON-driven core
+//  app.js (Part 1)
+// ============================================================
+
+// ----------------------------
+// 1. Language registry
+// ----------------------------
+
+const LANGUAGES = {
+  es: { code: "es", name: "Spanish" },
+  fr: { code: "fr", name: "French" },
+  nl: { code: "nl", name: "Dutch" }
+};
+
+// ----------------------------
+// 2. Wordbank registry
+// ----------------------------
+// Each language’s JS wordbank file must define its own globals,
+// e.g. CEFR_SENTENCE_CHOICES for sentences.
+
+const WORD_BANKS = {
+  es: {
+    sentences: CEFR_SENTENCE_CHOICES
+    // later: phrases, conversation, etc.
+  },
+  fr: {
+    sentences: {} // placeholder for future French
+  },
+  nl: {
+    sentences: {} // placeholder for future Dutch
+  }
+};
+
+// ----------------------------
+// 3. Global app state
+// ----------------------------
+
+let currentLanguage = "es";     // default language
+let currentLevel = "A1";        // default CEFR level
+let currentMode = "sentences";  // later: "phrases", "conversation", etc.
+
+let currentItems = [];          // active question set
+let currentIndex = 0;           // index in currentItems
+let currentItem = null;         // currently displayed item
+
+// ----------------------------
+// 4. Simple DOM helper
+// ----------------------------
+
+function $(id) {
+  return document.getElementById(id);
+}
