@@ -17,7 +17,7 @@ const LANGUAGES = {
 // ----------------------------
 const WORD_BANKS = {
   es: {
-    sentences: CEFR_SENTENCE_CHOICES,
+    sentences: CEFR_SENTENCE,
     conversation: CEFR_CONVERSATION
   },
   fr: {
