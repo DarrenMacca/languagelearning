@@ -1,4 +1,4 @@
-const CEFR_CONVERSATION_PROMPTS = {
+const CEFR_CONVERSATION = {
 
        A1: [
         {
