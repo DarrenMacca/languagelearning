@@ -1,4 +1,4 @@
-export const CEFR_SENTENCE_CHOICES = {
+const CEFR_SENTENCE_CHOICES = {
   A1: [
     {
       english: "I’m a bit tired today.",
