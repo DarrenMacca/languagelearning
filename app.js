@@ -1138,5 +1138,19 @@ function initApp() {
   sanityCheck();
 }
 
-document.addEventListener("DOMContentLoaded", initApp);
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadLanguagePack("es");  // loads ALL wordbanks/es files
+
+    // Now safe to run everything else
+    initLanguageSelector();
+    initTabNavigation();
+    activateTab("dashboard");
+    initRateControl();
+    initNameBox();
+    initDictionarySearch();
+    initFreePracticeSandbox();
+    updateBadges();
+    updateProgressMeters();
+});
+
 
