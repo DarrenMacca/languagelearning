@@ -1,5 +1,5 @@
 
-const B1_WORDS = [
+export default [
     { english: "and", spanish: "y", audio: "y.mp3", category: "connector" },
     { english: "but", spanish: "pero", audio: "pero.mp3", category: "connector" },
     { english: "however", spanish: "sin embargo", audio: "sin-embargo.mp3", category: "connector" },
