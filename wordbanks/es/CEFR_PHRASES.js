@@ -1,5 +1,5 @@
 
-const CEFR_PHRASES = {
+export default {
     "cómo estás": "how are you",
     "dónde vives": "where do you live",
     "qué hora es": "what time is it",
