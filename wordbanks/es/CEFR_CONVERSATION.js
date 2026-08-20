@@ -188,8 +188,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
-];
+  },
   {
     id: "A1_basic_social_011",
     cefr: "A1",
@@ -379,7 +378,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "A1_family_021",
     cefr: "A1",
@@ -569,7 +568,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "A1_food_031",
     cefr: "A1",
@@ -759,7 +758,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "A1_home_041",
     cefr: "A1",
@@ -949,7 +948,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
 
 
   {
@@ -1141,7 +1140,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "A2_food_011",
     cefr: "A2",
@@ -1331,7 +1330,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "A2_food_021",
     cefr: "A2",
@@ -1521,7 +1520,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "A2_food_031",
     cefr: "A2",
@@ -1711,7 +1710,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "A2_food_041",
     cefr: "A2",
@@ -1901,7 +1900,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
 
 
 
@@ -2094,7 +2093,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "B1_work_011",
     cefr: "B1",
@@ -2284,7 +2283,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "B1_work_021",
     cefr: "B1",
@@ -2474,7 +2473,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "B1_work_031",
     cefr: "B1",
@@ -2664,7 +2663,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
 
 
   {
@@ -2856,7 +2855,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "B2_coordination_011",
     cefr: "B2",
@@ -3236,7 +3235,7 @@ export default [
     ],
     audio_es: null,
     notes: null
-  }
+  },
 
 
 
@@ -3540,7 +3539,7 @@ CEFR_CONVERSATION.ALL = [
     replies: ["sí me gusta caminar","camino todos los días","prefiero correr"],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "A1_family_021",
     cefr: "A1",
@@ -3840,7 +3839,7 @@ CEFR_CONVERSATION.ALL = [
     replies: ["sí puedo repetir","lo repetiré más tarde","no puedo repetir ahora"],
     audio_es: null,
     notes: null
-  }
+  },
 
   {
     id: "A1_home_041",
@@ -3991,7 +3990,7 @@ CEFR_CONVERSATION.ALL = [
     replies: ["sí me gusta correr","corro todos los días","prefiero caminar"],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "A2_food_001",
     cefr: "A2",
@@ -4291,7 +4290,7 @@ CEFR_CONVERSATION.ALL = [
     replies: ["voy a estudiar","voy a salir con amigos","no tengo planes"],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "A2_food_021",
     cefr: "A2",
@@ -4591,7 +4590,7 @@ CEFR_CONVERSATION.ALL = [
     replies: ["voy a descansar","voy a cocinar algo","no tengo planes"],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "A2_food_041",
     cefr: "A2",
@@ -4741,7 +4740,7 @@ CEFR_CONVERSATION.ALL = [
     replies: ["voy a viajar","voy a descansar en casa","todavía no tengo planes"],
     audio_es: null,
     notes: null
-  }
+  },
 
 
 
@@ -5044,7 +5043,7 @@ CEFR_CONVERSATION.ALL = [
     replies: ["voy a trabajar cada día","tengo un plan claro","voy a pedir ayuda cuando la necesite"],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "B1_work_021",
     cefr: "B1",
@@ -5344,7 +5343,7 @@ CEFR_CONVERSATION.ALL = [
     replies: ["me recuerdo por qué son importantes","celebro pequeños avances","pido apoyo cuando lo necesito"],
     audio_es: null,
     notes: null
-  }
+  },
 
 
 
@@ -5647,7 +5646,7 @@ CEFR_CONVERSATION.ALL = [
     replies: ["reviso mi progreso regularmente","divido mis metas en pasos pequeños","mantengo una visión clara del futuro"],
     audio_es: null,
     notes: null
-  }
+  },
   {
     id: "B2_analysis_021",
     cefr: "B2",
