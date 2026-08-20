@@ -1,5 +1,5 @@
 
-const CEFR_LEVELS = {
+export default {
         A1: [
         { spanish: "vivir", english: "to live", category: "Daily Life" },
         { spanish: "trabajar", english: "to work", category: "Daily Life" },
