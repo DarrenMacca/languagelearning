@@ -1,12 +1,11 @@
 // ============================================================
 // LANGUAGE PACK LOADER
-// Loads ALL JS + JS files inside wordbanks/<lang>/
+// Loads ALL JS files inside wordbanks/<lang>/
 // ============================================================
 
 async function loadLanguagePack(lang) {
     const base = `wordbanks/${lang}`;
 
-    // List of all files in the folder (from your screenshot)
     const files = [
         "A1.js",
         "A2.js",
@@ -24,31 +23,29 @@ async function loadLanguagePack(lang) {
         "mining_references.js"
     ];
 
-  const jsonData = {};   // keep if your app expects LANG.json
-const modules = {};
+    const jsonData = {};   // stays empty unless you add JSON later
+    const modules = {};
 
-// -------------------------------
-// Load JS modules
-// -------------------------------
-const jsFiles = files.filter(f => f.endsWith(".js"));
+    // -------------------------------
+    // Load JS modules
+    // -------------------------------
+    const jsFiles = files.filter(f => f.endsWith(".js"));
 
-for (const file of jsFiles) {
-    try {
-        modules[file.replace(".js", "")] = await import(`./${base}/${file}`);
-    } catch (err) {
-        console.error("JS module load error:", err);
+    for (const file of jsFiles) {
+        try {
+            modules[file.replace(".js", "")] = await import(`./${base}/${file}`);
+        } catch (err) {
+            console.error("JS module load error:", err);
+        }
     }
-}
 
-// -------------------------------
-// Build global language object
-// -------------------------------
-window.LANG = {
-    lang,
-    json: jsonData,   // stays empty unless you add JSON later
-    modules: modules
-};
-
+    // -------------------------------
+    // Build global language object
+    // -------------------------------
+    window.LANG = {
+        lang,
+        json: jsonData,
+        modules: modules
     };
 
     console.log(`Language pack '${lang}' loaded:`, window.LANG);
