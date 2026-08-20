@@ -1,5 +1,5 @@
  
-const LISTEN_VOCAB = {
+export default {
     A1: {
         "Daily Life": [
             "vivir","trabajar","estudiar","leer","libros","hora",
