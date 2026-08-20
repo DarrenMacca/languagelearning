@@ -12,23 +12,7 @@ const LANGUAGES = {
   nl: { code: "nl", name: "Dutch" }
 };
 
-// ----------------------------
-// 2. Wordbank registry
-// ----------------------------
-const WORD_BANKS = {
-  es: {
-    sentences: CEFR_SENTENCE_CHOICES,
-    conversation: CEFR_CONVERSATION
-  },
-  fr: {
-    sentences: {},
-    conversation: {}
-  },
-  nl: {
-    sentences: {},
-    conversation: {}
-  }
-};
+
 
 // ----------------------------
 // 3. Global app state
@@ -1139,9 +1123,18 @@ function initApp() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    await loadLanguagePack("es");  // loads ALL wordbanks/es files
+    await loadLanguagePack("es");
 
-    // Now safe to run everything else
+    const WORD_BANKS = {
+      es: {
+        sentences: window.LANG.modules.CEFR_SENTENCE_CHOICES.default,
+        conversation: window.LANG.modules.CEFR_CONVERSATION.default
+      },
+      fr: { sentences: {}, conversation: {} },
+      nl: { sentences: {}, conversation: {} }
+    };
+
+    // now safe to run everything else
     initLanguageSelector();
     initTabNavigation();
     activateTab("dashboard");
@@ -1152,5 +1145,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateBadges();
     updateProgressMeters();
 });
-
-
