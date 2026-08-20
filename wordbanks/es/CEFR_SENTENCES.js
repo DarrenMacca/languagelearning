@@ -1,10 +1,8 @@
-/* ============================================================
-   CEFR SENTENCE BANKS (for Build tab)
-   ============================================================ */
+
 
 const CEFR_SENTENCES = {
         A1: [
-        // Simple Greetings & Formal Introductions
+      
         { english: "Hello, how are you?", spanish: "hola cómo estás" },
         { english: "Good morning, sir.", spanish: "buenos días señor" },
         { english: "Good afternoon, ma'am.", spanish: "buenas tardes señora" },
@@ -16,7 +14,7 @@ const CEFR_SENTENCES = {
         { english: "Hello, good morning.", spanish: "hola buenos días" },
         { english: "Goodbye, sir.", spanish: "adiós señor" },
 
-        // Travel, Transit & Essential Needs
+       
         { english: "I would like water, please.", spanish: "me gustaría agua por favor" },
         { english: "I would like beer, please.", spanish: "me gustaría cerveza por favor" },
         { english: "Where is the bathroom?", spanish: "dónde está el baño" },
@@ -27,8 +25,8 @@ const CEFR_SENTENCES = {
         { english: "Where is the bus?", spanish: "dónde está el autobús" },
         { english: "Where is the airport?", spanish: "dónde está el aeropuerto" },
         { english: "Where is the ticket?", spanish: "dónde está el boleto" },
-        // Daily Routines, Work & Study
-        { english: "I want a coffee.", spanish: "quiero un café" },
+
+           { english: "I want a coffee.", spanish: "quiero un café" },
         { english: "The coffee is hot.", spanish: "el café es caliente" },
         { english: "I want to study more.", spanish: "estudiar más" },
         { english: "I want to work more.", spanish: "trabajar más" },
@@ -43,7 +41,6 @@ const CEFR_SENTENCES = {
         { english: "We are ready.", spanish: "listos" },
         { english: "The hour is near.", spanish: "hora es cerca" },
 
-        // Family, Home Life & Food Transactions
         { english: "She is my sister.", spanish: "ella es mi hermana" },
         { english: "I have two brothers.", spanish: "tengo dos hermanos" },
         { english: "My friend is very happy.", spanish: "mi amigo es muy feliz" },
@@ -59,7 +56,6 @@ const CEFR_SENTENCES = {
     ],
 
         A2: [
-        // Time Sequences, Indicators, and Routines
         { english: "Normally I get up early.", spanish: "normalmente levantarse temprano" },
         { english: "I want to cook dinner now.", spanish: "quiero cocinar cena ahora" },
         { english: "She is learning fast now.", spanish: "ella aprendiendo rápido ahora" },
@@ -72,7 +68,6 @@ const CEFR_SENTENCES = {
         { english: "She already finished homework.", spanish: "ella ya terminar tarea" },
         { english: "I still have problems.", spanish: "todavía tengo problemas" },
 
-        // Household Actions, Cooking, and Spaces
         { english: "The kitchen is clean now.", spanish: "cocina es clara ahora" },
         { english: "Open the kitchen window, please.", spanish: "abrir ventana cocina por favor" },
         { english: "I want to try a new breakfast today.", spanish: "quiero probar un nuevo desayuno hoy" },
@@ -80,17 +75,15 @@ const CEFR_SENTENCES = {
         { english: "He is fixing the television in the house.", spanish: "el arreglando televisión en casa" },
         { english: "We have food for lunch and dinner.", spanish: "tenemos comida para almuerzo y cena" },
 
-        // Family Transactions & Travel Contexts
         { english: "We want to visit parents today.", spanish: "visitar padres hoy" },
         { english: "Where is my friend? I want to wait.", spanish: "dónde es mi amigo quiero esperar" },
         { english: "I want to drive to the airport.", spanish: "conducir a aeropuerto" },
-        // Messages, Information & Communication Loops
+
         { english: "I want to read the message now.", spanish: "quiero leer mensaje ahora" },
         { english: "She wants to write a message.", spanish: "ella escribir un mensaje" },
         { english: "He wants more information, please.", spanish: "el más información por favor" },
         { english: "Don't forget the message.", spanish: "no olvidar mensaje" },
 
-        // Travel Logistics, Apparel, & Social Scenarios
         { english: "Where is the plane? It is late.", spanish: "dónde es avión es tarde" },
         { english: "The plane arrives in twenty minutes.", spanish: "avión llegar en veinte minutos" },
         { english: "I need transport to the station.", spanish: "necesito transporte a estación" },
@@ -100,7 +93,6 @@ const CEFR_SENTENCES = {
         { english: "She likes her small shoes.", spanish: "ella gusta su pequeños zapatos" },
         { english: "Often, he likes this clean house.", spanish: "a menudo el gusta casa" },
 
-        // Number Assemblies & Quantities
         { english: "I have eleven new books.", spanish: "tengo once nuevos libros" },
         { english: "There are twelve buses in the station.", spanish: "hay doce autobuses en estación" },
         { english: "Thirteen minutes to finish.", spanish: "trece minutos para terminar" },
@@ -114,7 +106,6 @@ const CEFR_SENTENCES = {
     ],
 
         B1: [
-        // Present Perfect & Continuous Actions (The Core B1 Milestone)
         { english: "I have been here for a month.", spanish: "he estado aquí un mes" },
         { english: "You have learned fast during the trip.", spanish: "has aprendido rápido durante el viaje" },
         { english: "He has worked hard today.", spanish: "el ha trabajado más hoy" },
@@ -125,7 +116,6 @@ const CEFR_SENTENCES = {
         { english: "He is reading a new book while waiting.", spanish: "el leyendo un nuevo libro mientras esperar" },
         { english: "They are living in a small place near school.", spanish: "ellos viviendo en un pequeño lugar cerca escuela" },
 
-        // Daily Life Management, Communication & Improvement
         { english: "I want to improve my communication skills.", spanish: "quiero mejorar mi comunicación habilidades" },
         { english: "We need to continue the conversations today.", spanish: "necesitamos continuar las conversaciones hoy" },
         { english: "I want to understand the past experiences.", spanish: "quiero entender las experiencias pasadas" },
@@ -136,7 +126,6 @@ const CEFR_SENTENCES = {
         { english: "We need to change the daily routine.", spanish: "necesitamos cambiar la hora diarias" },
         { english: "However, I understand your problems.", spanish: "sin embargo quiero entender su problemas" },
 
-        // Restaurant Transactions & Food Contexts
         { english: "Where is the new restaurant?", spanish: "dónde es el nuevo restaurante" },
         { english: "Bring the menu, please.", spanish: "traer el menú por favor" },
         // Restaurant Billings, Logistics & Connections
@@ -144,7 +133,6 @@ const CEFR_SENTENCES = {
         { english: "The bill is big after dinner.", spanish: "la cuenta es grande después de cena" },
         { english: "I want to understand the restaurant menu.", spanish: "quiero entender el menú del restaurante" },
 
-        // Travel Logistics, Planning & Household Shifting
         { english: "I want to plan a new trip.", spanish: "quiero planear un nuevo viaje" },
         { english: "They want to find a hotel near the station.", spanish: "ellos quieren encontrar un hotel cerca estación" },
         { english: "She needs to cancel her train ticket.", spanish: "ella necesita cancelar su boleto tren" },
@@ -154,7 +142,6 @@ const CEFR_SENTENCES = {
         { english: "Where can I find transport now?", spanish: "dónde encontrar transporte ahora" },
         { english: "The plane was canceled last night.", spanish: "el avión cancelar anoche" },
 
-        // Timeline Scales, Numbers & Duration Indicators
         { english: "He studied for an hour during lunch.", spanish: "el estudiar una hora durante almuerzo" },
         { english: "She has been working here for a month.", spanish: "ella ha trabajando aquí un mes" },
         { english: "They have lived in this house for ten years.", spanish: "ellos han vivido en esta casa diez años" },
@@ -166,7 +153,6 @@ const CEFR_SENTENCES = {
         { english: "While studying, I want to improve daily.", spanish: "mientras estudiar quiero mejorar diarias" }
     ],
     B2: [
-        // Professional Strategies, Abstract Processes, and Analysis
         { english: "They want to analyze the situation.", spanish: "quieren analizar la situación" },
         { english: "We need to evaluate the risks carefully.", spanish: "necesitamos evaluar los riesgos cuidadosamente" },
         { english: "Although it was difficult, she finished the task.", spanish: "aunque difícil ella terminar la tarea" },
@@ -187,8 +173,8 @@ const CEFR_SENTENCES = {
         { english: "We need to update the system.", spanish: "necesitamos actualizar el sistema" },
         { english: "He explained the strategy clearly.", spanish: "el ha aclarado la estrategia clara" },
         { english: "They want to optimize the process.", spanish: "ellos quieren optimizar el proceso" },
-        // Abstract Milestones, Culture, and Challenges
-        { english: "We will continue even if there are challenges.", spanish: "continuaremos incluso si hay desafíos" },
+ 
+       { english: "We will continue even if there are challenges.", spanish: "continuaremos incluso si hay desafíos" },
         { english: "Despite the problems, they finished the trip.", spanish: "a pesar de los problemas terminaron el viaje" },
         { english: "We need to adapt to the new situation.", spanish: "necesitamos adaptarse a la nueva situación" },
         { english: "She wants to expand her professional experience.", spanish: "ella quiere ampliar su experiencia profesional" },
@@ -204,7 +190,6 @@ const CEFR_SENTENCES = {
         { english: "Expectations are high for the future long term trip.", spanish: "expectativas altas para el futuro viaje a largo plazo" },
         { english: "They live in a remote place, however they study daily.", spanish: "viven en un lugar remoto sin embargo estudiar diarias" },
 
-        // Final Verification Loops & Resource Management
         { english: "I want to understand this abstract concept better.", spanish: "quiero entender este concepto mejor" },
         { english: "We must prepare for possible system changes.", spanish: "debemos preparar para posible cambio del sistema" },
         { english: "They want to increase information access in society.", spanish: "ellos quieren aumentar la información en la sociedad" },
