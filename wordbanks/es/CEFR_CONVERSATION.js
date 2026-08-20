@@ -1,4 +1,4 @@
-CEFR_CONVERSATION.A1 = [
+export default [
   {
     id: "A1_food_001",
     cefr: "A1",
