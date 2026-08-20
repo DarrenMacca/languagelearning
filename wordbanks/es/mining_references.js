@@ -1,6 +1,6 @@
 
 
-const MINING_REFERENCES = {
+export default {
     "Open Cut Mining": [
         { spanish: "rampa de acceso", english: "access ramp", category: "Open Cut Mining" },
         { spanish: "ángulo de reposo", english: "angle of repose", category: "Open Cut Mining" },
