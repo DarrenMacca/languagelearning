@@ -1,5 +1,5 @@
 
-export default [
+[
     { english: "however", spanish: "sin embargo", audio: "sin-embargo.mp3", category: "connector" },
     { english: "on the other hand", spanish: "por otro lado", audio: "otro-lado.mp3", category: "connector" },
     { english: "as a result", spanish: "como resultado", audio: "resultado.mp3", category: "connector" },
