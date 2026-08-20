@@ -1,10 +1,6 @@
-/* ============================================================
-   CEFR LEVELS — A1 → B2 Vocabulary (Spanish → English)
-   ============================================================ */
 
 const CEFR_LEVELS = {
         A1: [
-        // Daily Life
         { spanish: "vivir", english: "to live", category: "Daily Life" },
         { spanish: "trabajar", english: "to work", category: "Daily Life" },
         { spanish: "estudiar", english: "to study", category: "Daily Life" },
@@ -47,7 +43,6 @@ const CEFR_LEVELS = {
         { spanish: "señor", english: "sir", category: "Daily Life" },
         { spanish: "señora", english: "ma'am", category: "Daily Life" },
 
-        // Family
         { spanish: "familia", english: "family", category: "Family" },
         { spanish: "madre", english: "mother", category: "Family" },
         { spanish: "padre", english: "father", category: "Family" },
@@ -63,7 +58,6 @@ const CEFR_LEVELS = {
         { spanish: "tenemos", english: "we have", category: "Family" },
         { spanish: "tienen", english: "they have", category: "Family" },
 
-        // Food & Drink
         { spanish: "agua", english: "water", category: "Food & Drink" },
         { spanish: "comida", english: "food", category: "Food & Drink" },
         { spanish: "café", english: "coffee", category: "Food & Drink" },
@@ -87,7 +81,6 @@ const CEFR_LEVELS = {
         { spanish: "queso", english: "cheese", category: "Food & Drink" },
         { spanish: "sal", english: "salt", category: "Food & Drink" },
 
-        // Travel
         { spanish: "autobús", english: "bus", category: "Travel" },
         { spanish: "tren", english: "train", category: "Travel" },
         { spanish: "boleto", english: "ticket", category: "Travel" },
@@ -99,7 +92,6 @@ const CEFR_LEVELS = {
         { spanish: "baño", english: "bathroom", category: "Travel" },
         { spanish: "lugar", english: "place", category: "Travel" },
 
-        // Connectors & Pronouns
         { spanish: "y", english: "and", category: "Connectors" },
         { spanish: "o", english: "or", category: "Connectors" },
         { spanish: "con", english: "with", category: "Connectors" },
@@ -135,7 +127,6 @@ const CEFR_LEVELS = {
         { spanish: "el", english: "the (masculine)", category: "Connectors" },
         { spanish: "la", english: "the (feminine)", category: "Connectors" },
 
-        // Verbs & Participles
         { spanish: "es", english: "is", category: "Verbs" },
         { spanish: "gusta", english: "likes", category: "Verbs" },
         { spanish: "gustan", english: "they like", category: "Verbs" },
@@ -147,7 +138,6 @@ const CEFR_LEVELS = {
         { spanish: "tengo", english: "I have", category: "Verbs" },
         { spanish: "necesito", english: "I need", category: "Verbs" },
 
-        // Adjectives
         { spanish: "bueno", english: "good", category: "Adjectives" },
         { spanish: "difícil", english: "difficult", category: "Adjectives" },
         { spanish: "clara", english: "clear", category: "Adjectives" },
@@ -155,7 +145,6 @@ const CEFR_LEVELS = {
         { spanish: "malo", english: "bad", category: "Adjectives" },
         { spanish: "pequeño", english: "small", category: "Adjectives" },
 
-        // Numbers
         { spanish: "uno", english: "one", category: "Numbers" },
         { spanish: "dos", english: "two", category: "Numbers" },
         { spanish: "tres", english: "three", category: "Numbers" },
@@ -169,7 +158,6 @@ const CEFR_LEVELS = {
     ],
 
     A2: [
-        // Daily Life
         { spanish: "desayuno", english: "breakfast", category: "Daily Life" },
         { spanish: "almuerzo", english: "lunch", category: "Daily Life" },
         { spanish: "cena", english: "dinner", category: "Daily Life" },
@@ -194,15 +182,12 @@ const CEFR_LEVELS = {
         { spanish: "irse", english: "to leave", category: "Daily Life" },
         { spanish: "llegar", english: "to arrive", category: "Daily Life" },
 
-        // Family
         { spanish: "padres", english: "parents", category: "Family" },
 
-        // Travel
         { spanish: "avión", english: "plane", category: "Travel" },
         { spanish: "visitar", english: "to visit", category: "Travel" },
         { spanish: "transporte", english: "transport", category: "Travel" },
 
-        // Connectors
         { spanish: "a menudo", english: "often", category: "Connectors" },
         { spanish: "antes", english: "before", category: "Connectors" },
         { spanish: "ya", english: "already", category: "Connectors" },
@@ -210,7 +195,6 @@ const CEFR_LEVELS = {
         { spanish: "normalmente", english: "normally", category: "Connectors" },
         { spanish: "porque", english: "because", category: "Connectors" },
 
-        // Numbers
         { spanish: "once", english: "eleven", category: "Numbers" },
         { spanish: "doce", english: "twelve", category: "Numbers" },
         { spanish: "trece", english: "thirteen", category: "Numbers" },
@@ -224,7 +208,6 @@ const CEFR_LEVELS = {
     ],
 
     B1: [
-        // Daily Life — auxiliary verbs
         { spanish: "he", english: "I have (auxiliary)", category: "Daily Life" },
         { spanish: "has", english: "you have (auxiliary)", category: "Daily Life" },
         { spanish: "ha", english: "he/she has (auxiliary)", category: "Daily Life" },
@@ -232,7 +215,6 @@ const CEFR_LEVELS = {
         { spanish: "habéis", english: "you (plural) have (auxiliary)", category: "Daily Life" },
         { spanish: "han", english: "they have (auxiliary)", category: "Daily Life" },
 
-        // Daily Life — participles
         { spanish: "estado", english: "been", category: "Daily Life" },
         { spanish: "aprendido", english: "learned", category: "Daily Life" },
         { spanish: "trabajando", english: "working", category: "Daily Life" },
@@ -241,7 +223,6 @@ const CEFR_LEVELS = {
         { spanish: "viviendo", english: "living", category: "Daily Life" },
         { spanish: "diarias", english: "daily", category: "Daily Life" },
 
-        // Daily Life — verbs & nouns
         { spanish: "comunicación", english: "communication", category: "Daily Life" },
         { spanish: "conversaciones", english: "conversations", category: "Daily Life" },
         { spanish: "mejorar", english: "to improve", category: "Daily Life" },
@@ -253,16 +234,13 @@ const CEFR_LEVELS = {
         { spanish: "conseguir", english: "to get", category: "Daily Life" },
         { spanish: "entender", english: "to understand", category: "Daily Life" },
 
-        // Family & Personal Experience
         { spanish: "experiencias", english: "experiences", category: "Family" },
         { spanish: "pasadas", english: "past", category: "Family" },
 
-        // Food & Drink
         { spanish: "restaurante", english: "restaurant", category: "Food & Drink" },
         { spanish: "menú", english: "menu", category: "Food & Drink" },
         { spanish: "cuenta", english: "bill", category: "Food & Drink" },
 
-        // Travel & Planning Logistics
         { spanish: "encontrar", english: "to find", category: "Travel" },
         { spanish: "cancelar", english: "to cancel", category: "Travel" },
         { spanish: "traer", english: "to bring", category: "Travel" },
@@ -270,19 +248,16 @@ const CEFR_LEVELS = {
         { spanish: "mudarse", english: "to move (house)", category: "Travel" },
         { spanish: "unirse", english: "to join", category: "Travel" },
 
-        // Connectors
         { spanish: "mientras", english: "while", category: "Connectors" },
         { spanish: "sin embargo", english: "however", category: "Connectors" },
         { spanish: "sobre", english: "about", category: "Connectors" },
         { spanish: "después", english: "after", category: "Connectors" },
         { spanish: "durante", english: "during", category: "Connectors" },
 
-        // Numbers & Time Scales
         { spanish: "mes", english: "month", category: "Numbers" },
         { spanish: "años", english: "years", category: "Numbers" }
     ],
     B2: [
-        // Daily Life — abstract nouns & professional vocabulary
         { spanish: "proceso", english: "process", category: "Daily Life" },
         { spanish: "resultados", english: "results", category: "Daily Life" },
         { spanish: "rendimiento", english: "performance", category: "Daily Life" },
@@ -294,7 +269,6 @@ const CEFR_LEVELS = {
         { spanish: "posibilidad", english: "possibility", category: "Daily Life" },
         { spanish: "situación", english: "situation", category: "Daily Life" },
 
-        // Daily Life — advanced verbs
         { spanish: "optimizar", english: "to optimize", category: "Daily Life" },
         { spanish: "coordinar", english: "to coordinate", category: "Daily Life" },
         { spanish: "aumentar", english: "to increase", category: "Daily Life" },
@@ -307,7 +281,6 @@ const CEFR_LEVELS = {
         { spanish: "adaptarse", english: "to adapt", category: "Daily Life" },
         { spanish: "lograr", english: "to achieve", category: "Daily Life" },
 
-        // Daily Life — B2 adjectives
         { spanish: "complicado", english: "complicated", category: "Daily Life" },
         { spanish: "necesario", english: "necessary", category: "Daily Life" },
         { spanish: "posible", english: "possible", category: "Daily Life" },
@@ -317,7 +290,6 @@ const CEFR_LEVELS = {
         { spanish: "profesional", english: "professional", category: "Daily Life" },
         { spanish: "positivo", english: "positive", category: "Daily Life" },
 
-        // Daily Life — participles used in B2 sentences
         { spanish: "analizado", english: "analyzed", category: "Daily Life" },
         { spanish: "evaluado", english: "evaluated", category: "Daily Life" },
         { spanish: "argumentado", english: "argued", category: "Daily Life" },
@@ -332,19 +304,16 @@ const CEFR_LEVELS = {
         { spanish: "actualizado", english: "updated", category: "Daily Life" },
         { spanish: "optimizado", english: "optimized", category: "Daily Life" },
 
-        // Family — abstract B2 concepts
         { spanish: "sociedad", english: "society", category: "Family" },
         { spanish: "cultura", english: "culture", category: "Family" },
         { spanish: "motivación", english: "motivation", category: "Family" },
         { spanish: "desafíos", english: "challenges", category: "Family" },
         { spanish: "expectativas", english: "expectations", category: "Family" },
 
-        // Travel — B2 abstract travel concepts
         { spanish: "remoto", english: "remote", category: "Travel" },
         { spanish: "futuro", english: "future", category: "Travel" },
         { spanish: "largo plazo", english: "long term", category: "Travel" },
 
-        // Connectors — B2 logical connectors
         { spanish: "además", english: "in addition", category: "Connectors" },
         { spanish: "por lo tanto", english: "therefore", category: "Connectors" },
         { spanish: "a pesar de", english: "despite", category: "Connectors" },
