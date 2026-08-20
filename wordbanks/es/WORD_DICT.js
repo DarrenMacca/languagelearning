@@ -1,6 +1,6 @@
  
 
-const WORD_DICT = {
+export default {
   
     "can": "puedo / puedes / puede",
     "buy": "comprar",
