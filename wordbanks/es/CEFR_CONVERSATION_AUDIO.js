@@ -1,4 +1,4 @@
-const CEFR_CONVERSATION_AUDIO_A1 = [
+export default [
     { es: "qué te gustaría beber", file: "que-te-gustaria-beber.mp3", en: "What would you like to drink?" },
     { es: "cómo estás hoy", file: "como-estas-hoy.mp3", en: "How are you today?" },
     { es: "dónde vives", file: "donde-vives.mp3", en: "Where do you live?" },
