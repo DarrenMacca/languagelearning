@@ -1,6 +1,6 @@
 
 
-const CEFR_SENTENCES = {
+export default {
         A1: [
       
         { english: "Hello, how are you?", spanish: "hola cómo estás" },
