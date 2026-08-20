@@ -1,4 +1,4 @@
-const CEFR_SENTENCE_CHOICES = {
+export default {
   A1: [
     {
       english: "I’m a bit tired today.",
