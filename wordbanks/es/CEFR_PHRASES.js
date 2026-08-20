@@ -1,8 +1,5 @@
-/* ============================================================
-   MULTI-WORD PHRASES (CEFR-aligned)
-   ============================================================ */
+
 const CEFR_PHRASES = {
-    // A1
     "cómo estás": "how are you",
     "dónde vives": "where do you live",
     "qué hora es": "what time is it",
@@ -17,7 +14,7 @@ const CEFR_PHRASES = {
     "ella es rápida": "she is fast",
     "ella va rápido": "she goes fast",
 
-    // A2
+   
     "qué hiciste ayer": "what did you do yesterday",
     "fuiste al supermercado": "did you go to the supermarket",
     "viajas a menudo": "you travel often",
@@ -28,7 +25,7 @@ const CEFR_PHRASES = {
     "quiero hacer una reserva": "I want to make a reservation",
     "dónde está la estación": "where is the station",
 
-    // B1
+    
     "he estado aprendiendo español": "I have been learning Spanish",
     "disfruto viajar": "I enjoy traveling",
     "quiero mejorar mis habilidades": "I want to improve my skills",
@@ -38,7 +35,7 @@ const CEFR_PHRASES = {
     "cuáles son tus metas": "what are your goals",
     "qué experiencias pasadas tienes": "what past experiences do you have",
 
-    // B2
+   
     "cómo manejas situaciones estresantes": "how do you handle stressful situations",
     "cuál es tu opinión sobre la tecnología": "what is your opinion on technology",
     "cómo ha cambiado tu vida": "how has your life changed",
