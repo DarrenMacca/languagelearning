@@ -1,14 +1,7 @@
-/* ============================================================
-   WORD-BY-WORD DICTIONARY — CEFR A1 → B2 (Categorized)
-   ============================================================ */
+ 
 
 const WORD_DICT = {
-    /* ============================================================
-       FOUNDATIONAL CONVERSATIONAL ARCHITECTURE (STRUCTURAL TOKENS)
-       ============================================================ */
-    /* ============================================================
-       ENGLISH DIRECT ANCHORS & FUNCTIONAL OVERRIDES
-       ============================================================ */
+  
     "can": "puedo / puedes / puede",
     "buy": "comprar",
     "order": "pedir",
@@ -20,9 +13,7 @@ const WORD_DICT = {
     "want": "quiero / quiere / queremos / quieren",
     "need": "necesito / necesita / necesitamos / necesitan",
 
-    /* ============================================================
-       VERB INFLECTION MATRIX (SUBJECT LOOPS)
-       ============================================================ */
+   
     "puedo": "I can",
     "puedes": "you can (informal)",
     "puede": "he / she / you (formal) can",
@@ -37,9 +28,7 @@ const WORD_DICT = {
     "pido": "I order / I request",
     "pides": "you order",
 
-    /* ============================================================
-       ADJECTIVE AGREEMENT AGREEMENTS (GENDER & PLURAL)
-       ============================================================ */
+     
     "buena": "good (fem.)",
     "buenos": "good (plural)",
     "buenas": "good (fem. plural)",
@@ -61,9 +50,7 @@ const WORD_DICT = {
     "limpia": "clean (fem.)",
     "limpios": "clean (plural)",
 
-    /* ============================
-       Functional Connectors
-       ============================ */
+     
     "y": "and",
     "o": "or",
     "con": "with",
@@ -105,9 +92,7 @@ const WORD_DICT = {
     "incluso": "even",
     "otra vez": "again",
 
-    /* ============================
-       Question Roots & Interrogatives
-       ============================ */
+    
     "qué": "what",
     "quién": "who",
     "cuándo": "when",
@@ -116,9 +101,7 @@ const WORD_DICT = {
     "dónde": "where",
     "por qué": "why",
 
-    /* ============================
-       Grammatical Definite & Indefinite Articles
-       ============================ */
+    
     "el": "the",
     "la": "the",
     "los": "the (plural)",
@@ -127,9 +110,7 @@ const WORD_DICT = {
     "una": "a / an (fem.)",
     "unos": "some",
     "unas": "some (fem.)",
-    /* ============================
-       Pronouns & Object Markers
-       =========================== */
+    
     "me": "me / myself",
     "te": "you / yourself",
     "le": "to him / to her",
@@ -165,9 +146,7 @@ const WORD_DICT = {
     "todas": "all (fem. plural)",
     "todos": "all (masc. plural)",
 
-    /* ============================
-       High-Frequency Verb Inflections (A1-B2)
-       ============================ */
+    
     "es": "is",
     "soy": "I am",
     "eres": "you are",
@@ -243,9 +222,7 @@ const WORD_DICT = {
     "comeremos": "we will eat",
     "irnos": "to leave / to go away",
 
-    /* ============================
-       Time, Chronology & Adverbs
-       ============================ */
+    
     "hoy": "today",
     "mañana": "tomorrow / morning",
     "ayer": "yesterday",
@@ -265,9 +242,7 @@ const WORD_DICT = {
     "a las nueve": "at nine",
     "claramente": "clearly",
     "lentamente": "slowly",
-    /* ============================
-       Gender & Plural Adjective Maps
-       ============================ */
+     
     "bueno": "good",
     "buena": "good (fem.)",
     "buenos": "good (plural)",
@@ -348,9 +323,7 @@ const WORD_DICT = {
     "próximo": "next",
     "próxima": "next (fem.)",
 
-    /* ============================
-       A2 Intermediate Core Numbers
-       ============================ */
+    
     "once": "eleven",
     "doce": "twelve",
     "trece": "thirteen",
@@ -361,4 +334,4 @@ const WORD_DICT = {
     "dieciocho": "eighteen",
     "diecinueve": "nineteen",
     "veinte": "twenty"
-}; // ✔ Safely closes the master WORD_DICT map shell container
+};  
