@@ -1,6 +1,4 @@
- /* ============================================================
-   MINING REFERENCES — Open Cut & Underground Vocabulary (Spanish → English)
-   ============================================================ */
+
 
 const MINING_REFERENCES = {
     "Open Cut Mining": [
