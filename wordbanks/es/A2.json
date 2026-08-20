@@ -1,5 +1,5 @@
 
-export default [
+[
  
     { english: "and", spanish: "y", audio: "y.mp3", category: "connector" },
     { english: "or", spanish: "o", audio: "o.mp3", category: "connector" },
