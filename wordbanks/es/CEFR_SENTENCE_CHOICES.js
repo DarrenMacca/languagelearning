@@ -1057,7 +1057,7 @@ B1: [
     "ella explicó la idea de una manera lenta"
   ],
   level: "B1"
-},
+  },
 
 {
   english: "We’re trying to improve the plan a little.",
@@ -1696,6 +1696,6 @@ B2: [
     "recomiendo discutir los detalles en casa la próxima vez"
   ],
   level: "B2"
-}
+ }
 ]
-
+};
