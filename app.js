@@ -1054,28 +1054,6 @@ function setupSentenceUI() {
   addMiningButtonToSentenceUI();
 }
 
-// 5. Language + level selectors (simple versions)
-function setupLanguageSelector() {
-  const select = $("languageSelect");
-  if (!select) return;
-
-  select.innerHTML = "";
-
-  Object.values(LANGUAGES).forEach(lang => {
-    const opt = document.createElement("option");
-    opt.value = lang.code;
-    opt.textContent = lang.name;
-    if (lang.code === currentLanguage) opt.selected = true;
-    select.appendChild(opt);
-  });
-
-  select.addEventListener("change", e => {
-    currentLanguage = e.target.value;
-    if (currentMode === "sentences") loadCurrentSet();
-    if (currentMode === "conversation") loadConversationSet();
-  });
-}
-
 function setupLevelSelector() {
   const select = $("levelSelect");
   if (!select) return;
@@ -1145,3 +1123,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateBadges();
     updateProgressMeters();
 });
+function initLanguageSelector() {
+  const selector = document.getElementById("language-select");
+  if (!selector) return;
+
+  selector.addEventListener("change", async (e) => {
+    const newLang = e.target.value;
+
+    // Update global language state
+    window.LANG.lang = newLang;
+
+    // Reload all language modules
+    await loadLanguagePack(newLang);
+
+    // Refresh UI
+    renderDashboard();
+    loadCurrentSet();
+    renderCurrentItem();
+  });
+}
