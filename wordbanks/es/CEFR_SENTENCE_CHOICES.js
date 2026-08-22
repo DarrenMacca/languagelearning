@@ -1045,9 +1045,7 @@ B1: [
       "él sugirió reunirse en el parque"
     ],
     level: "B1"
-  }
-],
-
+  },
 
   {
   english: "She explained the idea in a simple way.",
