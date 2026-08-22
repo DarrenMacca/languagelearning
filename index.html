@@ -59,31 +59,30 @@
 <!-- ============================================================
      DASHBOARD TAB CONTENT
 ============================================================ -->
-<div id="dashboard">
+<div id="dashboard" class="appSection">
 
-    <!-- AUDIO SPEED + SKILL LEVEL -->
+    <!-- TOP CONTROL BAR -->
     <div class="dashboard-row">
-        <div class="dash-left glass-panel">
+
+        <!-- AUDIO SPEED -->
+        <div class="glass-panel dash-control">
             <label class="section-title">Audio Speed</label>
             <input type="range" id="rate" min="0.6" max="1.4" step="0.1" value="1">
         </div>
 
-        <div class="dash-right glass-panel">
-            <label class="section-title">Skill Level</label>
-            <div class="level-buttons">
-                <button class="pill" data-level="A1">A1</button>
-                <button class="pill" data-level="A2">A2</button>
-                <button class="pill" data-level="B1">B1</button>
-                <button class="pill" data-level="B2">B2</button>
-            </div>
+        <!-- CEFR LEVEL SELECTOR -->
+        <div class="glass-panel dash-control">
+            <label class="section-title">CEFR Level</label>
+            <select id="levelSelect" class="input-field">
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+            </select>
         </div>
-    </div>
-
-    <!-- LANGUAGE + NAME + CERTIFICATES ROW -->
-    <div class="dashboard-row">
 
         <!-- LANGUAGE SELECTOR -->
-        <div class="glass-panel student-name-box" style="flex:1;">
+        <div class="glass-panel dash-control">
             <label class="section-title">Language</label>
             <select id="language-select" class="input-field">
                 <option value="es">Spanish</option>
@@ -92,16 +91,21 @@
             </select>
         </div>
 
+    </div>
+
+    <!-- NAME + CERTIFICATES -->
+    <div class="dashboard-row">
+
         <!-- LEARNER NAME -->
-        <div class="glass-panel student-name-box" style="flex:1;">
-            <label class="section-title">Your name for certificates</label>
+        <div class="glass-panel student-name-box">
+            <label class="section-title">Your Name</label>
             <input id="student-name" class="input-field" type="text" placeholder="Enter your name">
-            <button id="save-name-btn" class="pill">Save Name</button>
+            <button id="save-name-btn" class="pill">Save</button>
             <div id="name-status" class="name-status"></div>
         </div>
 
-        <!-- CERTIFICATES BUTTON -->
-        <div class="glass-panel student-name-box" style="flex:1; text-align:center;">
+        <!-- CERTIFICATES -->
+        <div class="glass-panel student-name-box">
             <label class="section-title">Certificates</label>
             <button class="pill" data-tab="certificates" id="certificates-tab-btn">
                 <img src="images/icon-certificate.png" class="tab-icon">
@@ -115,17 +119,17 @@
     <div class="utility-row">
 
         <!-- QUICK DICTIONARY SEARCH -->
-        <div class="student-name-box glass-panel dictionary-search-box">
+        <div class="glass-panel dictionary-search-box">
             <label class="section-title">🔍 Quick Dictionary Search</label>
-            <p class="subtext">Type an English word to find its Spanish translation</p>
+            <p class="subtext">Type an English word to find its translation</p>
             <input id="dict-search-input" class="input-field" type="text" placeholder="e.g., Hello, Dog, Apple...">
             <div id="dict-search-result" class="dict-result"></div>
         </div>
 
         <!-- FREE PRACTICE SANDBOX -->
-        <div class="student-name-box glass-panel free-practice-box">
+        <div class="glass-panel free-practice-box">
             <label class="section-title">🎯 Free Practice Sandbox</label>
-            <p class="subtext">No scoring, no rules. Translate the word below from any level!</p>
+            <p class="subtext">Translate the word below from any level</p>
             <div id="practice-prompt-row">
                 Translate: <span id="practice-english-word" class="highlight">Loading...</span>
             </div>
@@ -139,7 +143,7 @@
 
     </div>
 
-    <!-- PROGRESS METERS -->
+    <!-- PROGRESS GRID -->
     <div class="progress-section">
 
         <!-- QUIZ -->
@@ -231,6 +235,7 @@
 
 </div>
 
+
 <!-- ============================================================
      OTHER TABS (CONTENT POPULATED BY JS)
 ============================================================ -->
@@ -293,8 +298,6 @@
 
 <script src="LanguageLoader.js"></script>
 <script src="app.js"></script>
-
-
 
 </body>
 </html>
