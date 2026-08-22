@@ -1,4 +1,5 @@
-export default [
+export default {
+  A1: [
   {
     id: "A1_food_001",
     cefr: "A1",
@@ -948,9 +949,9 @@ export default [
     ],
     audio_es: null,
     notes: null
-  },
-
-
+  }
+],
+A2: [
   {
     id: "A2_food_001",
     cefr: "A2",
@@ -1900,8 +1901,10 @@ export default [
     ],
     audio_es: null,
     notes: null
-  },
+  }
+  ],
 
+  B1: [
   {
     id: "B1_work_001",
     cefr: "B1",
@@ -2661,9 +2664,10 @@ export default [
     ],
     audio_es: null,
     notes: null
-  },
+ }
+  ],
 
-B2: [
+  B2: [
   {
     id: "B2_strategy_001",
     cefr: "B2",
