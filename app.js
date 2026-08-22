@@ -1112,10 +1112,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       nl: { sentences: {}, conversation: {} }
     };
 
-    // now safe to run everything else
     initLanguageSelector();
-    initTabNavigation();
+    initApp();   // ⭐ THIS FIXES THE DASHBOARD
     activateTab("dashboard");
+    initTabNavigation();
     initRateControl();
     initNameBox();
     initDictionarySearch();
@@ -1123,6 +1123,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateBadges();
     updateProgressMeters();
 });
+
 function initLanguageSelector() {
   const selector = document.getElementById("language-select");
   if (!selector) return;
