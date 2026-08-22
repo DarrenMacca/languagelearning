@@ -1480,8 +1480,7 @@ B2: [
       "él se dio cuenta de que la reunión tomaría tiempo caro"
     ],
     level: "B2"
-  }
-],
+  },
 
 {
   english: "She considered changing the plan after the meeting.",
