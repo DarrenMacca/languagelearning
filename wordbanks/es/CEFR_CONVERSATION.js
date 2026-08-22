@@ -1902,8 +1902,6 @@ export default [
     notes: null
   },
 
-
-
   {
     id: "B1_work_001",
     cefr: "B1",
@@ -2665,7 +2663,7 @@ export default [
     notes: null
   },
 
-
+B2: [
   {
     id: "B2_strategy_001",
     cefr: "B2",
