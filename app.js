@@ -154,8 +154,8 @@ function sanityCheck() {
 
 // 1. Load CEFR items for current language + level
 function loadCurrentSet() {
-  const langBundle = WORD_BANKS[currentLanguage];
-  if (!langBundle) {
+  const pack = window.LANG.modules.CEFR_SENTENCE_CHOICES?.default;
+  if (!pack) {
     currentItems = [];
     currentIndex = 0;
     currentItem = null;
@@ -163,16 +163,14 @@ function loadCurrentSet() {
     return;
   }
 
-  const pack = langBundle.sentences || {};
   const levelArray = pack[currentLevel] || [];
-
   currentItems = levelArray.slice();
   currentIndex = 0;
-  currentItem = currentItems.length > 0 ? currentItems[0] : null;
+  currentItem = currentItems[0] || null;
 
   renderCurrentItem();
-  updateProgress();
 }
+
 
 // 2. Render the current item
 function renderCurrentItem() {
