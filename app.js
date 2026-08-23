@@ -116,65 +116,6 @@ function speak(text) {
   window.speechSynthesis.speak(utter);
 }
 
-
-
-// ----------------------------
-// 5. Section visibility
-// ----------------------------
-function showSection(id) {
-  const sections = document.querySelectorAll(".appSection");
-  sections.forEach(sec => sec.style.display = "none");
-
-  const target = $(id);
-  if (target) target.style.display = "block";
-}
-
-// ----------------------------
-// 6. Mode selector (single source of truth)
-// ----------------------------
-function setupModeSelector() {
-  const select = $("modeSelect");
-  if (!select) return;
-
-  const modes = [
-    { id: "sentences", label: "Sentences" },
-    { id: "conversation", label: "Conversation" },
-    { id: "mining", label: "Mining" },
-    { id: "dictionary", label: "Dictionary" },
-    { id: "review", label: "Review" },
-    { id: "certificates", label: "Certificates" }
-  ];
-
-  select.innerHTML = "";
-
-  modes.forEach(m => {
-    const opt = document.createElement("option");
-    opt.value = m.id;
-    opt.textContent = m.label;
-    if (m.id === currentMode) opt.selected = true;
-    select.appendChild(opt);
-  });
-
-  select.addEventListener("change", e => {
-    currentMode = e.target.value;
-
-    if (currentMode === "sentences") {
-      loadCurrentSet();
-      showSection("sentenceSection");
-    } else if (currentMode === "conversation") {
-      switchToConversationMode();
-    } else if (currentMode === "mining") {
-      switchToMiningTab();
-    } else if (currentMode === "dictionary") {
-      switchToDictionaryTab();
-    } else if (currentMode === "review") {
-      switchToReviewMode();
-    } else if (currentMode === "certificates") {
-      switchToCertificatePage();
-    }
-  });
-}
-
 // ----------------------------
 // 7. Sanity check
 // ----------------------------
@@ -367,8 +308,8 @@ function handleConversationReply(reply) {
 function switchToConversationMode() {
   currentMode = "conversation";
   loadConversationSet();
-  showSection("conversationSection");
 }
+
 
 // ============================================================
 //  MINING — FULL CONSOLIDATED (PART 3)
@@ -413,9 +354,9 @@ function renderMiningList() {
 // 2. Switch to mining tab
 function switchToMiningTab() {
   currentMode = "mining";
-  showSection("miningSection");
   renderMiningList();
 }
+
 
 // 3. Mining buttons
 function addMiningButtonToSentenceUI() {
@@ -514,9 +455,9 @@ function renderDictionaryList() {
 
 function switchToDictionaryTab() {
   currentMode = "dictionary";
-  showSection("dictionarySection");
   renderDictionaryList();
 }
+
 
 function setupDictionaryUI() {
   const input = $("dict-search-input");
@@ -633,10 +574,10 @@ function handleReviewAnswer() {
 
 function switchToReviewMode() {
   currentMode = "review";
-  showSection("reviewSection");
   reviewIndex = 0;
   renderReviewItem();
 }
+
 
 function setupReviewUI() {
   const retryBtn = $("reviewRetryButton");
@@ -968,9 +909,9 @@ function setupCertificateGeneratorPage() {
 // 9. Switch to certificate page
 function switchToCertificatePage() {
   currentMode = "certificates";
-  showSection("certificateGeneratorPage");
   renderCertificateHistoryGallery();
 }
+
 
 // ============================================================
 //  UI HELPERS — FULL CONSOLIDATED (PART 5)
