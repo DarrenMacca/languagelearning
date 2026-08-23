@@ -66,19 +66,57 @@ function $(id) {
 // ----------------------------
 // 4. Speech synthesis
 // ----------------------------
+let availableVoices = [];
+
+window.speechSynthesis.onvoiceschanged = () => {
+  availableVoices = window.speechSynthesis.getVoices();
+};
+
+function getBestVoiceForLanguage(langCode) {
+  if (!availableVoices.length) {
+    availableVoices = window.speechSynthesis.getVoices();
+  }
+
+  // Filter voices by language (es, fr, nl)
+  const matches = availableVoices.filter(v => v.lang.startsWith(langCode));
+
+  // Prefer Google or Microsoft voices (they sound best)
+  const preferred = matches.find(v =>
+    v.name.includes("Google") || v.name.includes("Microsoft")
+  );
+
+  return preferred || matches[0] || null;
+}
+
 function speak(text) {
   if (!window.speechSynthesis) return;
 
   const utter = new SpeechSynthesisUtterance(text);
-  utter.lang =
-    currentLanguage === "es" ? "es-ES" :
-    currentLanguage === "fr" ? "fr-FR" :
-    currentLanguage === "nl" ? "nl-NL" : "en-US";
 
-  utter.rate = window.speechRate || 1.0;   // ← ADD THIS LINE
+  // Map CEFR language to voice language code
+  const langCode =
+    currentLanguage === "es" ? "es" :
+    currentLanguage === "fr" ? "fr" :
+    currentLanguage === "nl" ? "nl" : "en";
+
+  // Pick the best available voice
+  const voice = getBestVoiceForLanguage(langCode);
+
+  if (voice) {
+    utter.voice = voice;
+    utter.lang = voice.lang;
+  } else {
+    // Fallback if no voice found
+    utter.lang = `${langCode}-${langCode.toUpperCase()}`;
+  }
+
+  // Apply speech rate slider
+  utter.rate = window.speechRate || 1.0;
 
   window.speechSynthesis.speak(utter);
 }
+
+
 
 // ----------------------------
 // 5. Section visibility
