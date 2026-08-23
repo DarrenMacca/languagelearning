@@ -284,23 +284,39 @@ function addMistake(item) {
 }
 
 function renderMistakeList() {
-  const listEl = $("mistakeList");
+  const listEl = $("review-words-list");
   if (!listEl) return;
 
   listEl.innerHTML = "";
 
-  if (mistakes.length === 0) {
-    listEl.textContent = "No mistakes yet.";
+  if (mistakeList.length === 0) {
+    listEl.innerHTML = `<div class="ui-empty">No mistakes yet.</div>`;
     return;
   }
 
-  mistakes.forEach(m => {
-    const div = document.createElement("div");
-    div.className = "ui-review-card";
-    div.textContent = `${m.english} → ${m.correct}`;
-    listEl.appendChild(div);
+  mistakeList.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "ui-card";
+
+    card.innerHTML = `
+      <div class="mistake-word">${item.word}</div>
+      <div class="mistake-correct">${item.correct}</div>
+    `;
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "ui-pill danger";
+    delBtn.textContent = "Remove";
+
+    delBtn.addEventListener("click", () => {
+      mistakeList.splice(index, 1);
+      renderMistakeList();
+    });
+
+    card.appendChild(delBtn);
+    listEl.appendChild(card);
   });
 }
+
 
 // 8. Badge rules (sentence mode)
 function badgeRule_firstCorrect(isCorrect) {
@@ -473,33 +489,34 @@ function renderMiningList() {
   listEl.innerHTML = "";
 
   if (miningList.length === 0) {
-    listEl.textContent = "No mined items yet.";
+    listEl.innerHTML = `<div class="ui-empty">No mined items yet.</div>`;
     return;
   }
 
   miningList.forEach((item, index) => {
-    const div = document.createElement("div");
-    div.className = "ui-card";
+    const card = document.createElement("div");
+    card.className = "ui-card";
 
-    div.innerHTML = `
-      <strong>${item.english}</strong><br>
-      ${item.foreign}<br>
-      <small>Source: ${item.source}</small>
+    card.innerHTML = `
+      <div class="mine-word">${item.word}</div>
+      <div class="mine-translation">${item.translation}</div>
+      <div class="mine-source ui-badge">${item.source}</div>
     `;
 
     const delBtn = document.createElement("button");
-    delBtn.className = "ui-pill";
-    delBtn.textContent = "Remove";
+    delBtn.className = "ui-pill danger";
+    delBtn.textContent = "Delete";
 
     delBtn.addEventListener("click", () => {
       miningList.splice(index, 1);
       renderMiningList();
     });
 
-    div.appendChild(delBtn);
-    listEl.appendChild(div);
+    card.appendChild(delBtn);
+    listEl.appendChild(card);
   });
 }
+
 
 // 2. Switch to mining tab
 function switchToMiningTab() {
@@ -639,29 +656,29 @@ function switchToDictionaryTab() {
 }
 
 function setupDictionaryUI() {
-  const lookupBtn = $("dictionaryLookupButton");
-  const input = $("dictionaryInput");
+  const input = $("dict-search-input");
+  const result = $("dict-search-result");
 
-  if (!lookupBtn || !input) return;
+  if (!input || !result) return;
 
-  lookupBtn.addEventListener("click", () => {
-    const word = input.value.trim();
-    if (!word) return;
+  input.addEventListener("input", () => {
+    const query = input.value.trim().toLowerCase();
+    if (!query) {
+      result.textContent = "";
+      return;
+    }
 
-    const definition = lookupWord(word);
-    renderDictionaryResult(word, definition);
+    const dict = window.LANG.modules.WORD_DICT?.default || {};
+    const translation = dict[query];
+
+    if (translation) {
+      result.textContent = translation;
+    } else {
+      result.textContent = "Not found.";
+    }
   });
+}
 
-  const saveBtn = $("dictionarySaveButton");
-  if (saveBtn) {
-    saveBtn.addEventListener("click", () => {
-      const word = input.value.trim();
-      if (!word) return;
-
-      const definition = lookupWord(word);
-      addDictionaryEntry(word, definition);
-    });
-  }
 }
 
 // ============================================================
