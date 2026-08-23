@@ -1093,9 +1093,17 @@ function initLanguageSelector() {
 function initApp() {
   initLanguageSelector();
   setupLevelSelector();
-  initTabs();               // NEW TAB SYSTEM
+  initTabs();
   setupThemeButtons();
 
+  // Dashboard features
+  initNameBox();
+  initRateControl();
+  initFreePracticeSandbox();
+  initDictionarySearch();
+  renderDashboard();
+
+  // Learning features
   loadCurrentSet();
   renderCurrentItem();
   setupSentenceUI();
@@ -1103,6 +1111,7 @@ function initApp() {
   setupReviewUI();
   setupCertificateGeneratorPage();
 
+  // Render stored data
   renderBadges();
   renderMiningList();
   renderDictionaryList();
@@ -1112,6 +1121,7 @@ function initApp() {
 
   sanityCheck();
 }
+
 
 document.addEventListener("DOMContentLoaded", async () => {
   await loadLanguagePack("es");
