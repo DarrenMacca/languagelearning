@@ -1204,7 +1204,7 @@ function initApp() {
   initLanguageSelector();
   setupLevelSelector();
   setupModeSelector();
-  setupTabs();
+  initTabs();
   setupThemeButtons();
 
   loadCurrentSet();
