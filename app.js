@@ -1075,6 +1075,7 @@ function initTabs() {
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const target = tab.getAttribute('data-tab');
+            console.log("TAB CLICKED:", target);
 
             // Highlight active tab
             tabs.forEach(t => t.classList.remove('is-active'));
@@ -1082,14 +1083,9 @@ function initTabs() {
 
             // Show correct section
             sections.forEach(sec => {
-                if (sec.id === target) {
-                    sec.style.display = 'block';
-                } else {
-                    sec.style.display = 'none';
-                }
+                sec.style.display = (sec.id === target) ? 'block' : 'none';
             });
 
-            // Mode switching
             handleModeSwitch(target);
         });
     });
@@ -1136,7 +1132,34 @@ function handleModeSwitch(tabId) {
     }
 }
 
-initTabs();
+function initApp() {
+  initLanguageSelector();
+  setupLevelSelector();
+  setupModeSelector();
+  initTabs();               // NEW TAB SYSTEM
+  setupThemeButtons();
+
+  loadCurrentSet();
+  renderCurrentItem();
+  setupSentenceUI();
+  setupDictionaryUI();
+  setupReviewUI();
+  setupCertificateGeneratorPage();
+
+  renderBadges();
+  renderMiningList();
+  renderDictionaryList();
+  renderMistakeList();
+  renderCertificateHistoryGallery();
+  renderLevelProgress();
+
+  sanityCheck();
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadLanguagePack("es");
+  initApp();
+});
 
 
 // ============================================================
