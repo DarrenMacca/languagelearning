@@ -1204,7 +1204,7 @@ function initApp() {
   initLanguageSelector();
   setupLevelSelector();
   setupModeSelector();
-  initTabs();
+  initTabs();               // NEW TAB SYSTEM
   setupThemeButtons();
 
   loadCurrentSet();
@@ -1228,8 +1228,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadLanguagePack("es");
 
   initApp();
-  activateTab("dashboard");
+
+  // REMOVE activateTab("dashboard")
+  // The new tab system already shows dashboard by default.
 });
+
 
 // ============================================================
 //  FREE PRACTICE SANDBOX
