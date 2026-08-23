@@ -1,6 +1,6 @@
 // ============================================================
 //  LANGUAGE LEARNING APP — FULL CONSOLIDATED JS (PART 1)
-//  Core state, helpers, mode selector, certificate storage
+//  Modernized for CEFR modules + new dashboard + .ui-tab system
 // ============================================================
 
 // ----------------------------
@@ -12,23 +12,22 @@ const LANGUAGES = {
   nl: { code: "nl", name: "Dutch" }
 };
 
-
-
 // ----------------------------
-// 3. Global app state
+// 2. Global app state
 // ----------------------------
 let currentLanguage = "es";
 let currentLevel = "A1";
 let currentMode = "sentences";
 
+// Sentence mode
 let currentItems = [];
 let currentIndex = 0;
 let currentItem = null;
 
-// Conversation
-let convoHistory = [];
-let convoIndex = 0;
-let convoItem = null;
+// Conversation mode
+let conversationItems = [];
+let conversationIndex = 0;
+let conversationItem = null;
 
 // Mining
 let miningList = [];
@@ -58,14 +57,14 @@ let score = 0;
 let certificateHistory = [];
 
 // ----------------------------
-// 4. DOM helper
+// 3. DOM helper
 // ----------------------------
 function $(id) {
   return document.getElementById(id);
 }
 
 // ----------------------------
-// 5. Speech synthesis
+// 4. Speech synthesis
 // ----------------------------
 function speak(text) {
   if (!window.speechSynthesis) return;
@@ -76,11 +75,13 @@ function speak(text) {
     currentLanguage === "fr" ? "fr-FR" :
     currentLanguage === "nl" ? "nl-NL" : "en-US";
 
+  utter.rate = window.speechRate || 1.0;   // ← ADD THIS LINE
+
   window.speechSynthesis.speak(utter);
 }
 
 // ----------------------------
-// 6. Section visibility
+// 5. Section visibility
 // ----------------------------
 function showSection(id) {
   const sections = document.querySelectorAll(".appSection");
@@ -91,7 +92,7 @@ function showSection(id) {
 }
 
 // ----------------------------
-// 7. Mode selector (single source of truth)
+// 6. Mode selector (single source of truth)
 // ----------------------------
 function setupModeSelector() {
   const select = $("modeSelect");
@@ -137,7 +138,7 @@ function setupModeSelector() {
 }
 
 // ----------------------------
-// 8. Sanity check
+// 7. Sanity check
 // ----------------------------
 function sanityCheck() {
   console.log("=== APP SANITY CHECK ===");
@@ -170,7 +171,6 @@ function loadCurrentSet() {
 
   renderCurrentItem();
 }
-
 
 // 2. Render the current item
 function renderCurrentItem() {
@@ -249,31 +249,261 @@ function goToNextSentenceItem() {
   renderCurrentItem();
 }
 
-// 5. Scoring
-function updateScore(isCorrect) {
-  if (isCorrect) {
-    score += 10;
-  } else {
-    score -= 2;
-    if (score < 0) score = 0;
+// ============================================================
+//  CONVERSATION MODE — FULL CONSOLIDATED (PART 3)
+// ============================================================
+
+// 1. Load conversation set
+function loadConversationSet() {
+  const pack = window.LANG.modules.CEFR_CONVERSATION?.default;
+  if (!pack) {
+    conversationItems = [];
+    conversationIndex = 0;
+    conversationItem = null;
+    renderConversationItem();
+    return;
   }
 
-  const scoreEl = $("scoreDisplay");
-  if (scoreEl) {
-    scoreEl.textContent = `Score: ${score}`;
+  const levelArray = pack[currentLevel] || [];
+  conversationItems = levelArray.slice();
+  conversationIndex = 0;
+  conversationItem = conversationItems[0] || null;
+
+  renderConversationItem();
+}
+
+// 2. Render conversation item
+function renderConversationItem() {
+  const promptEl = $("conversationPrompt");
+  const replyEl = $("conversationReplies");
+  const feedbackEl = $("conversationFeedback");
+
+  if (!promptEl || !replyEl || !feedbackEl) return;
+
+  replyEl.innerHTML = "";
+  feedbackEl.textContent = "";
+
+  if (!conversationItem) {
+    promptEl.textContent = "No conversation items available.";
+    return;
   }
+
+  promptEl.textContent = conversationItem.prompt;
+
+  conversationItem.replies.forEach(reply => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ui-pill";
+    btn.textContent = reply;
+
+    btn.addEventListener("click", () => {
+      handleConversationReply(reply);
+    });
+
+    replyEl.appendChild(btn);
+  });
 }
 
-// 6. Progress tracking
-function updateProgress() {
-  const progressEl = $("progressDisplay");
-  if (!progressEl || currentItems.length === 0) return;
+// 3. Handle conversation reply
+function handleConversationReply(reply) {
+  const feedbackEl = $("conversationFeedback");
+  if (!feedbackEl || !conversationItem) return;
 
-  const percent = Math.round((currentIndex + 1) / currentItems.length * 100);
-  progressEl.textContent = `Progress: ${percent}%`;
+  feedbackEl.textContent = `You said: ${reply}`;
+  feedbackEl.style.color = "blue";
+
+  speak(reply);
+
+  mineConversation(conversationItem.prompt, reply);
+
+  conversationIndex++;
+  if (conversationIndex >= conversationItems.length) {
+    conversationIndex = 0;
+  }
+
+  conversationItem = conversationItems[conversationIndex];
+  setTimeout(() => renderConversationItem(), 500);
 }
 
-// 7. Mistake tracking
+// 4. Switch to conversation mode
+function switchToConversationMode() {
+  currentMode = "conversation";
+  loadConversationSet();
+  showSection("conversationSection");
+}
+
+// ============================================================
+//  MINING — FULL CONSOLIDATED (PART 3)
+// ============================================================
+
+// 1. Render mining list
+function renderMiningList() {
+  const listEl = $("miningList");
+  if (!listEl) return;
+
+  listEl.innerHTML = "";
+
+  if (miningList.length === 0) {
+    listEl.innerHTML = `<div class="ui-empty">No mined items yet.</div>`;
+    return;
+  }
+
+  miningList.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "ui-card";
+
+    card.innerHTML = `
+      <div class="mine-word">${item.english}</div>
+      <div class="mine-translation">${item.foreign}</div>
+      <div class="mine-source ui-badge">${item.source}</div>
+    `;
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "ui-pill danger";
+    delBtn.textContent = "Delete";
+
+    delBtn.addEventListener("click", () => {
+      miningList.splice(index, 1);
+      renderMiningList();
+    });
+
+    card.appendChild(delBtn);
+    listEl.appendChild(card);
+  });
+}
+
+// 2. Switch to mining tab
+function switchToMiningTab() {
+  currentMode = "mining";
+  showSection("miningSection");
+  renderMiningList();
+}
+
+// 3. Mining buttons
+function addMiningButtonToSentenceUI() {
+  const mineBtn = $("mineSentenceButton");
+  if (!mineBtn) return;
+
+  mineBtn.addEventListener("click", () => {
+    if (currentItem) {
+      mineSentence(currentItem);
+    }
+  });
+}
+
+function mineSentence(item) {
+  miningList.push({
+    english: item.english,
+    foreign: item.foreignCorrect,
+    source: "sentence"
+  });
+
+  badgeRule_firstMine();
+  renderMiningList();
+}
+
+function addMiningButtonToConversationUI() {
+  const mineBtn = $("mineConversationButton");
+  if (!mineBtn) return;
+
+  mineBtn.addEventListener("click", () => {
+    if (conversationItem) {
+      mineConversation(conversationItem.prompt, "Your reply here");
+    }
+  });
+}
+
+function mineConversation(prompt, reply) {
+  miningList.push({
+    english: prompt,
+    foreign: reply,
+    source: "conversation"
+  });
+
+  badgeRule_firstMine();
+  renderMiningList();
+}
+
+// ============================================================
+//  DICTIONARY — FULL CONSOLIDATED (PART 3)
+// ============================================================
+
+function addDictionaryEntry(word, definition) {
+  dictionaryEntries.push({
+    word,
+    definition,
+    language: currentLanguage
+  });
+
+  badgeRule_firstDictionarySave();
+  renderDictionaryList();
+}
+
+function renderDictionaryList() {
+  const listEl = $("dictionaryList");
+  if (!listEl) return;
+
+  listEl.innerHTML = "";
+
+  if (dictionaryEntries.length === 0) {
+    listEl.textContent = "No saved dictionary entries.";
+    return;
+  }
+
+  dictionaryEntries.forEach((entry, index) => {
+    const div = document.createElement("div");
+    div.className = "ui-card";
+
+    div.innerHTML = `
+      <strong>${entry.word}</strong><br>
+      ${entry.definition}<br>
+      <small>Language: ${entry.language}</small>
+    `;
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "ui-pill danger";
+    delBtn.textContent = "Remove";
+
+    delBtn.addEventListener("click", () => {
+      dictionaryEntries.splice(index, 1);
+      renderDictionaryList();
+    });
+
+    div.appendChild(delBtn);
+    listEl.appendChild(div);
+  });
+}
+
+function switchToDictionaryTab() {
+  currentMode = "dictionary";
+  showSection("dictionarySection");
+  renderDictionaryList();
+}
+
+function setupDictionaryUI() {
+  const input = $("dict-search-input");
+  const result = $("dict-search-result");
+
+  if (!input || !result) return;
+
+  input.addEventListener("input", () => {
+    const query = input.value.trim().toLowerCase();
+    if (!query) {
+      result.textContent = "";
+      return;
+    }
+
+    const dict = window.LANG.modules.WORD_DICT?.default || {};
+    const translation = dict[query];
+
+    result.textContent = translation || "Not found.";
+  });
+}
+
+// ============================================================
+//  REVIEW MODE — FULL CONSOLIDATED (PART 3)
+// ============================================================
+
 function addMistake(item) {
   mistakes.push({
     english: item.english,
@@ -289,17 +519,17 @@ function renderMistakeList() {
 
   listEl.innerHTML = "";
 
-  if (mistakeList.length === 0) {
+  if (mistakes.length === 0) {
     listEl.innerHTML = `<div class="ui-empty">No mistakes yet.</div>`;
     return;
   }
 
-  mistakeList.forEach((item, index) => {
+  mistakes.forEach((item, index) => {
     const card = document.createElement("div");
     card.className = "ui-card";
 
     card.innerHTML = `
-      <div class="mistake-word">${item.word}</div>
+      <div class="mistake-word">${item.english}</div>
       <div class="mistake-correct">${item.correct}</div>
     `;
 
@@ -308,7 +538,7 @@ function renderMistakeList() {
     delBtn.textContent = "Remove";
 
     delBtn.addEventListener("click", () => {
-      mistakeList.splice(index, 1);
+      mistakes.splice(index, 1);
       renderMistakeList();
     });
 
@@ -317,8 +547,152 @@ function renderMistakeList() {
   });
 }
 
+function renderReviewItem() {
+  const promptEl = $("reviewPrompt");
+  const inputEl = $("reviewInput");
+  const feedbackEl = $("reviewFeedback");
 
-// 8. Badge rules (sentence mode)
+  if (!promptEl || !inputEl || !feedbackEl) return;
+
+  feedbackEl.textContent = "";
+  inputEl.value = "";
+
+  if (mistakes.length === 0) {
+    promptEl.textContent = "No mistakes to review.";
+    return;
+  }
+
+  reviewItem = mistakes[reviewIndex];
+  promptEl.textContent = reviewItem.english;
+}
+
+function handleReviewAnswer() {
+  const inputEl = $("reviewInput");
+  const feedbackEl = $("reviewFeedback");
+
+  if (!inputEl || !feedbackEl || !reviewItem) return;
+
+  const userAnswer = inputEl.value.trim();
+  const correct = reviewItem.correct;
+
+  if (userAnswer === correct) {
+    feedbackEl.textContent = "Correct!";
+    feedbackEl.style.color = "green";
+    speak(correct);
+  } else {
+    feedbackEl.textContent = `Incorrect — correct answer: ${correct}`;
+    feedbackEl.style.color = "red";
+    speak(correct);
+  }
+
+  reviewIndex++;
+  if (reviewIndex >= mistakes.length) {
+    reviewIndex = 0;
+  }
+
+  setTimeout(() => renderReviewItem(), 600);
+}
+
+function switchToReviewMode() {
+  currentMode = "review";
+  showSection("reviewSection");
+  reviewIndex = 0;
+  renderReviewItem();
+}
+
+function setupReviewUI() {
+  const retryBtn = $("reviewRetryButton");
+  if (!retryBtn) return;
+
+  retryBtn.addEventListener("click", handleReviewAnswer);
+}
+
+// ============================================================
+//  SCORING + PROGRESS — FULL CONSOLIDATED (PART 3)
+// ============================================================
+
+// 1. Scoring
+function updateScore(isCorrect) {
+  if (isCorrect) {
+    score += 10;
+  } else {
+    score -= 2;
+    if (score < 0) score = 0;
+  }
+
+  const scoreEl = $("scoreDisplay");
+  if (scoreEl) {
+    scoreEl.textContent = `Score: ${score}`;
+  }
+}
+
+// 2. Progress tracking
+function updateProgress() {
+  const progressEl = $("progressDisplay");
+  if (!progressEl || currentItems.length === 0) return;
+
+  const percent = Math.round((currentIndex + 1) / currentItems.length * 100);
+  progressEl.textContent = `Progress: ${percent}%`;
+}
+
+// ============================================================
+//  MISTAKE TRACKING — FULL CONSOLIDATED (PART 3)
+// ============================================================
+
+function addMistake(item) {
+  mistakes.push({
+    english: item.english,
+    correct: item.foreignCorrect
+  });
+
+  renderMistakeList();
+}
+
+function renderMistakeList() {
+  const listEl = $("review-words-list");
+  if (!listEl) return;
+
+  listEl.innerHTML = "";
+
+  if (mistakes.length === 0) {
+    listEl.innerHTML = `<div class="ui-empty">No mistakes yet.</div>`;
+    return;
+  }
+
+  mistakes.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "ui-card";
+
+    card.innerHTML = `
+      <div class="mistake-word">${item.english}</div>
+      <div class="mistake-correct">${item.correct}</div>
+    `;
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "ui-pill danger";
+    delBtn.textContent = "Remove";
+
+    delBtn.addEventListener("click", () => {
+      mistakes.splice(index, 1);
+      renderMistakeList();
+    });
+
+    card.appendChild(delBtn);
+    listEl.appendChild(card);
+  });
+}
+
+// ============================================================
+//  BADGES — FULL CONSOLIDATED (PART 3)
+// ============================================================
+
+function awardBadge(id, name, description, icon) {
+  if (badges.some(b => b.id === id)) return;
+
+  badges.push({ id, name, description, icon });
+  renderBadges();
+}
+
 function badgeRule_firstCorrect(isCorrect) {
   if (isCorrect) {
     awardBadge(
@@ -344,7 +718,57 @@ function badgeRule_tenCorrect(isCorrect) {
   }
 }
 
-// 9. Level-up system
+function badgeRule_firstMine() {
+  if (miningList.length === 1) {
+    awardBadge(
+      "first_mine",
+      "First Mined Item",
+      "Awarded for saving your first mined item.",
+      "⛏️"
+    );
+  }
+}
+
+function badgeRule_firstDictionarySave() {
+  if (dictionaryEntries.length === 1) {
+    awardBadge(
+      "first_dictionary",
+      "First Dictionary Save",
+      "Awarded for saving your first dictionary entry.",
+      "📘"
+    );
+  }
+}
+
+function renderBadges() {
+  const badgeEl = $("badgeList");
+  if (!badgeEl) return;
+
+  badgeEl.innerHTML = "";
+
+  if (badges.length === 0) {
+    badgeEl.textContent = "No badges earned yet.";
+    return;
+  }
+
+  badges.forEach(b => {
+    const div = document.createElement("div");
+    div.className = "ui-badge";
+
+    div.innerHTML = `
+      <span class="badgeIcon">${b.icon}</span>
+      <strong>${b.name}</strong><br>
+      <small>${b.description}</small>
+    `;
+
+    badgeEl.appendChild(div);
+  });
+}
+
+// ============================================================
+//  CEFR LEVEL-UP — FULL CONSOLIDATED (PART 3)
+// ============================================================
+
 function addLevelProgress(amount) {
   levelProgress += amount;
 
@@ -396,413 +820,6 @@ function renderLevelUpNotifications() {
 }
 
 // ============================================================
-//  CONVERSATION MODE — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-// 1. Load conversation set
-function loadConversationSet() {
-  const pack = window.LANG.modules.CEFR_CONVERSATION?.default;
-  if (!pack) {
-    currentConversation = [];
-    currentConversationIndex = 0;
-    renderConversationItem();
-    return;
-  }
-
-  const levelArray = pack[currentLevel] || [];
-  currentConversation = levelArray.slice();
-  currentConversationIndex = 0;
-
-  renderConversationItem();
-}
-
-
-// 2. Render conversation item
-function renderConversationItem() {
-  const promptEl = $("conversationPrompt");
-  const replyEl = $("conversationReplies");
-  const feedbackEl = $("conversationFeedback");
-
-  if (!promptEl || !replyEl || !feedbackEl) return;
-
-  replyEl.innerHTML = "";
-  feedbackEl.textContent = "";
-
-  if (!convoItem) {
-    promptEl.textContent = "No conversation items available.";
-    return;
-  }
-
-  promptEl.textContent = convoItem.prompt;
-
-  convoItem.replies.forEach(reply => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "ui-pill";
-    btn.textContent = reply;
-
-    btn.addEventListener("click", () => {
-      handleConversationReply(reply);
-    });
-
-    replyEl.appendChild(btn);
-  });
-}
-
-// 3. Handle conversation reply
-function handleConversationReply(reply) {
-  const feedbackEl = $("conversationFeedback");
-  if (!feedbackEl || !convoItem) return;
-
-  feedbackEl.textContent = `You said: ${reply}`;
-  feedbackEl.style.color = "blue";
-
-  speak(reply);
-
-  mineConversation(convoItem.prompt, reply);
-
-  convoIndex++;
-  if (convoIndex >= convoHistory.length) {
-    convoIndex = 0;
-  }
-
-  convoItem = convoHistory[convoIndex];
-  setTimeout(() => renderConversationItem(), 500);
-}
-
-// 4. Switch to conversation mode
-function switchToConversationMode() {
-  currentMode = "conversation";
-  loadConversationSet();
-  showSection("conversationSection");
-}
-
-// ============================================================
-//  MINING — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-// 1. Render mining list
-function renderMiningList() {
-  const listEl = $("miningList");
-  if (!listEl) return;
-
-  listEl.innerHTML = "";
-
-  if (miningList.length === 0) {
-    listEl.innerHTML = `<div class="ui-empty">No mined items yet.</div>`;
-    return;
-  }
-
-  miningList.forEach((item, index) => {
-    const card = document.createElement("div");
-    card.className = "ui-card";
-
-    card.innerHTML = `
-      <div class="mine-word">${item.word}</div>
-      <div class="mine-translation">${item.translation}</div>
-      <div class="mine-source ui-badge">${item.source}</div>
-    `;
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "ui-pill danger";
-    delBtn.textContent = "Delete";
-
-    delBtn.addEventListener("click", () => {
-      miningList.splice(index, 1);
-      renderMiningList();
-    });
-
-    card.appendChild(delBtn);
-    listEl.appendChild(card);
-  });
-}
-
-
-// 2. Switch to mining tab
-function switchToMiningTab() {
-  showSection("miningSection");
-  renderMiningList();
-}
-
-// 3. Mining buttons
-function addMiningButtonToSentenceUI() {
-  const mineBtn = $("mineSentenceButton");
-  if (!mineBtn) return;
-
-  mineBtn.addEventListener("click", () => {
-    if (currentItem) {
-      mineSentence(currentItem);
-    }
-  });
-}
-
-function mineSentence(item) {
-  miningList.push({
-    english: item.english,
-    foreign: item.foreignCorrect,
-    source: "sentence"
-  });
-
-  badgeRule_firstMine();
-  renderMiningList();
-}
-
-function addMiningButtonToConversationUI() {
-  const mineBtn = $("mineConversationButton");
-  if (!mineBtn) return;
-
-  mineBtn.addEventListener("click", () => {
-    if (convoItem) {
-      mineConversation(convoItem.prompt, "Your reply here");
-    }
-  });
-}
-
-function mineConversation(prompt, reply) {
-  miningList.push({
-    english: prompt,
-    foreign: reply,
-    source: "conversation"
-  });
-
-  badgeRule_firstMine();
-  renderMiningList();
-}
-
-// ============================================================
-//  DICTIONARY — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-const SIMPLE_DICTIONARY = {
-  es: {
-    hola: "A greeting meaning 'hello'.",
-    casa: "A building where people live.",
-    comida: "Food; something you eat."
-  },
-  fr: {
-    bonjour: "A greeting meaning 'hello'.",
-    maison: "A building where people live."
-  },
-  nl: {
-    hallo: "A greeting meaning 'hello'.",
-    huis: "A building where people live."
-  }
-};
-
-function lookupWord(word) {
-  const dict = SIMPLE_DICTIONARY[currentLanguage] || {};
-  return dict[word.toLowerCase()] || "No definition found.";
-}
-
-function addDictionaryEntry(word, definition) {
-  dictionaryEntries.push({
-    word,
-    definition,
-    language: currentLanguage
-  });
-
-  badgeRule_firstDictionarySave();
-  renderDictionaryList();
-}
-
-function renderDictionaryResult(word, definition) {
-  const resultEl = $("dictionaryResult");
-  if (!resultEl) return;
-
-  resultEl.innerHTML = `
-    <strong>${word}</strong><br>
-    ${definition}
-  `;
-}
-
-function renderDictionaryList() {
-  const listEl = $("dictionaryList");
-  if (!listEl) return;
-
-  listEl.innerHTML = "";
-
-  if (dictionaryEntries.length === 0) {
-    listEl.textContent = "No saved dictionary entries.";
-    return;
-  }
-
-  dictionaryEntries.forEach((entry, index) => {
-    const div = document.createElement("div");
-    div.className = "ui-card";
-
-    div.innerHTML = `
-      <strong>${entry.word}</strong><br>
-      ${entry.definition}<br>
-      <small>Language: ${entry.language}</small>
-    `;
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "ui-pill";
-    delBtn.textContent = "Remove";
-
-    delBtn.addEventListener("click", () => {
-      dictionaryEntries.splice(index, 1);
-      renderDictionaryList();
-    });
-
-    div.appendChild(delBtn);
-    listEl.appendChild(div);
-  });
-}
-
-function switchToDictionaryTab() {
-  showSection("dictionarySection");
-  renderDictionaryList();
-}
-
-function setupDictionaryUI() {
-  const input = $("dict-search-input");
-  const result = $("dict-search-result");
-
-  if (!input || !result) return;
-
-  input.addEventListener("input", () => {
-    const query = input.value.trim().toLowerCase();
-    if (!query) {
-      result.textContent = "";
-      return;
-    }
-
-    const dict = window.LANG.modules.WORD_DICT?.default || {};
-    const translation = dict[query];
-
-    if (translation) {
-      result.textContent = translation;
-    } else {
-      result.textContent = "Not found.";
-    }
-  });
-}
-
-}
-
-// ============================================================
-//  REVIEW MODE — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-function renderReviewItem() {
-  const promptEl = $("reviewPrompt");
-  const inputEl = $("reviewInput");
-  const feedbackEl = $("reviewFeedback");
-
-  if (!promptEl || !inputEl || !feedbackEl) return;
-
-  feedbackEl.textContent = "";
-  inputEl.value = "";
-
-  if (mistakes.length === 0) {
-    promptEl.textContent = "No mistakes to review.";
-    return;
-  }
-
-  reviewItem = mistakes[reviewIndex];
-  promptEl.textContent = reviewItem.english;
-}
-
-function handleReviewAnswer() {
-  const inputEl = $("reviewInput");
-  const feedbackEl = $("reviewFeedback");
-
-  if (!inputEl || !feedbackEl || !reviewItem) return;
-
-  const userAnswer = inputEl.value.trim();
-  const correct = reviewItem.correct;
-
-  if (userAnswer === correct) {
-    feedbackEl.textContent = "Correct!";
-    feedbackEl.style.color = "green";
-    speak(correct);
-  } else {
-    feedbackEl.textContent = `Incorrect — correct answer: ${correct}`;
-    feedbackEl.style.color = "red";
-    speak(correct);
-  }
-
-  reviewIndex++;
-  if (reviewIndex >= mistakes.length) {
-    reviewIndex = 0;
-  }
-
-  setTimeout(() => renderReviewItem(), 600);
-}
-
-function switchToReviewMode() {
-  showSection("reviewSection");
-  reviewIndex = 0;
-  renderReviewItem();
-}
-
-function setupReviewUI() {
-  const retryBtn = $("reviewRetryButton");
-  if (!retryBtn) return;
-
-  retryBtn.addEventListener("click", handleReviewAnswer);
-}
-
-// ============================================================
-//  BADGES — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-function awardBadge(id, name, description, icon) {
-  if (badges.some(b => b.id === id)) return;
-
-  badges.push({ id, name, description, icon });
-  renderBadges();
-}
-
-function badgeRule_firstMine() {
-  if (miningList.length === 1) {
-    awardBadge(
-      "first_mine",
-      "First Mined Item",
-      "Awarded for saving your first mined item.",
-      "⛏️"
-    );
-  }
-}
-
-function badgeRule_firstDictionarySave() {
-  if (dictionaryEntries.length === 1) {
-    awardBadge(
-      "first_dictionary",
-      "First Dictionary Save",
-      "Awarded for saving your first dictionary entry.",
-      "📘"
-    );
-  }
-}
-
-function renderBadges() {
-  const badgeEl = $("badgeList");
-  if (!badgeEl) return;
-
-  badgeEl.innerHTML = "";
-
-  if (badges.length === 0) {
-    badgeEl.textContent = "No badges earned yet.";
-    return;
-  }
-
-  badges.forEach(b => {
-    const div = document.createElement("div");
-    div.className = "ui-badge";
-
-    div.innerHTML = `
-      <span class="badgeIcon">${b.icon}</span>
-      <strong>${b.name}</strong><br>
-      <small>${b.description}</small>
-    `;
-
-    badgeEl.appendChild(div);
-  });
-}
-
-// ============================================================
 //  CERTIFICATES — FULL CONSOLIDATED (PART 4)
 // ============================================================
 
@@ -834,7 +851,7 @@ function renderCertificateHTML(name, level, date) {
   `;
 }
 
-// 2. Add certificate to history (no delete)
+// 2. Add certificate to history
 function addCertificateToHistory(name, level) {
   const date = new Date().toLocaleDateString();
 
@@ -958,15 +975,15 @@ function setupCertificateGeneratorPage() {
 
 // 9. Switch to certificate page
 function switchToCertificatePage() {
+  currentMode = "certificates";
   showSection("certificateGeneratorPage");
   renderCertificateHistoryGallery();
 }
 
 // ============================================================
-//  UI HELPERS, THEME, TABS, FINAL GLUE — FULL CONSOLIDATED (PART 5)
+//  UI HELPERS — FULL CONSOLIDATED (PART 5)
 // ============================================================
 
-// 1. UI helpers
 function flashElement(el) {
   if (!el) return;
   el.style.transition = "background-color 0.3s";
@@ -985,7 +1002,10 @@ function fadeIn(el) {
   });
 }
 
-// 2. Theme system
+// ============================================================
+//  THEME SYSTEM
+// ============================================================
+
 function toggleTheme() {
   const root = document.documentElement;
   const current = root.dataset.theme;
@@ -1006,7 +1026,10 @@ function setupThemeButtons() {
   if (contrastBtn) contrastBtn.addEventListener("click", toggleContrast);
 }
 
-// 3. Tabs
+// ============================================================
+//  NEW TAB SYSTEM — MODERN .ui-tab NAVIGATION
+// ============================================================
+
 function activateTab(tabId) {
   const tabs = document.querySelectorAll(".ui-tab");
   const sections = document.querySelectorAll(".appSection");
@@ -1022,6 +1045,43 @@ function activateTab(tabId) {
     activeSection.style.display = "block";
     fadeIn(activeSection);
   }
+
+  // Update mode
+  currentMode = tabId;
+  handleModeSwitch(tabId);
+}
+
+function handleModeSwitch(tabId) {
+  if (tabId === "sentenceSection") {
+    currentMode = "sentences";
+    loadCurrentSet();
+    renderCurrentItem();
+  }
+
+  if (tabId === "conversationSection") {
+    currentMode = "conversation";
+    switchToConversationMode();
+  }
+
+  if (tabId === "miningSection") {
+    currentMode = "mining";
+    switchToMiningTab();
+  }
+
+  if (tabId === "dictionarySection") {
+    currentMode = "dictionary";
+    switchToDictionaryTab();
+  }
+
+  if (tabId === "reviewSection") {
+    currentMode = "review";
+    switchToReviewMode();
+  }
+
+  if (tabId === "certificateGeneratorPage") {
+    currentMode = "certificates";
+    switchToCertificatePage();
+  }
 }
 
 function setupTabs() {
@@ -1031,34 +1091,14 @@ function setupTabs() {
     tab.addEventListener("click", () => {
       const target = tab.dataset.tab;
       activateTab(target);
-
-      currentMode = target;
-
-      if (target === "sentenceSection" || target === "sentences") {
-        currentMode = "sentences";
-        loadCurrentSet();
-        showSection("sentenceSection");
-      } else if (target === "conversationSection" || target === "conversation") {
-        currentMode = "conversation";
-        switchToConversationMode();
-      } else if (target === "miningSection" || target === "mining") {
-        currentMode = "mining";
-        switchToMiningTab();
-      } else if (target === "dictionarySection" || target === "dictionary") {
-        currentMode = "dictionary";
-        switchToDictionaryTab();
-      } else if (target === "reviewSection" || target === "review") {
-        currentMode = "review";
-        switchToReviewMode();
-      } else if (target === "certificateGeneratorPage" || target === "certificates") {
-        currentMode = "certificates";
-        switchToCertificatePage();
-      }
     });
   });
 }
 
-// 4. Sentence UI setup
+// ============================================================
+//  SENTENCE UI SETUP
+// ============================================================
+
 function setupSentenceUI() {
   const nextBtn = $("nextButton");
   if (nextBtn) nextBtn.addEventListener("click", goToNextSentenceItem);
@@ -1087,7 +1127,35 @@ function setupLevelSelector() {
   });
 }
 
-// 6. Final init
+function initLanguageSelector() {
+  const selector = $("language-select");
+  if (!selector) return;
+
+  selector.addEventListener("change", async (e) => {
+    const newLang = e.target.value;
+
+    currentLanguage = newLang;
+    window.LANG.lang = newLang;
+
+    await loadLanguagePack(newLang);
+
+    loadCurrentSet();
+    renderCurrentItem();
+    renderDictionaryList();
+    renderMiningList();
+    renderMistakeList();
+    renderCertificateHistoryGallery();
+    renderBadges();
+    renderLevelProgress();
+
+    sanityCheck();
+  });
+}
+
+// ============================================================
+//  FINAL INIT — FULLY MODERNIZED
+// ============================================================
+
 function initApp() {
   initLanguageSelector();
   setupLevelSelector();
@@ -1113,45 +1181,127 @@ function initApp() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    await loadLanguagePack("es");
+  await loadLanguagePack("es");
 
-    const WORD_BANKS = {
-      es: {
-        sentences: window.LANG.modules.CEFR_SENTENCE_CHOICES.default,
-        conversation: window.LANG.modules.CEFR_CONVERSATION.default
-      },
-      fr: { sentences: {}, conversation: {} },
-      nl: { sentences: {}, conversation: {} }
-    };
-
-    initLanguageSelector();
-    initApp();   // ⭐ THIS FIXES THE DASHBOARD
-    activateTab("dashboard");
-    initTabNavigation();
-    initRateControl();
-    initNameBox();
-    initDictionarySearch();
-    initFreePracticeSandbox();
-    updateBadges();
-    updateProgressMeters();
+  initApp();
+  activateTab("dashboard");
 });
 
-function initLanguageSelector() {
-  const selector = document.getElementById("language-select");
-  if (!selector) return;
+// ============================================================
+//  FREE PRACTICE SANDBOX
+// ============================================================
 
-  selector.addEventListener("change", async (e) => {
-    const newLang = e.target.value;
+function initFreePracticeSandbox() {
+  const input = $("sandboxInput");
+  const output = $("sandboxOutput");
+  const speakBtn = $("sandboxSpeakButton");
 
-    // Update global language state
-    window.LANG.lang = newLang;
+  if (!input || !output || !speakBtn) return;
 
-    // Reload all language modules
-    await loadLanguagePack(newLang);
+  input.addEventListener("input", () => {
+    const text = input.value.trim();
+    output.textContent = text || "";
+  });
 
-    // Refresh UI
-    renderDashboard();
-    loadCurrentSet();
-    renderCurrentItem();
+  speakBtn.addEventListener("click", () => {
+    const text = input.value.trim();
+    if (text) speak(text);
   });
 }
+
+// ============================================================
+//  DICTIONARY SEARCH BAR
+// ============================================================
+
+function initDictionarySearch() {
+  const searchInput = $("dictionarySearchInput");
+  const searchOutput = $("dictionarySearchOutput");
+
+  if (!searchInput || !searchOutput) return;
+
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.trim().toLowerCase();
+    if (!query) {
+      searchOutput.textContent = "";
+      return;
+    }
+
+    const dict = window.LANG.modules.WORD_DICT?.default || {};
+    const translation = dict[query];
+
+    searchOutput.textContent = translation || "Not found.";
+  });
+}
+
+// ============================================================
+//  NAME BOX (CERTIFICATE GENERATOR)
+// ============================================================
+
+function initNameBox() {
+  const nameInput = $("certGenNameInput");
+  const preview = $("certGenPreview");
+
+  if (!nameInput || !preview) return;
+
+  nameInput.addEventListener("input", () => {
+    const name = nameInput.value.trim() || "Student";
+    const level = $("certGenLevelSelect").value;
+    const date = new Date().toLocaleDateString();
+
+    preview.innerHTML = renderCertificateHTML(name, level, date);
+  });
+}
+
+// ============================================================
+//  RATE CONTROL (SPEECH SYNTHESIS SPEED)
+// ============================================================
+
+function initRateControl() {
+  const rateSlider = $("speechRateSlider");
+  const rateLabel = $("speechRateLabel");
+
+  if (!rateSlider || !rateLabel) return;
+
+  rateSlider.addEventListener("input", () => {
+    const rate = parseFloat(rateSlider.value);
+    rateLabel.textContent = `Rate: ${rate.toFixed(1)}`;
+
+    // Apply to speech synthesis
+    window.speechSynthesis.cancel();
+    window.speechRate = rate;
+  });
+}
+
+// ============================================================
+//  DASHBOARD RENDERING
+// ============================================================
+
+function renderDashboard() {
+  const langEl = $("dashLanguage");
+  const levelEl = $("dashLevel");
+  const scoreEl = $("dashScore");
+  const minedEl = $("dashMinedCount");
+  const dictEl = $("dashDictionaryCount");
+  const reviewEl = $("dashReviewCount");
+
+  if (langEl) langEl.textContent = LANGUAGES[currentLanguage].name;
+  if (levelEl) levelEl.textContent = currentLevel;
+  if (scoreEl) scoreEl.textContent = score;
+  if (minedEl) minedEl.textContent = miningList.length;
+  if (dictEl) dictEl.textContent = dictionaryEntries.length;
+  if (reviewEl) reviewEl.textContent = mistakes.length;
+}
+
+// ============================================================
+//  FINAL GLUE — ENSURES ALL UI COMPONENTS ARE ACTIVE
+// ============================================================
+
+function updateBadges() {
+  renderBadges();
+}
+
+function updateProgressMeters() {
+  renderLevelProgress();
+  updateProgress();
+}
+
