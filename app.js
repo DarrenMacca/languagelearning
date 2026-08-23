@@ -673,52 +673,6 @@ function updateProgress() {
   progressEl.textContent = `Progress: ${percent}%`;
 }
 
-// ============================================================
-//  MISTAKE TRACKING — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-function addMistake(item) {
-  mistakes.push({
-    english: item.english,
-    correct: item.foreignCorrect
-  });
-
-  renderMistakeList();
-}
-
-function renderMistakeList() {
-  const listEl = $("review-words-list");
-  if (!listEl) return;
-
-  listEl.innerHTML = "";
-
-  if (mistakes.length === 0) {
-    listEl.innerHTML = `<div class="ui-empty">No mistakes yet.</div>`;
-    return;
-  }
-
-  mistakes.forEach((item, index) => {
-    const card = document.createElement("div");
-    card.className = "ui-card";
-
-    card.innerHTML = `
-      <div class="mistake-word">${item.english}</div>
-      <div class="mistake-correct">${item.correct}</div>
-    `;
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "ui-pill danger";
-    delBtn.textContent = "Remove";
-
-    delBtn.addEventListener("click", () => {
-      mistakes.splice(index, 1);
-      renderMistakeList();
-    });
-
-    card.appendChild(delBtn);
-    listEl.appendChild(card);
-  });
-}
 
 // ============================================================
 //  BADGES — FULL CONSOLIDATED (PART 3)
@@ -779,7 +733,7 @@ function badgeRule_firstDictionarySave() {
 }
 
 function renderBadges() {
-  const badgeEl = $("badgeList");
+  const badgeEl = $("badge-List");
   if (!badgeEl) return;
 
   badgeEl.innerHTML = "";
@@ -1103,27 +1057,28 @@ function handleModeSwitch(tabId) {
 
     if (tabId === "conversationSection") {
         currentMode = "conversation";
-        switchToConversationMode();
+        loadConversationSet();
     }
 
     if (tabId === "miningSection") {
         currentMode = "mining";
-        switchToMiningTab();
+        renderMiningList();
     }
 
     if (tabId === "dictionarySection") {
         currentMode = "dictionary";
-        switchToDictionaryTab();
+        renderDictionaryList();
     }
 
     if (tabId === "reviewSection") {
         currentMode = "review";
-        switchToReviewMode();
+        reviewIndex = 0;
+        renderReviewItem();
     }
 
     if (tabId === "certificateGeneratorPage") {
         currentMode = "certificates";
-        switchToCertificatePage();
+        renderCertificateHistoryGallery();
     }
 
     if (tabId === "repeatPracticeSection") {
@@ -1131,35 +1086,6 @@ function handleModeSwitch(tabId) {
         loadRepeatPractice();
     }
 }
-
-function initApp() {
-  initLanguageSelector();
-  setupLevelSelector();
-  setupModeSelector();
-  initTabs();               // NEW TAB SYSTEM
-  setupThemeButtons();
-
-  loadCurrentSet();
-  renderCurrentItem();
-  setupSentenceUI();
-  setupDictionaryUI();
-  setupReviewUI();
-  setupCertificateGeneratorPage();
-
-  renderBadges();
-  renderMiningList();
-  renderDictionaryList();
-  renderMistakeList();
-  renderCertificateHistoryGallery();
-  renderLevelProgress();
-
-  sanityCheck();
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadLanguagePack("es");
-  initApp();
-});
 
 
 // ============================================================
@@ -1226,7 +1152,6 @@ function initLanguageSelector() {
 function initApp() {
   initLanguageSelector();
   setupLevelSelector();
-  setupModeSelector();
   initTabs();               // NEW TAB SYSTEM
   setupThemeButtons();
 
@@ -1249,12 +1174,9 @@ function initApp() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   await loadLanguagePack("es");
-
   initApp();
-
-  // REMOVE activateTab("dashboard")
-  // The new tab system already shows dashboard by default.
 });
+
 
 
 // ============================================================
