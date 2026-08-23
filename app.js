@@ -1065,73 +1065,79 @@ function setupThemeButtons() {
 }
 
 // ============================================================
-//  NEW TAB SYSTEM — MODERN .ui-tab NAVIGATION
+// NEW TAB SYSTEM (Matches your new HTML)
 // ============================================================
 
-function activateTab(tabId) {
-  const tabs = document.querySelectorAll(".ui-tab");
-  const sections = document.querySelectorAll(".appSection");
+function initTabs() {
+    const tabs = document.querySelectorAll('.ui-tab');
+    const sections = document.querySelectorAll('.appSection');
 
-  tabs.forEach(t => t.classList.remove("is-active"));
-  sections.forEach(s => s.style.display = "none");
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.getAttribute('data-tab');
 
-  const activeTab = document.querySelector(`.ui-tab[data-tab="${tabId}"]`);
-  const activeSection = $(tabId);
+            // Highlight active tab
+            tabs.forEach(t => t.classList.remove('is-active'));
+            tab.classList.add('is-active');
 
-  if (activeTab) activeTab.classList.add("is-active");
-  if (activeSection) {
-    activeSection.style.display = "block";
-    fadeIn(activeSection);
-  }
+            // Show correct section
+            sections.forEach(sec => {
+                if (sec.id === target) {
+                    sec.style.display = 'block';
+                } else {
+                    sec.style.display = 'none';
+                }
+            });
 
-  // Update mode
-  currentMode = tabId;
-  handleModeSwitch(tabId);
+            // Mode switching
+            handleModeSwitch(target);
+        });
+    });
+
+    // Default view
+    document.getElementById('dashboard').style.display = 'block';
 }
 
 function handleModeSwitch(tabId) {
-  if (tabId === "sentenceSection") {
-    currentMode = "sentences";
-    loadCurrentSet();
-    renderCurrentItem();
-  }
+    if (tabId === "sentenceSection") {
+        currentMode = "sentences";
+        loadCurrentSet();
+        renderCurrentItem();
+    }
 
-  if (tabId === "conversationSection") {
-    currentMode = "conversation";
-    switchToConversationMode();
-  }
+    if (tabId === "conversationSection") {
+        currentMode = "conversation";
+        switchToConversationMode();
+    }
 
-  if (tabId === "miningSection") {
-    currentMode = "mining";
-    switchToMiningTab();
-  }
+    if (tabId === "miningSection") {
+        currentMode = "mining";
+        switchToMiningTab();
+    }
 
-  if (tabId === "dictionarySection") {
-    currentMode = "dictionary";
-    switchToDictionaryTab();
-  }
+    if (tabId === "dictionarySection") {
+        currentMode = "dictionary";
+        switchToDictionaryTab();
+    }
 
-  if (tabId === "reviewSection") {
-    currentMode = "review";
-    switchToReviewMode();
-  }
+    if (tabId === "reviewSection") {
+        currentMode = "review";
+        switchToReviewMode();
+    }
 
-  if (tabId === "certificateGeneratorPage") {
-    currentMode = "certificates";
-    switchToCertificatePage();
-  }
+    if (tabId === "certificateGeneratorPage") {
+        currentMode = "certificates";
+        switchToCertificatePage();
+    }
+
+    if (tabId === "repeatPracticeSection") {
+        currentMode = "repeat";
+        loadRepeatPractice();
+    }
 }
 
-function setupTabs() {
-  const tabs = document.querySelectorAll(".ui-tab");
+initTabs();
 
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      const target = tab.dataset.tab;
-      activateTab(target);
-    });
-  });
-}
 
 // ============================================================
 //  SENTENCE UI SETUP
