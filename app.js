@@ -385,24 +385,21 @@ function renderLevelUpNotifications() {
 
 // 1. Load conversation set
 function loadConversationSet() {
-  const langBundle = WORD_BANKS[currentLanguage];
-  if (!langBundle) {
-    convoHistory = [];
-    convoIndex = 0;
-    convoItem = null;
+  const pack = window.LANG.modules.CEFR_CONVERSATION?.default;
+  if (!pack) {
+    currentConversation = [];
+    currentConversationIndex = 0;
     renderConversationItem();
     return;
   }
 
-  const pack = langBundle.conversation || {};
   const levelArray = pack[currentLevel] || [];
-
-  convoHistory = levelArray.slice();
-  convoIndex = 0;
-  convoItem = convoHistory.length > 0 ? convoHistory[0] : null;
+  currentConversation = levelArray.slice();
+  currentConversationIndex = 0;
 
   renderConversationItem();
 }
+
 
 // 2. Render conversation item
 function renderConversationItem() {
