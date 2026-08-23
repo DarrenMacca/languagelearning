@@ -1077,7 +1077,7 @@ function setupLevelSelector() {
 
 // 6. Final init
 function initApp() {
-  setupLanguageSelector();
+  initLanguageSelector();
   setupLevelSelector();
   setupModeSelector();
   setupTabs();
