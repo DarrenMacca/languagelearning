@@ -18,46 +18,49 @@
 </div>
 
 <!-- ============================================================
-     NAVIGATION BAR
+     NAVIGATION BAR (NEW STANDARD)
 ============================================================ -->
 <nav class="glass-panel nav-bar">
-    <button class="tab-btn active" data-tab="dashboard">
+    <div class="ui-tab is-active" data-tab="dashboard">
         <img src="images/dashboard-hero.png" class="tab-icon"> Dashboard
-    </button>
-    <button class="tab-btn" data-tab="listen">
+    </div>
+    <div class="ui-tab" data-tab="listenSection">
         <img src="images/listen.png" class="tab-icon"> Listen
-    </button>
-    <button class="tab-btn" data-tab="flash">
+    </div>
+    <div class="ui-tab" data-tab="flashSection">
         <img src="images/flashcards.png" class="tab-icon"> Flashcards
-    </button>
-    <button class="tab-btn" data-tab="quiz">
+    </div>
+    <div class="ui-tab" data-tab="quizSection">
         <img src="images/badge-quiz.png" class="tab-icon"> Quiz
-    </button>
-    <button class="tab-btn" data-tab="build">
+    </div>
+    <div class="ui-tab" data-tab="buildSection">
         <img src="images/badge-build.png" class="tab-icon"> Build
-    </button>
-    <button class="tab-btn" data-tab="sentence">
+    </div>
+    <div class="ui-tab" data-tab="sentenceSection">
         <img src="images/icon-sentence.png" class="tab-icon"> Sentence
-    </button>
-    <button class="tab-btn" data-tab="conversation">
+    </div>
+    <div class="ui-tab" data-tab="conversationSection">
         <img src="images/badge-conversation.png" class="tab-icon"> Conversation
-    </button>
-    <button class="tab-btn" data-tab="grammar">
+    </div>
+    <div class="ui-tab" data-tab="grammarSection">
         <img src="images/grammar.png" class="tab-icon"> Grammar
-    </button>
-    <button class="tab-btn" data-tab="mining">
+    </div>
+    <div class="ui-tab" data-tab="miningSection">
         <img src="images/mining.png" class="tab-icon"> Mining
-    </button>
-    <button class="tab-btn" data-tab="review">
+    </div>
+    <div class="ui-tab" data-tab="dictionarySection">
+        <img src="images/flashcards.png" class="tab-icon"> Dictionary
+    </div>
+    <div class="ui-tab" data-tab="reviewSection">
         <img src="images/icon-review.png" class="tab-icon"> Review
-    </button>
-    <button class="tab-btn" data-tab="certificates">
+    </div>
+    <div class="ui-tab" data-tab="certificateGeneratorPage">
         <img src="images/icon-certificate.png" class="tab-icon"> Certificates
-    </button>
+    </div>
 </nav>
 
 <!-- ============================================================
-     DASHBOARD TAB CONTENT
+     DASHBOARD
 ============================================================ -->
 <div id="dashboard" class="appSection">
 
@@ -104,10 +107,10 @@
             <div id="name-status" class="name-status"></div>
         </div>
 
-        <!-- CERTIFICATES -->
+        <!-- CERTIFICATES QUICK LINK -->
         <div class="glass-panel student-name-box">
             <label class="section-title">Certificates</label>
-            <button class="pill" data-tab="certificates" id="certificates-tab-btn">
+            <button class="pill" id="certificates-tab-btn" data-tab="certificateGeneratorPage">
                 <img src="images/icon-certificate.png" class="tab-icon">
                 View Certificates
             </button>
@@ -115,7 +118,7 @@
 
     </div>
 
-    <!-- DICTIONARY + SANDBOX -->
+    <!-- DICTIONARY + SANDBOX + REPEAT PRACTICE -->
     <div class="utility-row">
 
         <!-- QUICK DICTIONARY SEARCH -->
@@ -126,7 +129,7 @@
             <div id="dict-search-result" class="dict-result"></div>
         </div>
 
-        <!-- FREE PRACTICE SANDBOX -->
+        <!-- FREE PRACTICE SANDBOX + REPEAT PRACTICE BUTTON -->
         <div class="glass-panel free-practice-box">
             <label class="section-title">🎯 Free Practice Sandbox</label>
             <p class="subtext">Translate the word below from any level</p>
@@ -139,6 +142,13 @@
                 <button id="practice-check-btn" class="pill">Check</button>
                 <button id="practice-next-btn" class="pill alt-pill">Skip</button>
             </div>
+
+            <!-- Repeat Practice trigger (Dashboard-only) -->
+            <div class="repeat-practice-row">
+                <button id="repeatPracticeButton" class="pill alt-pill">
+                    🎤 Repeat Practice
+                </button>
+            </div>
         </div>
 
     </div>
@@ -146,7 +156,6 @@
     <!-- PROGRESS GRID -->
     <div class="progress-section">
 
-        <!-- QUIZ -->
         <div id="quiz-tile" class="progress-tile glass-panel">
             <div class="progress-icon-row">
                 <img src="images/badge-quiz.png" class="progress-img">
@@ -156,7 +165,6 @@
             <div class="progress-bar"><div class="progress-fill" id="quiz-progress"></div></div>
         </div>
 
-        <!-- BUILD -->
         <div id="build-tile" class="progress-tile glass-panel">
             <div class="progress-icon-row">
                 <img src="images/badge-build.png" class="progress-img">
@@ -166,7 +174,6 @@
             <div class="progress-bar"><div class="progress-fill" id="build-progress"></div></div>
         </div>
 
-        <!-- SENTENCE -->
         <div id="sentence-tile" class="progress-tile glass-panel">
             <div class="progress-icon-row">
                 <img src="images/icon-sentence.png" class="progress-img">
@@ -176,7 +183,6 @@
             <div class="progress-bar"><div class="progress-fill" id="sentence-progress"></div></div>
         </div>
 
-        <!-- XP -->
         <div id="xp-tile" class="progress-tile glass-panel">
             <div class="progress-icon-row">
                 <img src="images/icon-xp.png" class="progress-img">
@@ -186,7 +192,6 @@
             <div class="progress-bar"><div class="progress-fill" id="xp-progress"></div></div>
         </div>
 
-        <!-- STREAK -->
         <div id="streak-tile" class="progress-tile glass-panel">
             <div class="progress-icon-row">
                 <img src="images/icon-streak.png" class="progress-img">
@@ -196,7 +201,6 @@
             <div class="progress-bar"><div class="progress-fill" id="streak-progress"></div></div>
         </div>
 
-        <!-- SCORE -->
         <div id="score-tile" class="progress-tile glass-panel">
             <div class="progress-icon-row">
                 <img src="images/icon-level.png" class="progress-img">
@@ -206,7 +210,6 @@
             <div class="progress-bar"><div class="progress-fill" id="score-progress"></div></div>
         </div>
 
-        <!-- REVIEW -->
         <div id="review-tile" class="progress-tile glass-panel">
             <div class="progress-icon-row">
                 <img src="images/icon-review.png" class="progress-img">
@@ -216,7 +219,6 @@
             <div class="progress-bar"><div class="progress-fill" id="review-progress"></div></div>
         </div>
 
-        <!-- RESET -->
         <div id="reset-tile" class="progress-tile glass-panel reset-tile">
             <div class="progress-icon-row">
                 <img src="images/icon-reset.png" class="progress-img">
@@ -235,29 +237,79 @@
 
 </div>
 
+<!-- ============================================================
+     LISTEN / FLASHCARDS / QUIZ / BUILD / GRAMMAR
+     (EMPTY CONTAINERS FOR JS TO POPULATE)
+============================================================ -->
+<div id="listenSection" class="appSection">
+    <div id="listen-content" class="glass-panel"></div>
+</div>
+
+<div id="flashSection" class="appSection">
+    <div id="flash-content" class="glass-panel"></div>
+</div>
+
+<div id="quizSection" class="appSection">
+    <div id="quiz-content" class="glass-panel"></div>
+</div>
+
+<div id="buildSection" class="appSection">
+    <div id="build-content" class="glass-panel"></div>
+</div>
+
+<div id="grammarSection" class="appSection">
+    <div id="grammar-content" class="glass-panel"></div>
+</div>
 
 <!-- ============================================================
-     OTHER TABS (CONTENT POPULATED BY JS)
+     SENTENCE / CONVERSATION / MINING / DICTIONARY / REVIEW
 ============================================================ -->
-<div id="listen" class="hidden"><div id="listen-content"></div></div>
-<div id="flash" class="hidden"><div id="flash-content"></div></div>
-<div id="quiz" class="hidden"><div id="quiz-content"></div></div>
-<div id="build" class="hidden"><div id="build-content"></div></div>
-<div id="sentence" class="hidden"><div id="sentence-content"></div></div>
-<div id="conversation" class="hidden"><div id="conversation-content"></div></div>
-<div id="grammar" class="hidden"><div id="grammar-content"></div></div>
-<div id="mining" class="hidden"><div id="mining-content"></div></div>
+<div id="sentenceSection" class="appSection">
+    <div id="sentence-content" class="glass-panel"></div>
+</div>
 
-<!-- REVIEW -->
-<div id="review" class="hidden">
+<div id="conversationSection" class="appSection">
+    <div id="conversation-content" class="glass-panel"></div>
+</div>
+
+<div id="miningSection" class="appSection">
+    <div id="mining-content" class="glass-panel"></div>
+</div>
+
+<div id="dictionarySection" class="appSection">
+    <div id="dictionary-content" class="glass-panel"></div>
+</div>
+
+<div id="reviewSection" class="appSection">
     <div id="review-content" class="glass-panel" style="padding:20px; margin-top:20px;">
         <h2>Mistaken Areas Review</h2>
         <div id="review-words-list"></div>
     </div>
 </div>
 
-<!-- CERTIFICATES -->
-<div id="certificates" class="hidden">
+<!-- ============================================================
+     REPEAT PRACTICE (DASHBOARD-ONLY FEATURE)
+============================================================ -->
+<div id="repeatPracticeSection" class="appSection">
+    <div class="glass-panel" style="padding:20px; margin-top:20px;">
+        <h2 class="section-title">Repeat Practice</h2>
+        <p class="subtext">Listen to the sentence, then repeat it aloud.</p>
+
+        <div id="repeatPracticePrompt" class="repeat-prompt"></div>
+
+        <div class="repeat-buttons">
+            <button id="repeatSpeakButton" class="pill">Play Sentence</button>
+            <button id="repeatListenButton" class="pill alt-pill">Start Recording</button>
+        </div>
+
+        <div id="repeatPracticeFeedback" class="dict-result"></div>
+    </div>
+</div>
+
+<!-- ============================================================
+     CERTIFICATES
+============================================================ -->
+<div id="certificateGeneratorPage" class="appSection">
     <div id="certificates-content" class="glass-panel" style="padding:20px; margin-top:20px;">
         <h2 class="section-title">Your Certificates</h2>
 
@@ -296,6 +348,9 @@
     </div>
 </div>
 
+<!-- ============================================================
+     SCRIPTS
+============================================================ -->
 <script src="LanguageLoader.js"></script>
 <script src="app.js"></script>
 
