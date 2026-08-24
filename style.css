@@ -264,6 +264,24 @@ video {
   transition: filter var(--motion-fast) var(--motion-ease), transform var(--motion-fast) var(--motion-ease);
 }
 
+/* Normalize ALL tab icons */
+.tab-icon,
+.ui-tab-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  margin-right: 8px;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.4));
+  transition: filter var(--motion-fast) var(--motion-ease),
+              transform var(--motion-fast) var(--motion-ease);
+}
+
+.ui-tab:hover .tab-icon,
+.ui-tab:hover .ui-tab-icon {
+  filter: drop-shadow(0 0 6px rgba(0, 255, 255, 0.8));
+  transform: translateY(-2px);
+}
+
 .ui-tab:hover .ui-tab-icon {
   filter: drop-shadow(0 0 6px rgba(0, 255, 255, 0.8));
   transform: translateY(-2px);
