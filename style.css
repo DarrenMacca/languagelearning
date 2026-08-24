@@ -1265,6 +1265,90 @@ img, video {
   @page { size: A4 landscape; margin: 20mm; }
 }
 
+/* ============================================================
+   SPANISH-LESSONS LAYOUT OVERRIDES — FINAL
+   ============================================================ */
 
+/* Panels: tighter, like Spanish-Lessons */
+.ui-panel,
+.glass-panel {
+  padding: 14px;
+  border-radius: 14px;
+}
 
+/* Cards: slightly smaller */
+.ui-card {
+  padding: 12px;
+  border-radius: 12px;
+}
 
+/* Pills / buttons / inputs: compact Spanish-Lessons sizing */
+.ui-pill {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.ui-button {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.ui-input {
+  padding: 10px;
+  font-size: 14px;
+}
+
+/* Tabs: match Spanish-Lessons height + spacing */
+.ui-tab {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* Tab icons: identical to Spanish-Lessons */
+.tab-icon,
+.ui-tab-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  margin-right: 8px;
+}
+
+/* Progress tiles: same grid + density as Spanish-Lessons */
+.ui-progress-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  max-width: 780px;
+  margin: 20px auto;
+}
+
+.ui-progress-tile {
+  padding: 12px;
+  border-radius: 12px;
+}
+
+/* Progress icons: match Spanish-Lessons */
+.progress-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+/* Badge layout: compact row like Spanish-Lessons */
+#badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Dictionary + Sandbox boxes: tighter spacing */
+.dictionary-search-box,
+.free-practice-box {
+  padding: 12px;
+}
+
+/* Hero image: match Spanish-Lessons footprint */
+.dashboard-hero-img {
+  max-width: 320px;
+  margin: 16px auto 0 auto;
+}
