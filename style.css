@@ -5,6 +5,27 @@
 /* ============================================================
    PART 1 — DESIGN TOKENS + BASE + CORE COMPONENTS
    ============================================================ */
+/* Dashboard Hero Image — match Spanish-Lessons */
+.dashboard-hero-img {
+    width: 100%;
+    max-width: 340px;      /* desktop size */
+    height: auto;
+    display: block;
+    margin: 20px auto 0 auto;
+    border-radius: 18px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.4));
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+    .dashboard-hero-img {
+        max-width: 240px;  /* mobile size */
+        margin-top: 12px;
+        border-radius: 12px;
+        filter: drop-shadow(0 0 12px rgba(0, 255, 255, 0.3));
+    }
+}
 
 /* ------------------------------
    DESIGN TOKENS
