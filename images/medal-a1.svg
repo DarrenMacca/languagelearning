@@ -1,1 +1,43 @@
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+
+  <circle cx="150" cy="150" r="120" fill="rgba(59,130,246,0.25)" filter="url(#glow)" />
+
+  <circle cx="150" cy="150" r="110" fill="url(#grad)" stroke="url(#rim)" stroke-width="8" />
+
+  <circle cx="150" cy="150" r="85" fill="url(#inner)" stroke="rgba(255,255,255,0.35)" stroke-width="3" />
+
+  <polygon points="150,80 170,135 230,140 185,175 200,230 150,200 100,230 115,175 70,140 130,135"
+           fill="url(#star)" stroke="rgba(255,255,255,0.4)" stroke-width="2" />
+
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="50%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dbeafe"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+
+    <radialGradient id="inner">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="60%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1e40af"/>
+    </radialGradient>
+
+    <linearGradient id="star" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="50%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1e40af"/>
+    </linearGradient>
+  </defs>
+
+</svg>
 
