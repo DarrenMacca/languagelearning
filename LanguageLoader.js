@@ -1,52 +1,67 @@
 // ============================================================
-// LANGUAGE PACK LOADER
-// Loads ALL JS files inside wordbanks/<lang>/
+// MULTI-LANGUAGE + MULTI-MODULE LOADER
 // ============================================================
 
-async function loadLanguagePack(lang) {
-    const base = `wordbanks/${lang}`;
+let activeLanguage = "es";   // default
+let activeLevel = "A1";      // default
 
-    const files = [
-        "A1.js",
-        "A2.js",
-        "B1.js",
-        "B2.js",
-        "CEFR_CONVERSATION.js",
-        "CEFR_CONVERSATION_AUDIO.js",
-        "CEFR_LEVELS.js",
-        "CEFR_PHRASES.js",
-        "CEFR_SENTENCES.js",
-        "CEFR_SENTENCE_CHOICES.js",
-        "DISRUPTORS.js",
-        "LISTEN_VOCAB.js",
-        "WORD_DICT.js",
-        "mining_references.js"
-    ];
+// Map modules to their file names
+const MODULE_FILES = {
+    listen: "LISTEN_VOCAB.js",
+    flashcards: "CEFR_PHRASES.js",
+    quiz: "DISRUPTORS.js",
+    build: "CEFR_SENTENCE_CHOICES.js",
+    sentence: "CEFR_SENTENCES.js",
+    conversation: "CEFR_CONVERSATION.js",
+    conversationAudio: "CEFR_CONVERSATION_AUDIO.js",
+    grammar: "CEFR_LEVELS.js",
+    mining: "mining_references.js",
+    dictionary: "WORD_DICT.js",
+    review: "repeat",
+    repeat: "repeat"
+};
 
-    const jsonData = {};   // stays empty unless you add JSON later
-    const modules = {};
+// Load CEFR level file (A1.js, A2.js, B1.js, B2.js)
+async function loadLevelBank(level = activeLevel) {
+    const path = `wordbanks/${activeLanguage}/${level}.js`;
+    return import(`../${path}`);
+}
 
-    // -------------------------------
-    // Load JS modules
-    // -------------------------------
-    const jsFiles = files.filter(f => f.endsWith(".js"));
+// Load module file
+async function loadModuleBank(moduleName) {
+    const file = MODULE_FILES[moduleName];
 
-    for (const file of jsFiles) {
-        try {
-            modules[file.replace(".js", "")] = await import(`./${base}/${file}`);
-        } catch (err) {
-            console.error("JS module load error:", err);
-        }
+    // Repeat practice uses folder structure
+    if (moduleName === "repeat") {
+        const path = `wordbanks/${activeLanguage}/repeat/${activeLevel}.js`;
+        return import(`../${path}`);
     }
 
-    // -------------------------------
-    // Build global language object
-    // -------------------------------
-    window.LANG = {
-        lang,
-        json: jsonData,
-        modules: modules
-    };
-
-    console.log(`Language pack '${lang}' loaded:`, window.LANG);
+    const path = `wordbanks/${activeLanguage}/${file}`;
+    return import(`../${path}`);
 }
+
+// Change language
+function setLanguage(lang) {
+    activeLanguage = lang;
+    console.log("Language set to:", lang);
+}
+
+// Change CEFR level
+function setLevel(level) {
+    activeLevel = level;
+    console.log("Level set to:", level);
+}
+
+// Load everything needed for a module
+async function loadModule(moduleName) {
+    const levelBank = await loadLevelBank(activeLevel);
+    const moduleBank = await loadModuleBank(moduleName);
+
+    return {
+        levelBank,
+        moduleBank
+    };
+}
+
+export { setLanguage, setLevel, loadModule };
