@@ -429,10 +429,7 @@ function incrementStreak() {
     appState.streakDays += 1;
 }
 
-function totalXP() {
-    return Object.values(appState.levelStats)
-        .reduce((sum, lvl) => sum + lvl.xp, 0);
-}
+
 
 // ============================================================
 //  PART 2 — TAB ROUTER + LANGUAGE + CEFR CONTROLS
