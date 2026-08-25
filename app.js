@@ -753,7 +753,7 @@ function renderLevelUpNotifications() {
 }
 
 // ============================================================
-//  CERTIFICATES — FULL CONSOLIDATED (UPDATED)
+//  CERTIFICATES — FULL CONSOLIDATED (UPDATED WITH CEFR MEDALS)
 // ============================================================
 
 // CEFR descriptors
@@ -764,9 +764,18 @@ const CEFR_DESCRIPTORS = {
   B2: "Can understand complex texts on concrete and abstract topics. Can interact with fluency and produce clear, detailed explanations."
 };
 
-// 1. Core certificate rendering (new neon-gold design)
+// CEFR medal mapping
+const CEFR_MEDAL = {
+  A1: "images/medal-a1.svg",
+  A2: "images/medal-a2.svg",
+  B1: "images/medal-b1.svg",
+  B2: "images/medal-b2.svg"
+};
+
+// 1. Core certificate rendering (new neon CEFR medal design)
 function renderCertificateHTML(name, level, date) {
   const descriptor = CEFR_DESCRIPTORS[level] || "";
+  const medal = CEFR_MEDAL[level] || "images/gold-medal.svg"; // fallback
 
   return `
     <div class="ui-certificate">
@@ -794,7 +803,7 @@ function renderCertificateHTML(name, level, date) {
 
         <!-- RIGHT SIDE -->
         <div class="ui-cert-seal">
-          <img src="images/gold-medal.svg" alt="Gold Medal" style="width:90px;height:90px;">
+          <img src="${medal}" alt="${level} Medal" style="width:90px;height:90px;">
         </div>
 
       </div>
@@ -807,6 +816,7 @@ function renderCertificateHTML(name, level, date) {
     </div>
   `;
 }
+
 
 
 // 2. Add certificate to history
