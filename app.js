@@ -785,7 +785,7 @@ function initReview() {
 
 async function initRepeat() {
   const { moduleBank } = await loadModule("repeat");
-  const REPEAT_BANK = moduleBank.default || moduleBank;
+  const REPEAT_BANK = moduleBank;
 
   const container = $("repeatSection");
   if (!container || !REPEAT_BANK) return;
