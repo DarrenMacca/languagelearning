@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Macca's Language Learning Trainer</title>
 
-    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -15,210 +14,200 @@
     <img src="images/dashboard-hero.png" class="dashboard-hero-img">
 
     <!-- TAB BAR -->
-   <div class="ui-tab-bar">
-    <div class="ui-tab" data-tab-target="dashboard">Dashboard</div>
-    <div class="ui-tab" data-tab-target="listenSection">Listen</div>
-    <div class="ui-tab" data-tab-target="flashcardsSection">Flashcards</div>
-    <div class="ui-tab" data-tab-target="quizSection">Quiz</div>
-    <div class="ui-tab" data-tab-target="buildSection">Build</div>
-    <div class="ui-tab" data-tab-target="sentenceSection">Sentence</div>
-    <div class="ui-tab" data-tab-target="conversationSection">Conversation</div>
-    <div class="ui-tab" data-tab-target="grammarSection">Grammar</div>
-    <div class="ui-tab" data-tab-target="miningSection">Mining</div>
-    <div class="ui-tab" data-tab-target="dictionarySection">Dictionary</div>
-    <div class="ui-tab" data-tab-target="reviewSection">Review</div>
-    <div class="ui-tab" data-tab-target="certificatesSection">Certificates</div>
-    <div class="ui-tab" data-tab-target="repeatSection">Repeat Practice</div>
-</div>
-
+    <div class="ui-tab-bar">
+        <div class="ui-tab" data-tab-target="dashboard">Dashboard</div>
+        <div class="ui-tab" data-tab-target="listenSection">Listen</div>
+        <div class="ui-tab" data-tab-target="flashcardsSection">Flashcards</div>
+        <div class="ui-tab" data-tab-target="quizSection">Quiz</div>
+        <div class="ui-tab" data-tab-target="buildSection">Build</div>
+        <div class="ui-tab" data-tab-target="sentenceSection">Sentence</div>
+        <div class="ui-tab" data-tab-target="conversationSection">Conversation</div>
+        <div class="ui-tab" data-tab-target="grammarSection">Grammar</div>
+        <div class="ui-tab" data-tab-target="miningSection">Mining</div>
+        <div class="ui-tab" data-tab-target="dictionarySection">Dictionary</div>
+        <div class="ui-tab" data-tab-target="reviewSection">Review</div>
+        <div class="ui-tab" data-tab-target="certificatesSection">Certificates</div>
+        <div class="ui-tab" data-tab-target="repeatSection">Repeat Practice</div>
+    </div>
 
     <!-- ============================================================
          DASHBOARD SECTION
     ============================================================ -->
-   <div id="dashboard" class="appSection ui-container">
+    <div id="dashboard" class="appSection ui-container">
 
-    <!-- AUDIO SPEED + SKILL LEVEL (side-by-side) -->
-    <div class="u-row">
+        <!-- AUDIO SPEED + SKILL LEVEL -->
+        <div class="u-row">
+            <div class="ui-panel u-col">
+                <h2 class="ui-section-title">Audio Speed</h2>
+                <input type="range" id="audioSpeed" min="0.5" max="1.5" step="0.1" value="1.0">
+                <p>Rate: <span id="audioSpeedValue">1.0</span></p>
+            </div>
 
-        <div class="ui-panel u-col" style="flex:1;">
-            <h2 class="ui-section-title">Audio Speed</h2>
-            <input type="range" id="audioSpeed" min="0.5" max="1.5" step="0.1" value="1.0">
-            <p>Rate: <span id="audioSpeedValue">1.0</span></p>
-        </div>
-
-        <div class="ui-panel u-col" style="flex:1;">
-            <h2 class="ui-section-title">Skill Level</h2>
-            <div class="u-row u-gap-sm">
-                <button class="ui-pill" data-level="A1">A1</button>
-                <button class="ui-pill" data-level="A2">A2</button>
-                <button class="ui-pill" data-level="B1">B1</button>
-                <button class="ui-pill" data-level="B2">B2</button>
+            <div class="ui-panel u-col">
+                <h2 class="ui-section-title">Skill Level</h2>
+                <div class="u-row u-gap-sm">
+                    <button class="ui-pill" data-level="A1">A1</button>
+                    <button class="ui-pill" data-level="A2">A2</button>
+                    <button class="ui-pill" data-level="B1">B1</button>
+                    <button class="ui-pill" data-level="B2">B2</button>
+                </div>
             </div>
         </div>
 
-    </div>
-
-    <!-- CERTIFICATE NAME (reduced width) -->
-    <div class="ui-panel u-col" style="max-width: 480px;">
-        <h2 class="ui-section-title">Your name for certificates</h2>
-        <input id="certificateNameInput" class="ui-input" placeholder="Your name...">
-        <button id="saveCertificateName" class="ui-button">Save Name</button>
-    </div>
-
-    <!-- DICTIONARY + SANDBOX -->
-    <div class="u-row">
-
-        <div class="ui-panel u-col dictionary-search-box" style="flex:1;">
-            <h2 class="ui-section-title">Quick Dictionary Search</h2>
-            <input id="dictionarySearchInput" class="ui-input" placeholder="e.g., Hello, Dog, Apple...">
-            <div id="dictionarySearchOutput"></div>
+        <!-- CERTIFICATE NAME -->
+        <div class="ui-panel u-col" style="max-width:480px;">
+            <h2 class="ui-section-title">Your name for certificates</h2>
+            <input id="certificateNameInput" class="ui-input" placeholder="Your name...">
+            <button id="saveCertificateName" class="ui-button">Save Name</button>
         </div>
 
-        <div class="ui-panel u-col free-practice-box" style="flex:1;">
-            <h2 class="ui-section-title">Free Practice Sandbox</h2>
-            <p>No scoring, no rules. Translate the word below from any level!</p>
-            <p>Translate: <span id="sandboxPrompt">likes (A1)</span></p>
-            <input id="sandboxInput" class="ui-input" placeholder="Type the Spanish translation...">
-            <div class="u-row u-gap-sm">
-                <button id="sandboxCheck" class="ui-button">Check</button>
-                <button id="sandboxSkip" class="ui-button">Skip</button>
-            </div>
-            <div id="sandboxOutput"></div>
-        </div>
-
-    </div>
-
-    <!-- PROGRESS GRID -->
-    <div class="ui-progress-grid">
-
-        <div class="ui-progress-tile">
-            <img src="images/icon-quiz.png" class="progress-img">
-            <p>Quiz Progress <span id="quizProgress">0%</span></p>
-            <div class="ui-progress-bar"><div id="quizProgressFill" class="ui-progress-fill"></div></div>
-        </div>
-
-        <div class="ui-progress-tile">
-            <img src="images/icon-build.png" class="progress-img">
-            <p>Build Progress <span id="buildProgress">0%</span></p>
-            <div class="ui-progress-bar"><div id="buildProgressFill" class="ui-progress-fill"></div></div>
-        </div>
-
-        <div class="ui-progress-tile">
-            <img src="images/icon-sentence.png" class="progress-img">
-            <p>Sentence Progress <span id="sentenceProgress">0%</span></p>
-            <div class="ui-progress-bar"><div id="sentenceProgressFill" class="ui-progress-fill"></div></div>
-        </div>
-
-        <div class="ui-progress-tile">
-            <img src="images/icon-xp.png" class="progress-img">
-            <p>XP Progress <span id="xpProgress">0 XP</span></p>
-        </div>
-
-        <div class="ui-progress-tile">
-            <img src="images/icon-streak.png" class="progress-img">
-            <p>Streak <span id="streakCount">0 days</span></p>
-        </div>
-
-        <div class="ui-progress-tile">
-            <img src="images/icon-score.png" class="progress-img">
-            <p>Score Rating <span id="scoreRating">0 pts</span></p>
-        </div>
-
-        <div class="ui-progress-tile">
-            <img src="images/icon-review.png" class="progress-img">
-            <p>Due for Review <span id="dueReview">0 words</span></p>
-        </div>
-
-        <div class="ui-progress-tile">
-            <img src="images/icon-reset.png" class="progress-img">
-            <p>Reset All Levels</p>
-            <button id="resetAll" class="ui-button">Reset Everything</button>
-        </div>
-
-    </div>
-
-    <!-- BADGES -->
-    <div class="ui-panel">
-        <h2 class="ui-section-title">Your Badges</h2>
-        <div id="badge-list">No badges yet. Keep training!</div>
-    </div>
-
-</div>
-
-
-  <!-- ============================================================
-     MODE SECTIONS (Listen, Flashcards, Quiz, Build, Grammar)
-============================================================ -->
-
-<div id="listenSection" class="appSection ui-container"></div>
-<div id="flashcardsSection" class="appSection ui-container"></div>
-<div id="quizSection" class="appSection ui-container"></div>
-<div id="buildSection" class="appSection ui-container"></div>
-<div id="grammarSection" class="appSection ui-container"></div>
-
-<!-- ============================================================
-     CEFR TRAINER SECTIONS
-============================================================ -->
-
-<div id="sentenceSection" class="appSection ui-container"></div>
-<div id="conversationSection" class="appSection ui-container"></div>
-<div id="miningSection" class="appSection ui-container"></div>
-<div id="dictionarySection" class="appSection ui-container"></div>
-<div id="reviewSection" class="appSection ui-container"></div>
-<div id="repeatSection" class="appSection ui-container"></div>
-
-<!-- Certificates section (missing in your snippet) -->
-<div id="certificatesSection" class="appSection ui-container"></div>
-
-   <!-- ============================================================
-     CERTIFICATE GENERATOR
-============================================================ -->
-
-<div id="certificateGeneratorPage" class="appSection ui-container">
-
-    <div class="ui-certificate">
-
-        <div class="ui-cert-header">
-            <h1 class="ui-cert-title">Certificate of Achievement</h1>
-            <p class="ui-cert-subtitle">This certifies that</p>
-            <h2 id="certStudentName" class="ui-section-title">[Student Name]</h2>
-        </div>
-
-        <div class="ui-cert-layout">
-
-            <!-- LEFT SIDE -->
-            <div class="ui-cert-body">
-                <p>has successfully completed the CEFR level:</p>
-
-                <div id="certLevelBadge" class="ui-cert-level">A1</div>
-
-                <h3 class="ui-section-title" style="margin-top:20px;">Level Descriptor</h3>
-                <p id="certDescriptor">
-                    A1 Descriptor Placeholder
-                </p>
-
-                <h3 class="ui-section-title" style="margin-top:20px;">Completion Date</h3>
-                <p id="certDate">[Date]</p>
+        <!-- DICTIONARY + SANDBOX -->
+        <div class="u-row">
+            <div class="ui-panel u-col">
+                <h2 class="ui-section-title">Quick Dictionary Search</h2>
+                <input id="dictionarySearchInput" class="ui-input" placeholder="e.g., Hello, Dog, Apple...">
+                <div id="dictionarySearchOutput"></div>
             </div>
 
-            <!-- RIGHT SIDE -->
-            <div class="ui-cert-seal">
-                <img src="images/gold-medal.png" alt="Gold Medal" style="width:90px;height:90px;">
+            <div class="ui-panel u-col">
+                <h2 class="ui-section-title">Free Practice Sandbox</h2>
+                <p>No scoring, no rules. Translate the word below!</p>
+                <p>Translate: <span id="sandboxPrompt">likes (A1)</span></p>
+                <input id="sandboxInput" class="ui-input" placeholder="Type the Spanish translation...">
+                <div class="u-row u-gap-sm">
+                    <button id="sandboxCheck" class="ui-button">Check</button>
+                    <button id="sandboxSkip" class="ui-button">Skip</button>
+                </div>
+                <div id="sandboxOutput"></div>
+            </div>
+        </div>
+
+        <!-- PROGRESS GRID -->
+        <div class="ui-progress-grid">
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-quiz.png" class="progress-img">
+                <p>Quiz Progress <span id="quizProgress">0%</span></p>
+                <div class="ui-progress-bar"><div id="quizProgressFill" class="ui-progress-fill"></div></div>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-build.png" class="progress-img">
+                <p>Build Progress <span id="buildProgress">0%</span></p>
+                <div class="ui-progress-bar"><div id="buildProgressFill" class="ui-progress-fill"></div></div>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-sentence.png" class="progress-img">
+                <p>Sentence Progress <span id="sentenceProgress">0%</span></p>
+                <div class="ui-progress-bar"><div id="sentenceProgressFill" class="ui-progress-fill"></div></div>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-xp.png" class="progress-img">
+                <p>XP Progress <span id="xpProgress">0 XP</span></p>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-streak.png" class="progress-img">
+                <p>Streak <span id="streakCount">0 days</span></p>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-score.png" class="progress-img">
+                <p>Score Rating <span id="scoreRating">0 pts</span></p>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-review.png" class="progress-img">
+                <p>Due for Review <span id="dueReview">0 words</span></p>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-reset.png" class="progress-img">
+                <p>Reset All Levels</p>
+                <button id="resetAll" class="ui-button">Reset Everything</button>
             </div>
 
         </div>
 
-        <div class="ui-cert-signature">
-            <p>Issued by: Language Learning Trainer</p>
-            <p>Verification ID: <span id="certID">LLT-XXXXXX</span></p>
+        <!-- BADGES -->
+        <div class="ui-panel">
+            <h2 class="ui-section-title">Your Badges</h2>
+            <div id="badge-list">No badges yet. Keep training!</div>
         </div>
 
     </div>
 
-</div>
+    <!-- ============================================================
+         MODE SECTIONS
+    ============================================================ -->
 
+    <div id="listenSection" class="appSection ui-container"></div>
+    <div id="flashcardsSection" class="appSection ui-container"></div>
+    <div id="quizSection" class="appSection ui-container"></div>
+    <div id="buildSection" class="appSection ui-container"></div>
+    <div id="grammarSection" class="appSection ui-container"></div>
+
+    <!-- ============================================================
+         CEFR TRAINER SECTIONS
+    ============================================================ -->
+
+    <div id="sentenceSection" class="appSection ui-container"></div>
+    <div id="conversationSection" class="appSection ui-container"></div>
+    <div id="miningSection" class="appSection ui-container"></div>
+    <div id="dictionarySection" class="appSection ui-container"></div>
+    <div id="reviewSection" class="appSection ui-container"></div>
+    <div id="repeatSection" class="appSection ui-container"></div>
+
+    <!-- ============================================================
+         CERTIFICATES SECTION (correct placement)
+    ============================================================ -->
+
+    <div id="certificatesSection" class="appSection ui-container">
+
+        <div id="certificateGeneratorPage">
+
+            <div class="ui-certificate">
+
+                <div class="ui-cert-header">
+                    <h1 class="ui-cert-title">Certificate of Achievement</h1>
+                    <p class="ui-cert-subtitle">This certifies that</p>
+                    <h2 id="certStudentName" class="ui-section-title">[Student Name]</h2>
+                </div>
+
+                <div class="ui-cert-layout">
+
+                    <div class="ui-cert-body">
+                        <p>has successfully completed the CEFR level:</p>
+                        <div id="certLevelBadge" class="ui-cert-level">A1</div>
+
+                        <h3 class="ui-section-title" style="margin-top:20px;">Level Descriptor</h3>
+                        <p id="certDescriptor">A1 Descriptor Placeholder</p>
+
+                        <h3 class="ui-section-title" style="margin-top:20px;">Completion Date</h3>
+                        <p id="certDate">[Date]</p>
+                    </div>
+
+                    <div class="ui-cert-seal">
+                        <img src="images/gold-medal.png" alt="Gold Medal" style="width:90px;height:90px;">
+                    </div>
+
+                </div>
+
+                <div class="ui-cert-signature">
+                    <p>Issued by: Language Learning Trainer</p>
+                    <p>Verification ID: <span id="certID">LLT-XXXXXX</span></p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
     <!-- SCRIPTS -->
     <script type="module" src="app.js"></script>
+
 </body>
 </html>
