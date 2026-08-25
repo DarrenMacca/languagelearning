@@ -753,36 +753,61 @@ function renderLevelUpNotifications() {
 }
 
 // ============================================================
-//  CERTIFICATES — FULL CONSOLIDATED (PART 4)
+//  CERTIFICATES — FULL CONSOLIDATED (UPDATED)
 // ============================================================
 
-// 1. Core certificate rendering (single design)
+// CEFR descriptors
+const CEFR_DESCRIPTORS = {
+  A1: "Can understand and use basic everyday expressions. Can introduce themselves, ask simple questions, and interact when the other person speaks slowly and clearly.",
+  A2: "Can understand frequently used expressions related to daily routines. Can describe simple tasks, personal background, and basic needs.",
+  B1: "Can understand the main points of clear standard speech on familiar matters. Can handle most travel situations and express opinions.",
+  B2: "Can understand complex texts on concrete and abstract topics. Can interact with fluency and produce clear, detailed explanations."
+};
+
+// 1. Core certificate rendering (new neon-gold design)
 function renderCertificateHTML(name, level, date) {
+  const descriptor = CEFR_DESCRIPTORS[level] || "";
+
   return `
     <div class="ui-certificate">
+
       <div class="ui-cert-header">
         <div class="ui-cert-title">Certificate of Achievement</div>
-        <div class="ui-cert-subtitle">CEFR Level ${level}</div>
+        <div class="ui-cert-subtitle">This certifies that</div>
+        <h2 class="ui-section-title">${name}</h2>
       </div>
 
       <div class="ui-cert-layout">
+
+        <!-- LEFT SIDE -->
         <div class="ui-cert-body">
-          This certifies that <strong>${name}</strong> has successfully
-          completed all requirements for CEFR Level ${level}.
-          <br><br>
-          Awarded on: ${date}
+          <p>has successfully completed the CEFR level:</p>
+
+          <div class="ui-cert-level">${level}</div>
+
+          <h3 class="ui-section-title" style="margin-top:20px;">Level Descriptor</h3>
+          <p>${descriptor}</p>
+
+          <h3 class="ui-section-title" style="margin-top:20px;">Completion Date</h3>
+          <p>${date}</p>
         </div>
 
-        <div class="ui-cert-seal">CEFR</div>
+        <!-- RIGHT SIDE -->
+        <div class="ui-cert-seal">
+          <img src="images/gold-medal.svg" alt="Gold Medal" style="width:90px;height:90px;">
+        </div>
+
       </div>
 
       <div class="ui-cert-signature">
-        Instructor Signature<br>
-        ______________________
+        <p>Issued by: Language Learning Trainer</p>
+        <p>Verification ID: LLT-${Math.floor(Math.random() * 999999)}</p>
       </div>
+
     </div>
   `;
 }
+
 
 // 2. Add certificate to history
 function addCertificateToHistory(name, level) {
