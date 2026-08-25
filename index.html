@@ -2,202 +2,175 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Language Learning Trainer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Learning Trainer</title>
+
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- HEADER -->
-<div class="glass-header">
-    <h1>Language Learning Trainer</h1>
-    <img src="images/dashboard-hero.png" class="dashboard-hero-img">
-</div>
+    <!-- HERO IMAGE -->
+    <img src="images/dashboard-hero.png" class="dashboard-hero-img" alt="Dashboard Hero">
 
-<!-- NAVIGATION (UPDATED FOR NEW JS) -->
-<nav class="glass-panel nav-bar">
-    <button class="ui-tab is-active" data-tab="dashboard">
-        <img src="images/dashboard-hero.png" class="tab-icon"> Dashboard
-    </button>
+    <!-- TAB BAR -->
+    <div class="ui-tab-bar">
+        <div class="ui-tab" data-tab="dashboard">Dashboard</div>
+        <div class="ui-tab" data-tab="listenSection">Listen</div>
+        <div class="ui-tab" data-tab="flashSection">Flashcards</div>
+        <div class="ui-tab" data-tab="quizSection">Quiz</div>
+        <div class="ui-tab" data-tab="buildSection">Build</div>
+        <div class="ui-tab" data-tab="sentenceSection">Sentence</div>
+        <div class="ui-tab" data-tab="conversationSection">Conversation</div>
+        <div class="ui-tab" data-tab="grammarSection">Grammar</div>
+        <div class="ui-tab" data-tab="miningSection">Mining</div>
+        <div class="ui-tab" data-tab="dictionarySection">Dictionary</div>
+        <div class="ui-tab" data-tab="reviewSection">Review</div>
+        <div class="ui-tab" data-tab="certificateGeneratorPage">Certificates</div>
+        <div class="ui-tab" data-tab="repeatPracticeSection">Repeat Practice</div>
+    </div>
 
-    <button class="ui-tab" data-tab="sentenceSection">
-        <img src="images/icon-sentence.png" class="tab-icon"> Sentences
-    </button>
+    <!-- ============================================================
+         DASHBOARD SECTION
+    ============================================================ -->
+    <div id="dashboard" class="appSection ui-container">
 
-    <button class="ui-tab" data-tab="conversationSection">
-        <img src="images/badge-conversation.png" class="tab-icon"> Conversation
-    </button>
-
-    <button class="ui-tab" data-tab="miningSection">
-        <img src="images/mining.png" class="tab-icon"> Mining
-    </button>
-
-    <button class="ui-tab" data-tab="dictionarySection">
-        <img src="images/grammer.png" class="tab-icon"> Dictionary
-    </button>
-
-    <button class="ui-tab" data-tab="reviewSection">
-        <img src="images/icon-review.png" class="tab-icon"> Review
-    </button>
-
-    <button class="ui-tab" data-tab="certificateGeneratorPage">
-        <img src="images/icon-certificate.png" class="tab-icon"> Certificates
-    </button>
-
-    <button class="ui-tab" data-tab="repeatPracticeSection">
-        <img src="images/repeat.png" class="tab-icon"> Repeat Practice
-    </button>
-</nav>
-
-<!-- DASHBOARD -->
-<div id="dashboard" class="appSection">
-
-    <div class="dashboard-row">
-        <div class="dash-left glass-panel">
-            <label class="section-title">Audio Speed</label>
-            <input type="range" id="speechRateSlider" min="0.6" max="1.4" step="0.1" value="1">
-            <div id="speechRateLabel">Rate: 1.0</div>
+        <!-- AUDIO SPEED -->
+        <div class="ui-panel">
+            <h2 class="ui-section-title">Audio Speed</h2>
+            <input type="range" id="audioSpeed" min="0.5" max="1.5" step="0.1" value="1.0">
+            <p>Rate: <span id="audioSpeedValue">1.0</span></p>
         </div>
 
-        <div class="dash-right glass-panel">
-            <label class="section-title">Skill Level</label>
-            <select id="levelSelect" class="input-field"></select>
-        </div>
-    </div>
-
-    <div class="student-name-box glass-panel">
-        <label class="section-title">Your name for certificates</label>
-        <input id="certGenNameInput" class="input-field" type="text" placeholder="Enter your name">
-        <button id="certGenGenerateButton" class="pill">Save Name</button>
-        <div id="name-status"></div>
-    </div>
-
-    <!-- Dictionary Search -->
-    <div class="student-name-box glass-panel dictionary-search-box">
-        <label class="section-title">🔍 Quick Dictionary Search</label>
-        <input id="dictionarySearchInput" class="input-field" type="text" placeholder="Search English word...">
-        <div id="dictionarySearchOutput"></div>
-    </div>
-
-    <!-- Free Practice Sandbox -->
-    <div class="student-name-box glass-panel free-practice-box">
-        <label class="section-title">🎯 Free Practice Sandbox</label>
-        <input id="sandboxInput" class="input-field" type="text" placeholder="Type text...">
-        <div id="sandboxOutput"></div>
-        <button id="sandboxSpeakButton" class="pill">Speak</button>
-    </div>
-
-    <!-- Progress Tiles -->
-    <div class="progress-section">
-        <div class="progress-tile glass-panel">
-            <label class="section-title">Score</label>
-            <div id="scoreDisplay">Score: 0</div>
+        <!-- SKILL LEVEL -->
+        <div class="ui-panel">
+            <h2 class="ui-section-title">Skill Level</h2>
+            <div class="u-row">
+                <button class="ui-pill" data-level="A1">A1</button>
+                <button class="ui-pill" data-level="A2">A2</button>
+                <button class="ui-pill" data-level="B1">B1</button>
+                <button class="ui-pill" data-level="B2">B2</button>
+            </div>
         </div>
 
-        <div class="progress-tile glass-panel">
-            <label class="section-title">Progress</label>
-            <div id="progressDisplay">Progress: 0%</div>
+        <!-- CERTIFICATE NAME -->
+        <div class="ui-panel">
+            <h2 class="ui-section-title">Your name for certificates</h2>
+            <input id="certificateNameInput" class="ui-input" placeholder="Your name...">
+            <button id="saveCertificateName" class="ui-button">Save Name</button>
         </div>
 
-        <div class="progress-tile glass-panel">
-            <label class="section-title">Level Progress</label>
-            <div id="levelProgressDisplay"></div>
+        <!-- DICTIONARY + SANDBOX -->
+        <div class="ui-row">
+
+            <div class="ui-panel ui-col dictionary-search-box">
+                <h2 class="ui-section-title">Quick Dictionary Search</h2>
+                <input id="dictionarySearchInput" class="ui-input" placeholder="e.g., Hello, Dog, Apple...">
+                <div id="dictionarySearchOutput"></div>
+            </div>
+
+            <div class="ui-panel ui-col free-practice-box">
+                <h2 class="ui-section-title">Free Practice Sandbox</h2>
+                <p>No scoring, no rules. Translate the word below from any level!</p>
+                <p>Translate: <span id="sandboxPrompt">likes (A1)</span></p>
+                <input id="sandboxInput" class="ui-input" placeholder="Type the Spanish translation...">
+                <div class="u-row">
+                    <button id="sandboxCheck" class="ui-button">Check</button>
+                    <button id="sandboxSkip" class="ui-button">Skip</button>
+                </div>
+                <div id="sandboxOutput"></div>
+            </div>
+
         </div>
 
-        <div class="progress-tile glass-panel">
-            <label class="section-title">Level Notifications</label>
-            <div id="levelUpNotifications"></div>
+        <!-- PROGRESS GRID -->
+        <div class="ui-progress-grid">
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-quiz.png" class="progress-img">
+                <p>Quiz Progress <span id="quizProgress">0%</span></p>
+                <div class="ui-progress-bar"><div id="quizProgressFill" class="ui-progress-fill"></div></div>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-build.png" class="progress-img">
+                <p>Build Progress <span id="buildProgress">0%</span></p>
+                <div class="ui-progress-bar"><div id="buildProgressFill" class="ui-progress-fill"></div></div>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-sentence.png" class="progress-img">
+                <p>Sentence Progress <span id="sentenceProgress">0%</span></p>
+                <div class="ui-progress-bar"><div id="sentenceProgressFill" class="ui-progress-fill"></div></div>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-xp.png" class="progress-img">
+                <p>XP Progress <span id="xpProgress">0 XP</span></p>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-streak.png" class="progress-img">
+                <p>Streak <span id="streakCount">0 days</span></p>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-score.png" class="progress-img">
+                <p>Score Rating <span id="scoreRating">0 pts</span></p>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-review.png" class="progress-img">
+                <p>Due for Review <span id="dueReview">0 words</span></p>
+            </div>
+
+            <div class="ui-progress-tile">
+                <img src="images/icon-reset.png" class="progress-img">
+                <p>Reset All Levels</p>
+                <button id="resetAll" class="ui-button">Reset Everything</button>
+            </div>
+
         </div>
+
+        <!-- BADGES -->
+        <div class="ui-panel">
+            <h2 class="ui-section-title">Your Badges</h2>
+            <div id="badge-list">No badges yet. Keep training!</div>
+        </div>
+
     </div>
 
-    <!-- Badges -->
-    <div class="badge-section glass-panel">
-        <h3>Your Badges</h3>
-        <ul id="badge-list"></ul>
-    </div>
-</div>
+    <!-- ============================================================
+         MODE SECTIONS (Listen, Flashcards, Quiz, Build, Grammar)
+    ============================================================ -->
 
-<!-- SENTENCE MODE -->
-<div id="sentenceSection" class="appSection">
-    <div class="glass-panel">
-        <h2>Sentence Trainer</h2>
-        <div id="promptText"></div>
-        <div id="optionsContainer"></div>
-        <div id="feedbackText"></div>
-        <button id="nextButton" class="pill">Next</button>
-        <button id="mineSentenceButton" class="pill">Mine Sentence</button>
-    </div>
-</div>
+    <div id="listenSection" class="appSection ui-container"></div>
+    <div id="flashSection" class="appSection ui-container"></div>
+    <div id="quizSection" class="appSection ui-container"></div>
+    <div id="buildSection" class="appSection ui-container"></div>
+    <div id="grammarSection" class="appSection ui-container"></div>
 
-<!-- CONVERSATION MODE -->
-<div id="conversationSection" class="appSection">
-    <div class="glass-panel">
-        <h2>Conversation Trainer</h2>
-        <div id="conversationPrompt"></div>
-        <div id="conversationReplies"></div>
-        <div id="conversationFeedback"></div>
-        <button id="mineConversationButton" class="pill">Mine Reply</button>
-    </div>
-</div>
+    <!-- ============================================================
+         CEFR TRAINER SECTIONS
+    ============================================================ -->
 
-<!-- MINING -->
-<div id="miningSection" class="appSection">
-    <div class="glass-panel">
-        <h2>Mined Items</h2>
-        <div id="miningList"></div>
-    </div>
-</div>
+    <div id="sentenceSection" class="appSection ui-container"></div>
+    <div id="conversationSection" class="appSection ui-container"></div>
+    <div id="miningSection" class="appSection ui-container"></div>
+    <div id="dictionarySection" class="appSection ui-container"></div>
+    <div id="reviewSection" class="appSection ui-container"></div>
+    <div id="repeatPracticeSection" class="appSection ui-container"></div>
 
-<!-- DICTIONARY -->
-<div id="dictionarySection" class="appSection">
-    <div class="glass-panel">
-        <h2>Saved Dictionary Entries</h2>
-        <div id="dictionaryList"></div>
-    </div>
-</div>
+    <!-- ============================================================
+         CERTIFICATE GENERATOR
+    ============================================================ -->
 
-<!-- REVIEW -->
-<div id="reviewSection" class="appSection">
-    <div class="glass-panel">
-        <h2>Review Mistakes</h2>
-        <div id="reviewPrompt"></div>
-        <input id="reviewInput" class="input-field" type="text">
-        <div id="reviewFeedback"></div>
-        <button id="reviewRetryButton" class="pill">Check</button>
-        <div id="review-words-list"></div>
-    </div>
-</div>
+    <div id="certificateGeneratorPage" class="appSection ui-container"></div>
 
-<!-- CERTIFICATES -->
-<div id="certificateGeneratorPage" class="appSection">
-    <div class="glass-panel">
-        <h2>Certificate Generator</h2>
-        <select id="certGenLevelSelect" class="input-field">
-            <option value="A1">A1</option>
-            <option value="A2">A2</option>
-            <option value="B1">B1</option>
-            <option value="B2">B2</option>
-        </select>
-        <button id="certGenDownloadButton" class="pill">Download</button>
-        <div id="certGenPreview"></div>
-        <h3>Certificate History</h3>
-        <div id="certGalleryList"></div>
-    </div>
-</div>
-
-<!-- REPEAT PRACTICE -->
-<div id="repeatPracticeSection" class="appSection">
-    <div class="glass-panel">
-        <h2>Repeat Practice</h2>
-        <div id="repeatPrompt"></div>
-        <div id="repeatOptions"></div>
-        <div id="repeatFeedback"></div>
-    </div>
-</div>
-
-<script src="LanguageLoader.js"></script>
-<script src="app.js"></script>
+    <!-- SCRIPTS -->
+    <script src="LanguageLoader.js"></script>
+    <script src="app.js"></script>
 
 </body>
 </html>
