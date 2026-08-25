@@ -1,1285 +1,1420 @@
 // ============================================================
-//  LANGUAGE LEARNING APP — FULL CONSOLIDATED JS (PART 1)
-//  Modernized for CEFR modules + new dashboard + .ui-tab system
+//  APP CORE — MULTI-LANGUAGE CEFR PLATFORM
 // ============================================================
 
-// ----------------------------
-// 1. Language registry
-// ----------------------------
-const LANGUAGES = {
-  es: { code: "es", name: "Spanish" },
-  fr: { code: "fr", name: "French" },
-  nl: { code: "nl", name: "Dutch" }
+import { setLanguage, setLevel, loadModule } from "./LanguageLoader.js";
+
+// ---------- GLOBAL STATE ----------
+
+const appState = {
+  activeTab: "dashboard",
+  activeLanguage: "es",
+  activeLevel: "A1",
+  speechRate: 1.0,
+  levelStats: {
+    A1: { xp: 0, quizzes: 0, sentences: 0, listens: 0 },
+    A2: { xp: 0, quizzes: 0, sentences: 0, listens: 0 },
+    B1: { xp: 0, quizzes: 0, sentences: 0, listens: 0 },
+    B2: { xp: 0, quizzes: 0, sentences: 0, listens: 0 }
+  },
+  streakDays: 0,
+  scoreRating: 0,
+  dueReviewCount: 0,
+  mistakes: [],        // for Review tab
+  miningWords: [],     // for Mining tab
+  certificateName: ""
 };
 
-// ----------------------------
-// 2. Global app state
-// ----------------------------
-let currentLanguage = "es";
-let currentLevel = "A1";
-let currentMode = "sentences";
+// ---------- SIMPLE HELPERS ----------
 
-// Sentence mode
-let currentItems = [];
-let currentIndex = 0;
-let currentItem = null;
-
-// Conversation mode
-let conversationItems = [];
-let conversationIndex = 0;
-let conversationItem = null;
-
-// Mining
-let miningList = [];
-
-// Dictionary
-let dictionaryEntries = [];
-
-// Review
-let mistakes = [];
-let reviewIndex = 0;
-let reviewItem = null;
-
-// Badges
-let badges = [];
-let totalCorrectAnswers = 0;
-
-// Level-up
-const CEFR_LEVELS = ["A1", "A2", "B1", "B2"];
-let levelProgress = 0;
-const LEVEL_UP_THRESHOLD = 100;
-let levelUpNotifications = [];
-
-// Scoring
-let score = 0;
-
-// Certificates
-let certificateHistory = [];
-
-// ----------------------------
-// 3. DOM helper
-// ----------------------------
 function $(id) {
   return document.getElementById(id);
 }
 
-// ----------------------------
-// 4. Speech synthesis
-// ----------------------------
-let availableVoices = [];
+function switchTab(tabId) {
+  appState.activeTab = tabId;
 
-window.speechSynthesis.onvoiceschanged = () => {
-  availableVoices = window.speechSynthesis.getVoices();
-};
+  document.querySelectorAll(".appSection").forEach(sec => {
+    sec.style.display = sec.id === tabId ? "block" : "none";
+  });
 
-function getBestVoiceForLanguage(langCode) {
-  if (!availableVoices.length) {
-    availableVoices = window.speechSynthesis.getVoices();
-  }
-
-  // Filter voices by language (es, fr, nl)
-  const matches = availableVoices.filter(v => v.lang.startsWith(langCode));
-
-  // Prefer Google or Microsoft voices (they sound best)
-  const preferred = matches.find(v =>
-    v.name.includes("Google") || v.name.includes("Microsoft")
-  );
-
-  return preferred || matches[0] || null;
+  // route to module init
+  if (tabId === "listenSection") initListen();
+  if (tabId === "flashcardsSection") initFlashcards();
+  if (tabId === "quizSection") initQuiz();
+  if (tabId === "buildSection") initBuild();
+  if (tabId === "sentenceSection") initSentence();
+  if (tabId === "conversationSection") initConversation();
+  if (tabId === "grammarSection") initGrammar();
+  if (tabId === "miningSection") initMining();
+  if (tabId === "dictionarySection") initDictionary();
+  if (tabId === "reviewSection") initReview();
+  if (tabId === "repeatSection") initRepeat();
+  if (tabId === "certificatesSection") initCertificates();
 }
 
-function speak(text) {
-  if (!window.speechSynthesis) return;
+// ---------- LANGUAGE + LEVEL ----------
 
-  const utter = new SpeechSynthesisUtterance(text);
-
-  // Map CEFR language to voice language code
-  const langCode =
-    currentLanguage === "es" ? "es" :
-    currentLanguage === "fr" ? "fr" :
-    currentLanguage === "nl" ? "nl" : "en";
-
-  // Pick the best available voice
-  const voice = getBestVoiceForLanguage(langCode);
-
-  if (voice) {
-    utter.voice = voice;
-    utter.lang = voice.lang;
-  } else {
-    // Fallback if no voice found
-    utter.lang = `${langCode}-${langCode.toUpperCase()}`;
-  }
-
-  // Apply speech rate slider
-  utter.rate = window.speechRate || 1.0;
-
-  window.speechSynthesis.speak(utter);
-}
-
-// ----------------------------
-// 7. Sanity check
-// ----------------------------
-function sanityCheck() {
-  console.log("=== APP SANITY CHECK ===");
-  console.log("Language:", currentLanguage);
-  console.log("Level:", currentLevel);
-  console.log("Mode:", currentMode);
-  console.log("Items loaded:", currentItems.length);
-  console.log("=========================");
-}
-
-// ============================================================
-//  SENTENCE MODE — FULL CONSOLIDATED (PART 2)
-// ============================================================
-
-// 1. Load CEFR items for current language + level
-function loadCurrentSet() {
-  const pack = window.LANG.modules.CEFR_SENTENCE_CHOICES?.default;
-  if (!pack) {
-    currentItems = [];
-    currentIndex = 0;
-    currentItem = null;
-    renderCurrentItem();
-    return;
-  }
-
-  const levelArray = pack[currentLevel] || [];
-  currentItems = levelArray.slice();
-  currentIndex = 0;
-  currentItem = currentItems[0] || null;
-
-  renderCurrentItem();
-}
-
-// 2. Render the current item
-function renderCurrentItem() {
-  const promptEl = $("promptText");
-  const optionsEl = $("optionsContainer");
-  const feedbackEl = $("feedbackText");
-
-  if (!promptEl || !optionsEl || !feedbackEl) return;
-
-  optionsEl.innerHTML = "";
-  feedbackEl.textContent = "";
-
-  if (!currentItem) {
-    promptEl.textContent = "No items available for this language and level.";
-    return;
-  }
-
-  promptEl.textContent = currentItem.english;
-
-  const opts = currentItem.foreignOptions || [];
-
-  opts.forEach(optionText => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "ui-pill";
-    btn.textContent = optionText;
-
+function initLanguageControls() {
+  // language selector (you can add real buttons/select later)
+  // example: data-lang="es" / "fr" / "nl"
+  document.querySelectorAll("[data-lang]").forEach(btn => {
     btn.addEventListener("click", () => {
-      handleSentenceAnswer(optionText);
+      const lang = btn.dataset.lang;
+      appState.activeLanguage = lang;
+      setLanguage(lang);
+      // re-init current tab with new language
+      switchTab(appState.activeTab);
     });
-
-    optionsEl.appendChild(btn);
   });
-}
 
-// 3. Unified sentence answer handler
-function handleSentenceAnswer(selectedText) {
-  const feedbackEl = $("feedbackText");
-  if (!feedbackEl || !currentItem) return;
-
-  const correct = currentItem.foreignCorrect;
-  const isCorrect = selectedText === correct;
-
-  if (isCorrect) {
-    feedbackEl.textContent = "Correct!";
-    feedbackEl.style.color = "green";
-    speak(correct);
-    addLevelProgress(10);
-  } else {
-    feedbackEl.textContent = `Incorrect — correct answer: ${correct}`;
-    feedbackEl.style.color = "red";
-    addMistake(currentItem);
-    speak(correct);
-    addLevelProgress(2);
-  }
-
-  updateScore(isCorrect);
-  updateProgress();
-
-  badgeRule_firstCorrect(isCorrect);
-  badgeRule_tenCorrect(isCorrect);
-
-  goToNextSentenceItem();
-}
-
-// 4. Move to next item
-function goToNextSentenceItem() {
-  if (!currentItems || currentItems.length === 0) return;
-
-  currentIndex++;
-  if (currentIndex >= currentItems.length) {
-    currentIndex = 0;
-  }
-
-  currentItem = currentItems[currentIndex];
-  renderCurrentItem();
-}
-
-// ============================================================
-//  CONVERSATION MODE — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-// 1. Load conversation set
-function loadConversationSet() {
-  const pack = window.LANG.modules.CEFR_CONVERSATION?.default;
-  if (!pack) {
-    conversationItems = [];
-    conversationIndex = 0;
-    conversationItem = null;
-    renderConversationItem();
-    return;
-  }
-
-  const levelArray = pack[currentLevel] || [];
-  conversationItems = levelArray.slice();
-  conversationIndex = 0;
-  conversationItem = conversationItems[0] || null;
-
-  renderConversationItem();
-}
-
-// 2. Render conversation item
-function renderConversationItem() {
-  const promptEl = $("conversationPrompt");
-  const replyEl = $("conversationReplies");
-  const feedbackEl = $("conversationFeedback");
-
-  if (!promptEl || !replyEl || !feedbackEl) return;
-
-  replyEl.innerHTML = "";
-  feedbackEl.textContent = "";
-
-  if (!conversationItem) {
-    promptEl.textContent = "No conversation items available.";
-    return;
-  }
-
-  promptEl.textContent = conversationItem.prompt;
-
-  conversationItem.replies.forEach(reply => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "ui-pill";
-    btn.textContent = reply;
-
+  // CEFR level buttons (A1–B2)
+  document.querySelectorAll("[data-level]").forEach(btn => {
     btn.addEventListener("click", () => {
-      handleConversationReply(reply);
+      const level = btn.dataset.level;
+      appState.activeLevel = level;
+      setLevel(level);
+      // re-init current tab with new level
+      switchTab(appState.activeTab);
     });
-
-    replyEl.appendChild(btn);
   });
 }
 
-// 3. Handle conversation reply
-function handleConversationReply(reply) {
-  const feedbackEl = $("conversationFeedback");
-  if (!feedbackEl || !conversationItem) return;
+// ---------- AUDIO SPEED ----------
 
-  feedbackEl.textContent = `You said: ${reply}`;
-  feedbackEl.style.color = "blue";
+function initAudioSpeed() {
+  const slider = $("audioSpeed");
+  const label = $("audioSpeedValue");
+  if (!slider || !label) return;
 
-  speak(reply);
-
-  mineConversation(conversationItem.prompt, reply);
-
-  conversationIndex++;
-  if (conversationIndex >= conversationItems.length) {
-    conversationIndex = 0;
-  }
-
-  conversationItem = conversationItems[conversationIndex];
-  setTimeout(() => renderConversationItem(), 500);
-}
-
-// 4. Switch to conversation mode
-function switchToConversationMode() {
-  currentMode = "conversation";
-  loadConversationSet();
-}
-
-
-// ============================================================
-//  MINING — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-// 1. Render mining list
-function renderMiningList() {
-  const listEl = $("miningList");
-  if (!listEl) return;
-
-  listEl.innerHTML = "";
-
-  if (miningList.length === 0) {
-    listEl.innerHTML = `<div class="ui-empty">No mined items yet.</div>`;
-    return;
-  }
-
-  miningList.forEach((item, index) => {
-    const card = document.createElement("div");
-    card.className = "ui-card";
-
-    card.innerHTML = `
-      <div class="mine-word">${item.english}</div>
-      <div class="mine-translation">${item.foreign}</div>
-      <div class="mine-source ui-badge">${item.source}</div>
-    `;
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "ui-pill danger";
-    delBtn.textContent = "Delete";
-
-    delBtn.addEventListener("click", () => {
-      miningList.splice(index, 1);
-      renderMiningList();
-    });
-
-    card.appendChild(delBtn);
-    listEl.appendChild(card);
+  slider.addEventListener("input", () => {
+    appState.speechRate = parseFloat(slider.value);
+    label.textContent = slider.value;
   });
 }
 
-// 2. Switch to mining tab
-function switchToMiningTab() {
-  currentMode = "mining";
-  renderMiningList();
+// ---------- DASHBOARD ----------
+
+function initDashboard() {
+  switchTab("dashboard");
+  initAudioSpeed();
+  initLanguageControls();
+  initCertificateName();
+  updateProgressMeters();
 }
 
+function initCertificateName() {
+  const input = $("certificateNameInput");
+  const btn = $("saveCertificateName");
+  if (!input || !btn) return;
 
-// 3. Mining buttons
-function addMiningButtonToSentenceUI() {
-  const mineBtn = $("mineSentenceButton");
-  if (!mineBtn) return;
-
-  mineBtn.addEventListener("click", () => {
-    if (currentItem) {
-      mineSentence(currentItem);
-    }
+  btn.addEventListener("click", () => {
+    appState.certificateName = input.value.trim();
   });
-}
-
-function mineSentence(item) {
-  miningList.push({
-    english: item.english,
-    foreign: item.foreignCorrect,
-    source: "sentence"
-  });
-
-  badgeRule_firstMine();
-  renderMiningList();
-}
-
-function addMiningButtonToConversationUI() {
-  const mineBtn = $("mineConversationButton");
-  if (!mineBtn) return;
-
-  mineBtn.addEventListener("click", () => {
-    if (conversationItem) {
-      mineConversation(conversationItem.prompt, "Your reply here");
-    }
-  });
-}
-
-function mineConversation(prompt, reply) {
-  miningList.push({
-    english: prompt,
-    foreign: reply,
-    source: "conversation"
-  });
-
-  badgeRule_firstMine();
-  renderMiningList();
-}
-
-// ============================================================
-//  DICTIONARY — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-function addDictionaryEntry(word, definition) {
-  dictionaryEntries.push({
-    word,
-    definition,
-    language: currentLanguage
-  });
-
-  badgeRule_firstDictionarySave();
-  renderDictionaryList();
-}
-
-function renderDictionaryList() {
-  const listEl = $("dictionaryList");
-  if (!listEl) return;
-
-  listEl.innerHTML = "";
-
-  if (dictionaryEntries.length === 0) {
-    listEl.textContent = "No saved dictionary entries.";
-    return;
-  }
-
-  dictionaryEntries.forEach((entry, index) => {
-    const div = document.createElement("div");
-    div.className = "ui-card";
-
-    div.innerHTML = `
-      <strong>${entry.word}</strong><br>
-      ${entry.definition}<br>
-      <small>Language: ${entry.language}</small>
-    `;
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "ui-pill danger";
-    delBtn.textContent = "Remove";
-
-    delBtn.addEventListener("click", () => {
-      dictionaryEntries.splice(index, 1);
-      renderDictionaryList();
-    });
-
-    div.appendChild(delBtn);
-    listEl.appendChild(div);
-  });
-}
-
-function switchToDictionaryTab() {
-  currentMode = "dictionary";
-  renderDictionaryList();
-}
-
-
-function setupDictionaryUI() {
-  const input = $("dict-search-input");
-  const result = $("dict-search-result");
-
-  if (!input || !result) return;
-
-  input.addEventListener("input", () => {
-    const query = input.value.trim().toLowerCase();
-    if (!query) {
-      result.textContent = "";
-      return;
-    }
-
-    const dict = window.LANG.modules.WORD_DICT?.default || {};
-    const translation = dict[query];
-
-    result.textContent = translation || "Not found.";
-  });
-}
-
-// ============================================================
-//  REVIEW MODE — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-function addMistake(item) {
-  mistakes.push({
-    english: item.english,
-    correct: item.foreignCorrect
-  });
-
-  renderMistakeList();
-}
-
-function renderMistakeList() {
-  const listEl = $("review-words-list");
-  if (!listEl) return;
-
-  listEl.innerHTML = "";
-
-  if (mistakes.length === 0) {
-    listEl.innerHTML = `<div class="ui-empty">No mistakes yet.</div>`;
-    return;
-  }
-
-  mistakes.forEach((item, index) => {
-    const card = document.createElement("div");
-    card.className = "ui-card";
-
-    card.innerHTML = `
-      <div class="mistake-word">${item.english}</div>
-      <div class="mistake-correct">${item.correct}</div>
-    `;
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "ui-pill danger";
-    delBtn.textContent = "Remove";
-
-    delBtn.addEventListener("click", () => {
-      mistakes.splice(index, 1);
-      renderMistakeList();
-    });
-
-    card.appendChild(delBtn);
-    listEl.appendChild(card);
-  });
-}
-
-function renderReviewItem() {
-  const promptEl = $("reviewPrompt");
-  const inputEl = $("reviewInput");
-  const feedbackEl = $("reviewFeedback");
-
-  if (!promptEl || !inputEl || !feedbackEl) return;
-
-  feedbackEl.textContent = "";
-  inputEl.value = "";
-
-  if (mistakes.length === 0) {
-    promptEl.textContent = "No mistakes to review.";
-    return;
-  }
-
-  reviewItem = mistakes[reviewIndex];
-  promptEl.textContent = reviewItem.english;
-}
-
-function handleReviewAnswer() {
-  const inputEl = $("reviewInput");
-  const feedbackEl = $("reviewFeedback");
-
-  if (!inputEl || !feedbackEl || !reviewItem) return;
-
-  const userAnswer = inputEl.value.trim();
-  const correct = reviewItem.correct;
-
-  if (userAnswer === correct) {
-    feedbackEl.textContent = "Correct!";
-    feedbackEl.style.color = "green";
-    speak(correct);
-  } else {
-    feedbackEl.textContent = `Incorrect — correct answer: ${correct}`;
-    feedbackEl.style.color = "red";
-    speak(correct);
-  }
-
-  reviewIndex++;
-  if (reviewIndex >= mistakes.length) {
-    reviewIndex = 0;
-  }
-
-  setTimeout(() => renderReviewItem(), 600);
-}
-
-function switchToReviewMode() {
-  currentMode = "review";
-  reviewIndex = 0;
-  renderReviewItem();
-}
-
-
-function setupReviewUI() {
-  const retryBtn = $("reviewRetryButton");
-  if (!retryBtn) return;
-
-  retryBtn.addEventListener("click", handleReviewAnswer);
-}
-
-// ============================================================
-//  SCORING + PROGRESS — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-// 1. Scoring
-function updateScore(isCorrect) {
-  if (isCorrect) {
-    score += 10;
-  } else {
-    score -= 2;
-    if (score < 0) score = 0;
-  }
-
-  const scoreEl = $("scoreDisplay");
-  if (scoreEl) {
-    scoreEl.textContent = `Score: ${score}`;
-  }
-}
-
-// 2. Progress tracking
-function updateProgress() {
-  const progressEl = $("progressDisplay");
-  if (!progressEl || currentItems.length === 0) return;
-
-  const percent = Math.round((currentIndex + 1) / currentItems.length * 100);
-  progressEl.textContent = `Progress: ${percent}%`;
-}
-
-
-// ============================================================
-//  BADGES — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-function awardBadge(id, name, description, icon) {
-  if (badges.some(b => b.id === id)) return;
-
-  badges.push({ id, name, description, icon });
-  renderBadges();
-}
-
-function badgeRule_firstCorrect(isCorrect) {
-  if (isCorrect) {
-    awardBadge(
-      "first_correct",
-      "First Correct Answer",
-      "Awarded for getting your first correct answer.",
-      "🥇"
-    );
-  }
-}
-
-function badgeRule_tenCorrect(isCorrect) {
-  if (isCorrect) {
-    totalCorrectAnswers++;
-    if (totalCorrectAnswers === 10) {
-      awardBadge(
-        "ten_correct",
-        "Ten Correct Answers",
-        "Awarded for answering ten questions correctly.",
-        "🏆"
-      );
-    }
-  }
-}
-
-function badgeRule_firstMine() {
-  if (miningList.length === 1) {
-    awardBadge(
-      "first_mine",
-      "First Mined Item",
-      "Awarded for saving your first mined item.",
-      "⛏️"
-    );
-  }
-}
-
-function badgeRule_firstDictionarySave() {
-  if (dictionaryEntries.length === 1) {
-    awardBadge(
-      "first_dictionary",
-      "First Dictionary Save",
-      "Awarded for saving your first dictionary entry.",
-      "📘"
-    );
-  }
-}
-
-function renderBadges() {
-  const badgeEl = $("badge-List");
-  if (!badgeEl) return;
-
-  badgeEl.innerHTML = "";
-
-  if (badges.length === 0) {
-    badgeEl.textContent = "No badges earned yet.";
-    return;
-  }
-
-  badges.forEach(b => {
-    const div = document.createElement("div");
-    div.className = "ui-badge";
-
-    div.innerHTML = `
-      <span class="badgeIcon">${b.icon}</span>
-      <strong>${b.name}</strong><br>
-      <small>${b.description}</small>
-    `;
-
-    badgeEl.appendChild(div);
-  });
-}
-
-// ============================================================
-//  CEFR LEVEL-UP — FULL CONSOLIDATED (PART 3)
-// ============================================================
-
-function addLevelProgress(amount) {
-  levelProgress += amount;
-
-  if (levelProgress >= LEVEL_UP_THRESHOLD) {
-    levelProgress = 0;
-    promoteUserLevel();
-  }
-
-  renderLevelProgress();
-}
-
-function promoteUserLevel() {
-  const currentIdx = CEFR_LEVELS.indexOf(currentLevel);
-
-  if (currentIdx < CEFR_LEVELS.length - 1) {
-    const newLevel = CEFR_LEVELS[currentIdx + 1];
-    currentLevel = newLevel;
-
-    levelUpNotifications.push(`You advanced to ${newLevel}!`);
-    renderLevelUpNotifications();
-
-    // Auto-create certificate entry
-    addCertificateToHistory("Auto", newLevel);
-
-    if (currentMode === "sentences") loadCurrentSet();
-    if (currentMode === "conversation") loadConversationSet();
-  }
-}
-
-function renderLevelProgress() {
-  const el = $("levelProgressDisplay");
-  if (!el) return;
-
-  el.textContent = `Level Progress: ${levelProgress}/${LEVEL_UP_THRESHOLD}`;
-}
-
-function renderLevelUpNotifications() {
-  const el = $("levelUpNotifications");
-  if (!el) return;
-
-  el.innerHTML = "";
-
-  levelUpNotifications.forEach(msg => {
-    const div = document.createElement("div");
-    div.className = "ui-badge";
-    div.textContent = msg;
-    el.appendChild(div);
-  });
-}
-
-// ============================================================
-//  CERTIFICATES — FULL CONSOLIDATED (UPDATED WITH CEFR MEDALS)
-// ============================================================
-
-// CEFR descriptors
-const CEFR_DESCRIPTORS = {
-  A1: "Can understand and use basic everyday expressions. Can introduce themselves, ask simple questions, and interact when the other person speaks slowly and clearly.",
-  A2: "Can understand frequently used expressions related to daily routines. Can describe simple tasks, personal background, and basic needs.",
-  B1: "Can understand the main points of clear standard speech on familiar matters. Can handle most travel situations and express opinions.",
-  B2: "Can understand complex texts on concrete and abstract topics. Can interact with fluency and produce clear, detailed explanations."
-};
-
-// CEFR medal mapping
-const CEFR_MEDAL = {
-  A1: "images/medal-a1.svg",
-  A2: "images/medal-a2.svg",
-  B1: "images/medal-b1.svg",
-  B2: "images/medal-b2.svg"
-};
-
-// 1. Core certificate rendering (new neon CEFR medal design)
-function renderCertificateHTML(name, level, date) {
-  const descriptor = CEFR_DESCRIPTORS[level] || "";
-  const medal = CEFR_MEDAL[level] || "images/gold-medal.svg"; // fallback
-
-  return `
-    <div class="ui-certificate">
-
-      <div class="ui-cert-header">
-        <div class="ui-cert-title">Certificate of Achievement</div>
-        <div class="ui-cert-subtitle">This certifies that</div>
-        <h2 class="ui-section-title">${name}</h2>
-      </div>
-
-      <div class="ui-cert-layout">
-
-        <!-- LEFT SIDE -->
-        <div class="ui-cert-body">
-          <p>has successfully completed the CEFR level:</p>
-
-          <div class="ui-cert-level">${level}</div>
-
-          <h3 class="ui-section-title" style="margin-top:20px;">Level Descriptor</h3>
-          <p>${descriptor}</p>
-
-          <h3 class="ui-section-title" style="margin-top:20px;">Completion Date</h3>
-          <p>${date}</p>
-        </div>
-
-        <!-- RIGHT SIDE -->
-        <div class="ui-cert-seal">
-          <img src="${medal}" alt="${level} Medal" style="width:90px;height:90px;">
-        </div>
-
-      </div>
-
-      <div class="ui-cert-signature">
-        <p>Issued by: Language Learning Trainer</p>
-        <p>Verification ID: LLT-${Math.floor(Math.random() * 999999)}</p>
-      </div>
-
-    </div>
-  `;
-}
-
-
-
-// 2. Add certificate to history
-function addCertificateToHistory(name, level) {
-  const date = new Date().toLocaleDateString();
-
-  certificateHistory.push({
-    name,
-    level,
-    date,
-    html: renderCertificateHTML(name, level, date)
-  });
-
-  renderCertificateHistoryGallery();
-}
-
-// 3. Certificate gallery rendering
-function renderCertificateHistoryGallery() {
-  const listEl = $("certGalleryList");
-  if (!listEl) return;
-
-  listEl.innerHTML = "";
-
-  if (certificateHistory.length === 0) {
-    listEl.textContent = "No certificates earned yet.";
-    return;
-  }
-
-  certificateHistory.forEach((cert, index) => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "ui-card";
-
-    wrapper.innerHTML = `
-      <strong>${cert.name}</strong><br>
-      Level: ${cert.level}<br>
-      Date: ${cert.date}
-    `;
-
-    const viewBtn = document.createElement("button");
-    viewBtn.className = "ui-pill";
-    viewBtn.textContent = "View";
-
-    viewBtn.addEventListener("click", () => {
-      renderCertificatePreviewFromHistory(index);
-    });
-
-    const downloadBtn = document.createElement("button");
-    downloadBtn.className = "ui-pill ui-pill-glow";
-    downloadBtn.textContent = "Download PDF";
-
-    downloadBtn.addEventListener("click", () => {
-      downloadCertificateFromHistory(index);
-    });
-
-    wrapper.appendChild(document.createElement("br"));
-    wrapper.appendChild(viewBtn);
-    wrapper.appendChild(downloadBtn);
-
-    listEl.appendChild(wrapper);
-  });
-}
-
-// 4. Render preview from history
-function renderCertificatePreviewFromHistory(index) {
-  const cert = certificateHistory[index];
-  const previewEl = $("certGenPreview");
-  if (!cert || !previewEl) return;
-
-  previewEl.innerHTML = cert.html;
-}
-
-// 5. Download certificate from history
-function downloadCertificateFromHistory(index) {
-  const cert = certificateHistory[index];
-  if (!cert) return;
-
-  const tempContainer = document.createElement("div");
-  tempContainer.innerHTML = cert.html;
-
-  exportCertificateAsPDF(tempContainer);
-}
-
-// 6. Certificate generator preview
-function generateCertificatePreview() {
-  const name = $("certGenNameInput").value.trim() || "Student";
-  const level = $("certGenLevelSelect").value;
-  const date = new Date().toLocaleDateString();
-
-  const previewEl = $("certGenPreview");
-  if (!previewEl) return;
-
-  previewEl.innerHTML = renderCertificateHTML(name, level, date);
-}
-
-// 7. Download current generated certificate
-function downloadGeneratedCertificate() {
-  const previewEl = $("certGenPreview");
-  if (!previewEl) return;
-
-  exportCertificateAsPDF(previewEl);
-}
-
-// 8. Certificate generator + gallery UI setup
-function setupCertificateGeneratorPage() {
-  const genBtn = $("certGenGenerateButton");
-  const dlBtn = $("certGenDownloadButton");
-
-  if (genBtn) {
-    genBtn.addEventListener("click", () => {
-      const name = $("certGenNameInput").value.trim() || "Student";
-      const level = $("certGenLevelSelect").value;
-
-      generateCertificatePreview();
-      addCertificateToHistory(name, level);
-    });
-  }
-
-  if (dlBtn) {
-    dlBtn.addEventListener("click", downloadGeneratedCertificate);
-  }
-
-  renderCertificateHistoryGallery();
-}
-
-// 9. Switch to certificate page
-function switchToCertificatePage() {
-  currentMode = "certificates";
-  renderCertificateHistoryGallery();
-}
-
-
-// ============================================================
-//  UI HELPERS — FULL CONSOLIDATED (PART 5)
-// ============================================================
-
-function flashElement(el) {
-  if (!el) return;
-  el.style.transition = "background-color 0.3s";
-  el.style.backgroundColor = "#ffe9a8";
-  setTimeout(() => {
-    el.style.backgroundColor = "";
-  }, 300);
-}
-
-function fadeIn(el) {
-  if (!el) return;
-  el.style.opacity = 0;
-  el.style.transition = "opacity 0.4s ease";
-  requestAnimationFrame(() => {
-    el.style.opacity = 1;
-  });
-}
-
-// ============================================================
-//  THEME SYSTEM
-// ============================================================
-
-function toggleTheme() {
-  const root = document.documentElement;
-  const current = root.dataset.theme;
-  root.dataset.theme = current === "light" ? "dark" : "light";
-}
-
-function toggleContrast() {
-  const root = document.documentElement;
-  const current = root.dataset.theme;
-  root.dataset.theme = current === "contrast" ? "dark" : "contrast";
-}
-
-function setupThemeButtons() {
-  const themeBtn = $("themeToggleButton");
-  const contrastBtn = $("contrastToggleButton");
-
-  if (themeBtn) themeBtn.addEventListener("click", toggleTheme);
-  if (contrastBtn) contrastBtn.addEventListener("click", toggleContrast);
-}
-
-// ============================================================
-// NEW TAB SYSTEM (Matches your new HTML)
-// ============================================================
-
-function initTabs() {
-    const tabs = document.querySelectorAll('.ui-tab');
-    const sections = document.querySelectorAll('.appSection');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const target = tab.getAttribute('data-tab');
-            console.log("TAB CLICKED:", target);
-
-            // Highlight active tab
-            tabs.forEach(t => t.classList.remove('is-active'));
-            tab.classList.add('is-active');
-
-            // Show correct section
-            sections.forEach(sec => {
-                sec.style.display = (sec.id === target) ? 'block' : 'none';
-            });
-
-            handleModeSwitch(target);
-        });
-    });
-
-    // Default view
-    document.getElementById('dashboard').style.display = 'block';
-}
-
-function handleModeSwitch(tabId) {
-    if (tabId === "sentenceSection") {
-        currentMode = "sentences";
-        loadCurrentSet();
-        renderCurrentItem();
-    }
-
-    if (tabId === "conversationSection") {
-        currentMode = "conversation";
-        loadConversationSet();
-    }
-
-    if (tabId === "miningSection") {
-        currentMode = "mining";
-        renderMiningList();
-    }
-
-    if (tabId === "dictionarySection") {
-        currentMode = "dictionary";
-        renderDictionaryList();
-    }
-
-    if (tabId === "reviewSection") {
-        currentMode = "review";
-        reviewIndex = 0;
-        renderReviewItem();
-    }
-
-    if (tabId === "certificateGeneratorPage") {
-        currentMode = "certificates";
-        renderCertificateHistoryGallery();
-    }
-
-    if (tabId === "repeatPracticeSection") {
-        currentMode = "repeat";
-        loadRepeatPractice();
-    }
-}
-
-
-// ============================================================
-//  SENTENCE UI SETUP
-// ============================================================
-
-function setupSentenceUI() {
-  const nextBtn = $("nextButton");
-  if (nextBtn) nextBtn.addEventListener("click", goToNextSentenceItem);
-
-  addMiningButtonToSentenceUI();
-}
-
-function setupLevelSelector() {
-  const select = $("levelSelect");
-  if (!select) return;
-
-  select.innerHTML = "";
-
-  CEFR_LEVELS.forEach(level => {
-    const opt = document.createElement("option");
-    opt.value = level;
-    opt.textContent = level;
-    if (level === currentLevel) opt.selected = true;
-    select.appendChild(opt);
-  });
-
-  select.addEventListener("change", e => {
-    currentLevel = e.target.value;
-    if (currentMode === "sentences") loadCurrentSet();
-    if (currentMode === "conversation") loadConversationSet();
-  });
-}
-
-function initLanguageSelector() {
-  const selector = $("language-select");
-  if (!selector) return;
-
-  selector.addEventListener("change", async (e) => {
-    const newLang = e.target.value;
-
-    currentLanguage = newLang;
-    window.LANG.lang = newLang;
-
-    await loadLanguagePack(newLang);
-
-    loadCurrentSet();
-    renderCurrentItem();
-    renderDictionaryList();
-    renderMiningList();
-    renderMistakeList();
-    renderCertificateHistoryGallery();
-    renderBadges();
-    renderLevelProgress();
-
-    sanityCheck();
-  });
-}
-
-// ============================================================
-//  FINAL INIT — FULLY MODERNIZED
-// ============================================================
-
-function initApp() {
-  initLanguageSelector();
-  setupLevelSelector();
-  initTabs();
-  setupThemeButtons();
-
-  // Dashboard features
-  initNameBox();
-  initRateControl();
-  initFreePracticeSandbox();
-  initDictionarySearch();
-  renderDashboard();
-
-  // Learning features
-  loadCurrentSet();
-  renderCurrentItem();
-  setupSentenceUI();
-  setupDictionaryUI();
-  setupReviewUI();
-  setupCertificateGeneratorPage();
-
-  // Render stored data
-  renderBadges();
-  renderMiningList();
-  renderDictionaryList();
-  renderMistakeList();
-  renderCertificateHistoryGallery();
-  renderLevelProgress();
-
-  sanityCheck();
-}
-
-
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadLanguagePack("es");
-  initApp();
-});
-
-
-
-// ============================================================
-//  FREE PRACTICE SANDBOX
-// ============================================================
-
-function initFreePracticeSandbox() {
-  const input = $("sandboxInput");
-  const output = $("sandboxOutput");
-  const speakBtn = $("sandboxSpeakButton");
-
-  if (!input || !output || !speakBtn) return;
-
-  input.addEventListener("input", () => {
-    const text = input.value.trim();
-    output.textContent = text || "";
-  });
-
-  speakBtn.addEventListener("click", () => {
-    const text = input.value.trim();
-    if (text) speak(text);
-  });
-}
-
-// ============================================================
-//  DICTIONARY SEARCH BAR
-// ============================================================
-
-function initDictionarySearch() {
-  const searchInput = $("dictionarySearchInput");
-  const searchOutput = $("dictionarySearchOutput");
-
-  if (!searchInput || !searchOutput) return;
-
-  searchInput.addEventListener("input", () => {
-    const query = searchInput.value.trim().toLowerCase();
-    if (!query) {
-      searchOutput.textContent = "";
-      return;
-    }
-
-    const dict = window.LANG.modules.WORD_DICT?.default || {};
-    const translation = dict[query];
-
-    searchOutput.textContent = translation || "Not found.";
-  });
-}
-
-// ============================================================
-//  NAME BOX (CERTIFICATE GENERATOR)
-// ============================================================
-
-function initNameBox() {
-  const nameInput = $("certGenNameInput");
-  const preview = $("certGenPreview");
-
-  if (!nameInput || !preview) return;
-
-  nameInput.addEventListener("input", () => {
-    const name = nameInput.value.trim() || "Student";
-    const level = $("certGenLevelSelect").value;
-    const date = new Date().toLocaleDateString();
-
-    preview.innerHTML = renderCertificateHTML(name, level, date);
-  });
-}
-
-// ============================================================
-//  RATE CONTROL (SPEECH SYNTHESIS SPEED)
-// ============================================================
-
-function initRateControl() {
-  const rateSlider = $("speechRateSlider");
-  const rateLabel = $("speechRateLabel");
-
-  if (!rateSlider || !rateLabel) return;
-
-  rateSlider.addEventListener("input", () => {
-    const rate = parseFloat(rateSlider.value);
-    rateLabel.textContent = `Rate: ${rate.toFixed(1)}`;
-
-    // Apply to speech synthesis
-    window.speechSynthesis.cancel();
-    window.speechRate = rate;
-  });
-}
-
-// ============================================================
-//  DASHBOARD RENDERING
-// ============================================================
-
-function renderDashboard() {
-  const langEl = $("dashLanguage");
-  const levelEl = $("dashLevel");
-  const scoreEl = $("dashScore");
-  const minedEl = $("dashMinedCount");
-  const dictEl = $("dashDictionaryCount");
-  const reviewEl = $("dashReviewCount");
-
-  if (langEl) langEl.textContent = LANGUAGES[currentLanguage].name;
-  if (levelEl) levelEl.textContent = currentLevel;
-  if (scoreEl) scoreEl.textContent = score;
-  if (minedEl) minedEl.textContent = miningList.length;
-  if (dictEl) dictEl.textContent = dictionaryEntries.length;
-  if (reviewEl) reviewEl.textContent = mistakes.length;
-}
-
-// ============================================================
-//  FINAL GLUE — ENSURES ALL UI COMPONENTS ARE ACTIVE
-// ============================================================
-
-function updateBadges() {
-  renderBadges();
 }
 
 function updateProgressMeters() {
-  renderLevelProgress();
-  updateProgress();
+  $("quizProgress") && ( $("quizProgress").textContent = "0%" );
+  $("buildProgress") && ( $("buildProgress").textContent = "0%" );
+  $("sentenceProgress") && ( $("sentenceProgress").textContent = "0%" );
+  $("xpProgress") && ( $("xpProgress").textContent = `${totalXP()} XP` );
+  $("streakCount") && ( $("streakCount").textContent = `${appState.streakDays} days` );
+  $("scoreRating") && ( $("scoreRating").textContent = `${appState.scoreRating} pts` );
+  $("dueReview") && ( $("dueReview").textContent = `${appState.mistakes.length} words` );
 }
 
+function totalXP() {
+  return Object.values(appState.levelStats).reduce((sum, lvl) => sum + lvl.xp, 0);
+}
+
+// ============================================================
+//  MODULES
+// ============================================================
+
+// ---------- LISTEN ----------
+
+let listenAutoPlay = { active: false, paused: false, index: 0, list: [] };
+
+function speakWord(word) {
+  const utter = new SpeechSynthesisUtterance(word);
+  const lang = appState.activeLanguage;
+
+  utter.lang = lang === "es" ? "es-ES" :
+               lang === "fr" ? "fr-FR" :
+               lang === "nl" ? "nl-NL" : "es-ES";
+
+  utter.rate = appState.speechRate;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
+
+function playNextListenWord() {
+  if (!listenAutoPlay.active || listenAutoPlay.paused) return;
+
+  const list = listenAutoPlay.list;
+  if (listenAutoPlay.index >= list.length) {
+    listenAutoPlay.active = false;
+    return;
+  }
+
+  const word = list[listenAutoPlay.index];
+  speakWord(word);
+
+  listenAutoPlay.index++;
+  setTimeout(() => playNextListenWord(), 200);
+}
+
+async function initListen() {
+  const { moduleBank } = await loadModule("listen");
+  const LISTEN_VOCAB = moduleBank.LISTEN_VOCAB;
+  const container = $("listenSection");
+  if (!container || !LISTEN_VOCAB) return;
+
+  const levelData = LISTEN_VOCAB[appState.activeLevel];
+  if (!levelData) {
+    container.innerHTML = "<p>No listen data for this level.</p>";
+    return;
+  }
+
+  let html = `
+    <div class="glass-panel quiz-card">
+      <h2>Listen — Level ${appState.activeLevel}</h2>
+      <div class="listen-player-controls">
+        <button class="pill" id="listen-playall">Play All</button>
+        <button class="pill" id="listen-pause">Pause</button>
+        <button class="pill" id="listen-resume">Resume</button>
+        <button class="pill" id="listen-stop">Stop</button>
+      </div>
+    </div>
+  `;
+
+  Object.keys(levelData).forEach(cat => {
+    const words = levelData[cat];
+    html += `
+      <div class="glass-panel">
+        <h3>${cat}</h3>
+        <div class="listen-grid">
+          ${words.map(w => `
+            <button class="pill listen-pill" data-word="${w}">${w}</button>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+
+  listenAutoPlay.list = Object.values(levelData).flat();
+  $("listen-playall").onclick = () => {
+    listenAutoPlay.active = true;
+    listenAutoPlay.paused = false;
+    listenAutoPlay.index = 0;
+    playNextListenWord();
+  };
+  $("listen-pause").onclick = () => {
+    listenAutoPlay.paused = true;
+    speechSynthesis.pause();
+  };
+  $("listen-resume").onclick = () => {
+    listenAutoPlay.paused = false;
+    speechSynthesis.resume();
+    playNextListenWord();
+  };
+  $("listen-stop").onclick = () => {
+    listenAutoPlay.active = false;
+    listenAutoPlay.paused = false;
+    listenAutoPlay.index = 0;
+    speechSynthesis.cancel();
+  };
+
+  document.querySelectorAll(".listen-pill").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const w = btn.dataset.word;
+      speakWord(w);
+    });
+  });
+}
+
+// ---------- FLASHCARDS ----------
+
+async function initFlashcards() {
+  const { moduleBank } = await loadModule("flashcards");
+  const PHRASES = moduleBank.CEFR_PHRASES;
+  const container = $("flashcardsSection");
+  if (!container || !PHRASES) return;
+
+  // TODO: render flashcards UI using PHRASES[activeLevel]
+  container.innerHTML = `<p>Flashcards for ${appState.activeLevel} coming online.</p>`;
+}
+
+// ---------- QUIZ ----------
+
+async function initQuiz() {
+  const { moduleBank } = await loadModule("quiz");
+  const DISRUPTORS = moduleBank.DISRUPTORS;
+  const container = $("quizSection");
+  if (!container || !DISRUPTORS) return;
+
+  // TODO: render quiz UI using DISRUPTORS + CEFR data
+  container.innerHTML = `<p>Quiz for ${appState.activeLevel} coming online.</p>`;
+}
+
+// ---------- BUILD ----------
+
+async function initBuild() {
+  const { moduleBank } = await loadModule("build");
+  const CHOICES = moduleBank.CEFR_SENTENCE_CHOICES;
+  const container = $("buildSection");
+  if (!container || !CHOICES) return;
+
+  // TODO: render sentence build UI
+  container.innerHTML = `<p>Build mode for ${appState.activeLevel} coming online.</p>`;
+}
+
+// ---------- SENTENCE ----------
+
+async function initSentence() {
+  const { moduleBank } = await loadModule("sentence");
+  const SENTENCES = moduleBank.CEFR_SENTENCES;
+  const container = $("sentenceSection");
+  if (!container || !SENTENCES) return;
+
+  // TODO: render sentence trainer
+  container.innerHTML = `<p>Sentence trainer for ${appState.activeLevel} coming online.</p>`;
+}
+
+// ---------- CONVERSATION ----------
+
+async function initConversation() {
+  const { moduleBank } = await loadModule("conversation");
+  const CONVO = moduleBank.CEFR_CONVERSATION;
+  const container = $("conversationSection");
+  if (!container || !CONVO) return;
+
+  // TODO: render conversation trainer
+  container.innerHTML = `<p>Conversation trainer for ${appState.activeLevel} coming online.</p>`;
+}
+
+// ---------- GRAMMAR ----------
+
+async function initGrammar() {
+  const { moduleBank } = await loadModule("grammar");
+  const LEVELS = moduleBank.CEFR_LEVELS;
+  const container = $("grammarSection");
+  if (!container || !LEVELS) return;
+
+  // TODO: render grammar overview
+  container.innerHTML = `<p>Grammar overview for ${appState.activeLevel} coming online.</p>`;
+}
+
+// ---------- MINING ----------
+
+async function initMining() {
+  const { moduleBank } = await loadModule("mining");
+  const MINING = moduleBank.mining_references;
+  const container = $("miningSection");
+  if (!container || !MINING) return;
+
+  // TODO: render mining UI
+  container.innerHTML = `<p>Mining tools coming online.</p>`;
+}
+
+// ---------- DICTIONARY ----------
+
+async function initDictionary() {
+  const { moduleBank } = await loadModule("dictionary");
+  const DICT = moduleBank.WORD_DICT;
+  const container = $("dictionarySection");
+  if (!container || !DICT) return;
+
+  // TODO: hook up search input to DICT
+  container.innerHTML = `<p>Dictionary coming online.</p>`;
+}
+
+// ---------- REVIEW (mistakes) ----------
+
+function initReview() {
+  const container = $("reviewSection");
+  if (!container) return;
+
+  if (appState.mistakes.length === 0) {
+    container.innerHTML = "<p>No mistakes yet. Keep training!</p>";
+    return;
+  }
+
+  // TODO: render mistake list + retry UI
+  container.innerHTML = `<p>Review mode coming online.</p>`;
+}
+
+// ---------- REPEAT (audio shadowing) ----------
+
+async function initRepeat() {
+  const { moduleBank } = await loadModule("repeat");
+  const REPEAT_BANK = moduleBank.default || moduleBank; // depending on export
+  const container = $("repeatSection");
+  if (!container || !REPEAT_BANK) return;
+
+  // TODO: render repeat practice UI (play audio, learner repeats aloud)
+  container.innerHTML = `<p>Repeat practice coming online.</p>`;
+}
+
+// ---------- CERTIFICATES ----------
+
+function initCertificates() {
+  const container = $("certificatesSection");
+  if (!container) return;
+
+  // TODO: render certificate generator using appState.certificateName + CEFR level
+  container.innerHTML = `<p>Certificates coming online.</p>`;
+}
+
+// ============================================================
+//  APP INIT
+// ============================================================
+
+function initTabs() {
+  document.querySelectorAll("[data-tab-target]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.tabTarget;
+      switchTab(target);
+    });
+  });
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  initTabs();
+  initDashboard();
+});
+
+// ============================================================
+//  PART 1 — CORE STATE + HELPERS
+// ============================================================
+
+// ---------- GLOBAL APPLICATION STATE ----------
+
+const appState = {
+    activeTab: "dashboard",      // current visible tab
+    activeLanguage: "es",        // "es", "fr", "nl"
+    activeLevel: "A1",           // "A1", "A2", "B1", "B2"
+    speechRate: 1.0,             // global audio speed
+
+    // CEFR progress tracking
+    levelStats: {
+        A1: { xp: 0, quizzes: 0, sentences: 0, listens: 0 },
+        A2: { xp: 0, quizzes: 0, sentences: 0, listens: 0 },
+        B1: { xp: 0, quizzes: 0, sentences: 0, listens: 0 },
+        B2: { xp: 0, quizzes: 0, sentences: 0, listens: 0 }
+    },
+
+    streakDays: 0,
+    scoreRating: 0,
+
+    mistakes: [],          // REVIEW mode uses this
+    miningWords: [],       // MINING mode uses this
+    certificateName: "",   // used in Certificates tab
+};
+
+
+// ---------- BASIC DOM HELPERS ----------
+
+function $(id) {
+    return document.getElementById(id);
+}
+
+
+// ---------- SPEECH SYNTHESIS HELPER ----------
+
+function speakText(text) {
+    const utter = new SpeechSynthesisUtterance(text);
+
+    // language routing
+    const lang = appState.activeLanguage;
+    utter.lang =
+        lang === "es" ? "es-ES" :
+        lang === "fr" ? "fr-FR" :
+        lang === "nl" ? "nl-NL" :
+        "es-ES";
+
+    utter.rate = appState.speechRate;
+
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+}
+
+
+// ---------- XP / SCORE / STREAK HELPERS ----------
+
+function addXP(amount = 1) {
+    appState.levelStats[appState.activeLevel].xp += amount;
+}
+
+function addScore(amount = 1) {
+    appState.scoreRating += amount;
+}
+
+function incrementStreak() {
+    appState.streakDays += 1;
+}
+
+function totalXP() {
+    return Object.values(appState.levelStats)
+        .reduce((sum, lvl) => sum + lvl.xp, 0);
+}
+
+// ============================================================
+//  PART 2 — TAB ROUTER + LANGUAGE + CEFR CONTROLS
+// ============================================================
+
+// ---------- TAB SWITCHING ----------
+
+function switchTab(tabId) {
+    appState.activeTab = tabId;
+
+    // Show only the selected tab
+    document.querySelectorAll(".appSection").forEach(sec => {
+        sec.style.display = sec.id === tabId ? "block" : "none";
+    });
+
+    // Route to module initializer
+    if (tabId === "dashboard") initDashboard();
+    if (tabId === "listenSection") initListen();
+    if (tabId === "flashcardsSection") initFlashcards();
+    if (tabId === "quizSection") initQuiz();
+    if (tabId === "buildSection") initBuild();
+    if (tabId === "sentenceSection") initSentence();
+    if (tabId === "conversationSection") initConversation();
+    if (tabId === "grammarSection") initGrammar();
+    if (tabId === "miningSection") initMining();
+    if (tabId === "dictionarySection") initDictionary();
+    if (tabId === "reviewSection") initReview();
+    if (tabId === "repeatSection") initRepeat();
+    if (tabId === "certificatesSection") initCertificates();
+}
+
+
+// ---------- TAB BUTTONS ----------
+
+function initTabs() {
+    document.querySelectorAll("[data-tab-target]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const target = btn.dataset.tabTarget;
+            switchTab(target);
+        });
+    });
+}
+
+
+// ---------- LANGUAGE SWITCHING (es, fr, nl) ----------
+
+function initLanguageControls() {
+    document.querySelectorAll("[data-lang]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const lang = btn.dataset.lang;
+
+            appState.activeLanguage = lang;
+            setLanguage(lang);   // from LanguageLoader.js
+
+            // Reinitialize current tab with new language
+            switchTab(appState.activeTab);
+        });
+    });
+}
+
+
+// ---------- CEFR LEVEL SWITCHING (A1–B2) ----------
+
+function initLevelControls() {
+    document.querySelectorAll("[data-level]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const level = btn.dataset.level;
+
+            appState.activeLevel = level;
+            setLevel(level);     // from LanguageLoader.js
+
+            // Reinitialize current tab with new level
+            switchTab(appState.activeTab);
+        });
+    });
+}
+
+
+// ---------- AUDIO SPEED SLIDER ----------
+
+function initAudioSpeed() {
+    const slider = $("audioSpeed");
+    const label = $("audioSpeedValue");
+
+    if (!slider || !label) return;
+
+    slider.addEventListener("input", () => {
+        appState.speechRate = parseFloat(slider.value);
+        label.textContent = slider.value;
+    });
+}
+
+// ============================================================
+//  PART 3 — DASHBOARD + PROGRESS SYSTEM + CERTIFICATE NAME
+// ============================================================
+
+
+// ---------- DASHBOARD INITIALIZER ----------
+
+function initDashboard() {
+    // Show dashboard
+    switchTab("dashboard");
+
+    // Initialize dashboard controls
+    initAudioSpeed();
+    initLanguageControls();
+    initLevelControls();
+    initCertificateName();
+
+    // Update progress meters
+    updateProgressMeters();
+}
+
+
+// ---------- CERTIFICATE NAME SAVING ----------
+
+function initCertificateName() {
+    const input = $("certificateNameInput");
+    const btn = $("saveCertificateName");
+
+    if (!input || !btn) return;
+
+    // Load saved name if exists
+    if (appState.certificateName.trim() !== "") {
+        input.value = appState.certificateName;
+    }
+
+    btn.addEventListener("click", () => {
+        const name = input.value.trim();
+        appState.certificateName = name;
+    });
+}
+
+
+// ---------- PROGRESS METER UPDATES ----------
+
+function updateProgressMeters() {
+
+    // Quiz Progress
+    if ($("quizProgress")) {
+        $("quizProgress").textContent =
+            `${appState.levelStats[appState.activeLevel].quizzes}%`;
+    }
+
+    // Build Progress
+    if ($("buildProgress")) {
+        $("buildProgress").textContent =
+            `${appState.levelStats[appState.activeLevel].sentences}%`;
+    }
+
+    // Sentence Progress
+    if ($("sentenceProgress")) {
+        $("sentenceProgress").textContent =
+            `${appState.levelStats[appState.activeLevel].sentences}%`;
+    }
+
+    // XP Progress
+    if ($("xpProgress")) {
+        $("xpProgress").textContent = `${totalXP()} XP`;
+    }
+
+    // Streak
+    if ($("streakCount")) {
+        $("streakCount").textContent = `${appState.streakDays} days`;
+    }
+
+    // Score Rating
+    if ($("scoreRating")) {
+        $("scoreRating").textContent = `${appState.scoreRating} pts`;
+    }
+
+    // Due for Review
+    if ($("dueReview")) {
+        $("dueReview").textContent = `${appState.mistakes.length} words`;
+    }
+}
+
+// ============================================================
+//  PART 4 — LISTEN MODULE (FULLY WIRED)
+// ============================================================
+
+import { loadModule } from "./LanguageLoader.js";
+
+
+// ---------- GLOBAL AUTOPLAY ENGINE ----------
+
+let listenAutoPlay = {
+    active: false,
+    paused: false,
+    index: 0,
+    list: []
+};
+
+
+// ---------- SPEAK A SINGLE WORD ----------
+
+function speakWord(word) {
+    const utter = new SpeechSynthesisUtterance(word);
+
+    const lang = appState.activeLanguage;
+    utter.lang =
+        lang === "es" ? "es-ES" :
+        lang === "fr" ? "fr-FR" :
+        lang === "nl" ? "nl-NL" :
+        "es-ES";
+
+    utter.rate = appState.speechRate;
+
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+}
+
+
+// ---------- PLAY NEXT WORD IN AUTOPLAY LIST ----------
+
+function playNextListenWord() {
+    if (!listenAutoPlay.active || listenAutoPlay.paused) return;
+
+    const list = listenAutoPlay.list;
+
+    if (listenAutoPlay.index >= list.length) {
+        listenAutoPlay.active = false;
+        return;
+    }
+
+    const word = list[listenAutoPlay.index];
+    speakWord(word);
+
+    listenAutoPlay.index++;
+
+    setTimeout(() => playNextListenWord(), 200);
+}
+
+
+// ---------- INITIALIZE LISTEN MODULE ----------
+
+async function initListen() {
+    const { moduleBank } = await loadModule("listen");
+    const LISTEN_VOCAB = moduleBank.LISTEN_VOCAB;
+
+    const container = $("listenSection");
+    if (!container || !LISTEN_VOCAB) return;
+
+    const levelData = LISTEN_VOCAB[appState.activeLevel];
+    if (!levelData) {
+        container.innerHTML = "<p>No listening data available for this level.</p>";
+        return;
+    }
+
+    // ---------- BUILD LISTEN UI ----------
+
+    let html = `
+        <div class="glass-panel quiz-card">
+            <h2>Listen — Level ${appState.activeLevel}</h2>
+            <p>Tap a word to hear it, or use the global controls.</p>
+
+            <div class="listen-player-controls" style="
+                display:flex;
+                gap:6px;
+                flex-wrap:wrap;
+                margin-top:6px;
+            ">
+                <button class="pill" id="listen-playall">Play All</button>
+                <button class="pill" id="listen-pause">Pause</button>
+                <button class="pill" id="listen-resume">Resume</button>
+                <button class="pill" id="listen-stop">Stop</button>
+            </div>
+        </div>
+    `;
+
+    // ---------- CATEGORY BLOCKS ----------
+
+    Object.keys(levelData).forEach(categoryName => {
+        const words = levelData[categoryName];
+
+        html += `
+            <div class="glass-panel">
+                <h3>${categoryName}</h3>
+
+                <div class="listen-grid" style="
+                    display:grid;
+                    grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
+                    gap:6px;
+                    margin-top:8px;
+                ">
+                    ${words.map(word => `
+                        <button class="pill listen-pill" data-word="${word}">
+                            ${word}
+                        </button>
+                    `).join("")}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+
+    // ---------- SETUP GLOBAL PLAYBACK LIST ----------
+
+    listenAutoPlay.list = Object.values(levelData).flat();
+
+
+    // ---------- GLOBAL CONTROLS ----------
+
+    $("listen-playall").onclick = () => {
+        listenAutoPlay.active = true;
+        listenAutoPlay.paused = false;
+        listenAutoPlay.index = 0;
+        playNextListenWord();
+    };
+
+    $("listen-pause").onclick = () => {
+        listenAutoPlay.paused = true;
+        speechSynthesis.pause();
+    };
+
+    $("listen-resume").onclick = () => {
+        listenAutoPlay.paused = false;
+        speechSynthesis.resume();
+        playNextListenWord();
+    };
+
+    $("listen-stop").onclick = () => {
+        listenAutoPlay.active = false;
+        listenAutoPlay.paused = false;
+        listenAutoPlay.index = 0;
+        speechSynthesis.cancel();
+    };
+
+
+    // ---------- INDIVIDUAL WORD PLAYBACK ----------
+
+    document.querySelectorAll(".listen-pill").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const word = btn.dataset.word;
+            speakWord(word);
+
+            // Track listening progress
+            appState.levelStats[appState.activeLevel].listens++;
+            updateProgressMeters();
+        });
+    });
+}
+
+// ============================================================
+//  PART 5 — FLASHCARDS MODULE (FULLY WIRED)
+// ============================================================
+
+import { loadModule } from "./LanguageLoader.js";
+
+
+// ---------- FLASHCARD STATE ----------
+
+let flashcards = [];
+let flashIndex = 0;
+
+
+// ---------- RENDER FLASHCARD UI ----------
+
+function renderFlashcardUI(container) {
+    if (!flashcards.length) {
+        container.innerHTML = "<p>No flashcards available for this level.</p>";
+        return;
+    }
+
+    const card = flashcards[flashIndex];
+
+    container.innerHTML = `
+        <div class="glass-panel quiz-card" style="text-align:center;">
+            <h2>Flashcards — Level ${appState.activeLevel}</h2>
+            <p>Tap the card to flip it.</p>
+
+            <div id="flashcard" class="flashcard">
+                <div class="flashcard-inner">
+                    <div class="flashcard-front">
+                        <span>${card.english}</span>
+                    </div>
+                    <div class="flashcard-back">
+                        <span>${card[appState.activeLanguage]}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flashcard-controls" style="
+                display:flex;
+                justify-content:center;
+                gap:10px;
+                margin-top:15px;
+            ">
+                <button class="pill" id="flash-prev">Previous</button>
+                <button class="pill" id="flash-next">Next</button>
+            </div>
+        </div>
+    `;
+
+    setupFlashcardEvents();
+}
+
+
+// ---------- SETUP FLASHCARD EVENTS ----------
+
+function setupFlashcardEvents() {
+    const card = $("flashcard");
+    const prevBtn = $("flash-prev");
+    const nextBtn = $("flash-next");
+
+    if (!card || !prevBtn || !nextBtn) return;
+
+    // Flip card
+    card.addEventListener("click", () => {
+        card.classList.toggle("flipped");
+    });
+
+    // Previous card
+    prevBtn.addEventListener("click", () => {
+        flashIndex = (flashIndex - 1 + flashcards.length) % flashcards.length;
+        updateFlashcard();
+    });
+
+    // Next card
+    nextBtn.addEventListener("click", () => {
+        flashIndex = (flashIndex + 1) % flashcards.length;
+        updateFlashcard();
+    });
+}
+
+
+// ---------- UPDATE FLASHCARD DISPLAY ----------
+
+function updateFlashcard() {
+    const container = $("flashcardsSection");
+    if (!container) return;
+    renderFlashcardUI(container);
+
+    // XP + score for engagement
+    addXP(1);
+    addScore(1);
+    updateProgressMeters();
+}
+
+
+// ---------- INITIALIZE FLASHCARDS MODULE ----------
+
+async function initFlashcards() {
+    const { moduleBank } = await loadModule("flashcards");
+    const PHRASES = moduleBank.CEFR_PHRASES;
+
+    const container = $("flashcardsSection");
+    if (!container || !PHRASES) return;
+
+    const levelData = PHRASES[appState.activeLevel];
+    if (!levelData || !Array.isArray(levelData)) {
+        container.innerHTML = "<p>No flashcards found for this level.</p>";
+        return;
+    }
+
+    // Prepare flashcards
+    flashcards = levelData.map(entry => ({
+        english: entry.english,
+        es: entry.spanish,
+        fr: entry.french,
+        nl: entry.dutch
+    }));
+
+    flashIndex = 0;
+
+    renderFlashcardUI(container);
+}
+
+// ============================================================
+//  PART 6 — QUIZ + BUILD + SENTENCE MODULES
+// ============================================================
+
+import { loadModule } from "./LanguageLoader.js";
+
+
+// ---------- QUIZ MODULE (SCAFFOLDED MCQ) ----------
+
+async function initQuiz() {
+    const { moduleBank } = await loadModule("quiz");
+    const DISRUPTORS = moduleBank.DISRUPTORS;
+
+    const container = $("quizSection");
+    if (!container || !DISRUPTORS) return;
+
+    const levelData = DISRUPTORS[appState.activeLevel];
+    if (!levelData || !Array.isArray(levelData)) {
+        container.innerHTML = "<p>No quiz data for this level.</p>";
+        return;
+    }
+
+    // Simple scaffold: show one question at a time
+    const question = levelData[0];
+
+    container.innerHTML = `
+        <div class="glass-panel quiz-card">
+            <h2>Quiz — Level ${appState.activeLevel}</h2>
+            <p>Select the correct answer.</p>
+
+            <div class="quiz-question">
+                <strong>${question.prompt}</strong>
+            </div>
+
+            <div class="quiz-options">
+                ${question.options.map((opt, idx) => `
+                    <button class="pill quiz-option" data-index="${idx}">
+                        ${opt}
+                    </button>
+                `).join("")}
+            </div>
+
+            <div id="quiz-feedback" style="margin-top:10px;"></div>
+        </div>
+    `;
+
+    document.querySelectorAll(".quiz-option").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const idx = parseInt(btn.dataset.index, 10);
+            const feedback = $("quiz-feedback");
+
+            if (idx === question.correctIndex) {
+                feedback.textContent = "Correct!";
+                addXP(2);
+                addScore(2);
+                appState.levelStats[appState.activeLevel].quizzes += 10;
+            } else {
+                feedback.textContent = "Try again.";
+                appState.mistakes.push(question.prompt);
+            }
+
+            updateProgressMeters();
+        });
+    });
+}
+
+
+// ---------- BUILD MODULE (SENTENCE CHOICES SCAFFOLD) ----------
+
+async function initBuild() {
+    const { moduleBank } = await loadModule("build");
+    const CHOICES = moduleBank.CEFR_SENTENCE_CHOICES;
+
+    const container = $("buildSection");
+    if (!container || !CHOICES) return;
+
+    const levelData = CHOICES[appState.activeLevel];
+    if (!levelData || !Array.isArray(levelData)) {
+        container.innerHTML = "<p>No build data for this level.</p>";
+        return;
+    }
+
+    const item = levelData[0];
+
+    container.innerHTML = `
+        <div class="glass-panel quiz-card">
+            <h2>Build — Level ${appState.activeLevel}</h2>
+            <p>Choose the correct sentence.</p>
+
+            <div class="build-prompt">
+                <strong>${item.prompt}</strong>
+            </div>
+
+            <div class="build-options">
+                ${item.options.map((opt, idx) => `
+                    <button class="pill build-option" data-index="${idx}">
+                        ${opt}
+                    </button>
+                `).join("")}
+            </div>
+
+            <div id="build-feedback" style="margin-top:10px;"></div>
+        </div>
+    `;
+
+    document.querySelectorAll(".build-option").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const idx = parseInt(btn.dataset.index, 10);
+            const feedback = $("build-feedback");
+
+            if (idx === item.correctIndex) {
+                feedback.textContent = "Correct sentence!";
+                addXP(2);
+                addScore(2);
+                appState.levelStats[appState.activeLevel].sentences += 10;
+            } else {
+                feedback.textContent = "Not quite. Try again.";
+                appState.mistakes.push(item.prompt);
+            }
+
+            updateProgressMeters();
+        });
+    });
+}
+
+
+// ---------- SENTENCE MODULE (SENTENCE TRAINER SCAFFOLD) ----------
+
+async function initSentence() {
+    const { moduleBank } = await loadModule("sentence");
+    const SENTENCES = moduleBank.CEFR_SENTENCES;
+
+    const container = $("sentenceSection");
+    if (!container || !SENTENCES) return;
+
+    const levelData = SENTENCES[appState.activeLevel];
+    if (!levelData || !Array.isArray(levelData)) {
+        container.innerHTML = "<p>No sentence data for this level.</p>";
+        return;
+    }
+
+    const sentence = levelData[0];
+
+    container.innerHTML = `
+        <div class="glass-panel quiz-card">
+            <h2>Sentence Trainer — Level ${appState.activeLevel}</h2>
+            <p>Read and listen to the sentence.</p>
+
+            <div class="sentence-block">
+                <strong>${sentence.target}</strong>
+            </div>
+
+            <div class="sentence-translation">
+                <em>${sentence.english}</em>
+            </div>
+
+            <div class="sentence-controls" style="margin-top:10px;">
+                <button class="pill" id="sentence-play">Play</button>
+            </div>
+        </div>
+    `;
+
+    $("sentence-play").onclick = () => {
+        speakText(sentence.target);
+        addXP(1);
+        appState.levelStats[appState.activeLevel].sentences += 5;
+        updateProgressMeters();
+    };
+}
+
+// ============================================================
+//  PART 7 — CONVERSATION + GRAMMAR + MINING + DICTIONARY
+// ============================================================
+
+import { loadModule } from "./LanguageLoader.js";
+
+
+// ---------- CONVERSATION MODULE ----------
+
+async function initConversation() {
+    const { moduleBank } = await loadModule("conversation");
+    const CONVO = moduleBank.CEFR_CONVERSATION;
+
+    const container = $("conversationSection");
+    if (!container || !CONVO) return;
+
+    const levelData = CONVO[appState.activeLevel];
+    if (!levelData || !Array.isArray(levelData)) {
+        container.innerHTML = "<p>No conversation data for this level.</p>";
+        return;
+    }
+
+    const turn = levelData[0];
+
+    container.innerHTML = `
+        <div class="glass-panel quiz-card">
+            <h2>Conversation — Level ${appState.activeLevel}</h2>
+            <p>Listen and repeat the dialogue.</p>
+
+            <div class="conversation-line">
+                <strong>${turn.speaker}:</strong> ${turn.text}
+            </div>
+
+            <div class="conversation-controls" style="margin-top:10px;">
+                <button class="pill" id="conversation-play">Play</button>
+            </div>
+        </div>
+    `;
+
+    $("conversation-play").onclick = () => {
+        speakText(turn.text);
+        addXP(2);
+        addScore(1);
+        updateProgressMeters();
+    };
+}
+
+
+// ---------- GRAMMAR MODULE ----------
+
+async function initGrammar() {
+    const { moduleBank } = await loadModule("grammar");
+    const LEVELS = moduleBank.CEFR_LEVELS;
+
+    const container = $("grammarSection");
+    if (!container || !LEVELS) return;
+
+    const levelData = LEVELS[appState.activeLevel];
+    if (!levelData || !Array.isArray(levelData)) {
+        container.innerHTML = "<p>No grammar data for this level.</p>";
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="glass-panel quiz-card">
+            <h2>Grammar — Level ${appState.activeLevel}</h2>
+            <ul class="grammar-list">
+                ${levelData.map(rule => `
+                    <li>
+                        <strong>${rule.title}</strong><br>
+                        <span>${rule.explanation}</span>
+                    </li>
+                `).join("")}
+            </ul>
+        </div>
+    `;
+}
+
+
+// ---------- MINING MODULE ----------
+
+async function initMining() {
+    const { moduleBank } = await loadModule("mining");
+    const MINING = moduleBank.mining_references;
+
+    const container = $("miningSection");
+    if (!container || !MINING) return;
+
+    container.innerHTML = `
+        <div class="glass-panel quiz-card">
+            <h2>Mining — Level ${appState.activeLevel}</h2>
+            <p>Save interesting words or phrases for later review.</p>
+
+            <div class="mining-controls" style="margin-top:10px;">
+                <input id="mining-input" class="pill" placeholder="Type a word or phrase">
+                <button class="pill" id="mining-add">Add to Mining</button>
+            </div>
+
+            <div id="mining-list" style="margin-top:15px;"></div>
+        </div>
+    `;
+
+    const input = $("mining-input");
+    const addBtn = $("mining-add");
+    const list = $("mining-list");
+
+    addBtn.onclick = () => {
+        const text = (input.value || "").trim();
+        if (!text) return;
+
+        appState.miningWords.push(text);
+        input.value = "";
+        renderMiningList(list);
+    };
+
+    renderMiningList(list);
+}
+
+function renderMiningList(listEl) {
+    if (!listEl) return;
+
+    if (!appState.miningWords.length) {
+        listEl.innerHTML = "<p>No mined items yet.</p>";
+        return;
+    }
+
+    listEl.innerHTML = `
+        <ul>
+            ${appState.miningWords.map(w => `<li>${w}</li>`).join("")}
+        </ul>
+    `;
+}
+
+
+// ---------- DICTIONARY MODULE ----------
+
+async function initDictionary() {
+    const { moduleBank } = await loadModule("dictionary");
+    const DICT = moduleBank.WORD_DICT;
+
+    const container = $("dictionarySection");
+    if (!container || !DICT) return;
+
+    container.innerHTML = `
+        <div class="glass-panel quiz-card">
+            <h2>Dictionary</h2>
+            <p>Search for a word.</p>
+
+            <div class="dictionary-controls" style="margin-top:10px;">
+                <input id="dict-input" class="pill" placeholder="Enter word">
+                <button class="pill" id="dict-search">Search</button>
+            </div>
+
+            <div id="dict-result" style="margin-top:15px;"></div>
+        </div>
+    `;
+
+    const input = $("dict-input");
+    const btn = $("dict-search");
+    const result = $("dict-result");
+
+    btn.onclick = () => {
+        const query = (input.value || "").trim().toLowerCase();
+        if (!query) {
+            result.innerHTML = "<p>Please enter a word.</p>";
+            return;
+        }
+
+        const entry = DICT[query];
+        if (!entry) {
+            result.innerHTML = "<p>No entry found.</p>";
+            return;
+        }
+
+        result.innerHTML = `
+            <p><strong>${query}</strong><br>
+            <em>${entry.definition}</em></p>
+        `;
+    };
+}
+
+// ============================================================
+//  PART 8 — REVIEW + REPEAT PRACTICE + CERTIFICATES + APP INIT
+// ============================================================
+
+import { loadModule } from "./LanguageLoader.js";
+
+
+// ---------- REVIEW MODULE (Mistake Retry System) ----------
+
+function initReview() {
+    const container = $("reviewSection");
+    if (!container) return;
+
+    if (appState.mistakes.length === 0) {
+        container.innerHTML = `
+            <div class="glass-panel quiz-card">
+                <h2>Review</h2>
+                <p>No mistakes yet. Great job!</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="glass-panel quiz-card">
+            <h2>Review Mistakes</h2>
+            <p>Retry the words or phrases you missed.</p>
+
+            <ul id="review-list" class="review-list">
+                ${appState.mistakes.map((m, i) => `
+                    <li>
+                        ${m}
+                        <button class="pill review-retry" data-index="${i}">
+                            Retry
+                        </button>
+                    </li>
+                `).join("")}
+            </ul>
+        </div>
+    `;
+
+    document.querySelectorAll(".review-retry").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const idx = parseInt(btn.dataset.index, 10);
+            const word = appState.mistakes[idx];
+
+            speakText(word);
+
+            // Remove mistake after retry
+            appState.mistakes.splice(idx, 1);
+            updateProgressMeters();
+            initReview(); // re-render
+        });
+    });
+}
+
+
+// ---------- REPEAT PRACTICE MODULE (Audio Shadowing) ----------
+
+async function initRepeat() {
+    const { moduleBank } = await loadModule("repeat");
+    const REPEAT_BANK = moduleBank.default || moduleBank;
+
+    const container = $("repeatSection");
+    if (!container || !REPEAT_BANK) return;
+
+    const levelData = REPEAT_BANK[appState.activeLevel];
+    if (!levelData || !Array.isArray(levelData)) {
+        container.innerHTML = "<p>No repeat practice data for this level.</p>";
+        return;
+    }
+
+    const phrase = levelData[0];
+
+    container.innerHTML = `
+        <div class="glass-panel quiz-card">
+            <h2>Repeat Practice — Level ${appState.activeLevel}</h2>
+            <p>Listen and repeat aloud.</p>
+
+            <div class="repeat-line">
+                <strong>${phrase}</strong>
+            </div>
+
+            <div class="repeat-controls" style="margin-top:10px;">
+                <button class="pill" id="repeat-play">Play</button>
+            </div>
+        </div>
+    `;
+
+    $("repeat-play").onclick = () => {
+        speakText(phrase);
+        addXP(1);
+        addScore(1);
+        updateProgressMeters();
+    };
+}
+
+
+// ---------- CERTIFICATES MODULE ----------
+
+function initCertificates() {
+    const container = $("certificatesSection");
+    if (!container) return;
+
+    const name = appState.certificateName || "Learner";
+
+    container.innerHTML = `
+        <div class="glass-panel quiz-card">
+            <h2>Certificate</h2>
+            <p>Preview your CEFR certificate.</p>
+
+            <div class="certificate-preview" style="
+                margin-top:15px;
+                padding:20px;
+                border:2px solid #fff;
+                border-radius:10px;
+                text-align:center;
+            ">
+                <h3>Certificate of Achievement</h3>
+                <p>This certifies that</p>
+                <h2>${name}</h2>
+                <p>has completed CEFR Level</p>
+                <h2>${appState.activeLevel}</h2>
+                <p>Total XP: ${totalXP()}</p>
+            </div>
+        </div>
+    `;
+}
+
+
+// ============================================================
+//  FINAL APP INITIALIZATION
+// ============================================================
+
+window.addEventListener("DOMContentLoaded", () => {
+    initTabs();
+    initDashboard();
+});
