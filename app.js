@@ -368,15 +368,6 @@ function initCertificates() {
 //  APP INIT
 // ============================================================
 
-function initTabs() {
-  document.querySelectorAll("[data-tab-target]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const target = btn.dataset.tabTarget;
-      switchTab(target);
-    });
-  });
-}
-
 window.addEventListener("DOMContentLoaded", () => {
   initTabs();
   initDashboard();
