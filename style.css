@@ -1352,3 +1352,32 @@ img, video {
   max-width: 320px;
   margin: 16px auto 0 auto;
 }
+/* Increase hero image size by ~25% */
+.dashboard-hero-img {
+    max-width: 420px !important;
+    margin-bottom: 20px;
+}
+
+/* Reduce name field width */
+#certificateNameInput {
+    max-width: 300px;
+}
+
+/* Tidy spacing */
+#dashboard .ui-panel {
+    margin-bottom: 20px;
+}
+
+#dashboard .dictionary-search-box,
+#dashboard .free-practice-box {
+    min-height: 240px;
+}
+
+#dashboard .ui-progress-grid {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#dashboard #badge-list {
+    margin-top: 10px;
+}
