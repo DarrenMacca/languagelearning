@@ -162,11 +162,53 @@
     <div id="reviewSection" class="appSection ui-container"></div>
     <div id="repeatPracticeSection" class="appSection ui-container"></div>
 
-    <!-- ============================================================
-         CERTIFICATE GENERATOR
-    ============================================================ -->
+   <!-- ============================================================
+     CERTIFICATE GENERATOR
+============================================================ -->
 
-    <div id="certificateGeneratorPage" class="appSection ui-container"></div>
+<div id="certificateGeneratorPage" class="appSection ui-container">
+
+    <div class="ui-certificate">
+
+        <div class="ui-cert-header">
+            <h1 class="ui-cert-title">Certificate of Achievement</h1>
+            <p class="ui-cert-subtitle">This certifies that</p>
+            <h2 id="certStudentName" class="ui-section-title">[Student Name]</h2>
+        </div>
+
+        <div class="ui-cert-layout">
+
+            <!-- LEFT SIDE -->
+            <div class="ui-cert-body">
+                <p>has successfully completed the CEFR level:</p>
+
+                <div id="certLevelBadge" class="ui-cert-level">A1</div>
+
+                <h3 class="ui-section-title" style="margin-top:20px;">Level Descriptor</h3>
+                <p id="certDescriptor">
+                    A1 Descriptor Placeholder
+                </p>
+
+                <h3 class="ui-section-title" style="margin-top:20px;">Completion Date</h3>
+                <p id="certDate">[Date]</p>
+            </div>
+
+            <!-- RIGHT SIDE -->
+            <div class="ui-cert-seal">
+                <img src="images/gold-medal.png" alt="Gold Medal" style="width:90px;height:90px;">
+            </div>
+
+        </div>
+
+        <div class="ui-cert-signature">
+            <p>Issued by: Language Learning Trainer</p>
+            <p>Verification ID: <span id="certID">LLT-XXXXXX</span></p>
+        </div>
+
+    </div>
+
+</div>
+
 
     <!-- SCRIPTS -->
     <script src="LanguageLoader.js"></script>
