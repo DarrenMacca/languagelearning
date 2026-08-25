@@ -23,7 +23,8 @@ const MODULE_FILES = {
 // Load CEFR level file (A1.js, A2.js, B1.js, B2.js)
 async function loadLevelBank(level = activeLevel) {
     const path = `./wordbanks/${activeLanguage}/${level}.js`;
-    return import(path);
+    const raw = await import(path);
+    return raw.default ?? raw;   // normalize default export
 }
 
 // Load module file
@@ -36,11 +37,13 @@ async function loadModuleBank(moduleName) {
 
     if (moduleName === "repeat") {
         const path = `./wordbanks/${activeLanguage}/repeat/${activeLevel}.js`;
-        return import(path);
+        const raw = await import(path);
+        return raw.default ?? raw;
     }
 
     const path = `./wordbanks/${activeLanguage}/${file}`;
-    return import(path);
+    const raw = await import(path);
+    return raw.default ?? raw;   // normalize default export
 }
 
 function setLanguage(lang) {
@@ -52,8 +55,11 @@ function setLevel(level) {
 }
 
 async function loadModule(moduleName) {
-    const levelBank = await loadLevelBank(activeLevel);
-    const moduleBank = await loadModuleBank(moduleName);
+    const levelBankRaw = await loadLevelBank(activeLevel);
+    const moduleBankRaw = await loadModuleBank(moduleName);
+
+    const levelBank = levelBankRaw.default ?? levelBankRaw;
+    const moduleBank = moduleBankRaw.default ?? moduleBankRaw;
 
     return {
         levelBank,
