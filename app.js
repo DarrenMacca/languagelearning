@@ -243,7 +243,8 @@ function playNextListenWord() {
 
 async function initListen() {
   const { moduleBank } = await loadModule("listen");
-  const LISTEN_VOCAB = moduleBank.LISTEN_VOCAB;
+  const LISTEN_VOCAB = moduleBank;
+
 
   const container = $("listenSection");
   if (!container || !LISTEN_VOCAB) return;
@@ -393,7 +394,8 @@ function updateFlashcard() {
 
 async function initFlashcards() {
   const { moduleBank } = await loadModule("flashcards");
-  const PHRASES = moduleBank.CEFR_PHRASES;
+  const PHRASES = moduleBank;
+
 
   const container = $("flashcardsSection");
   if (!container || !PHRASES) return;
@@ -421,7 +423,8 @@ async function initFlashcards() {
 
 async function initQuiz() {
   const { moduleBank } = await loadModule("quiz");
-  const DISRUPTORS = moduleBank.DISRUPTORS;
+  const DISRUPTORS = moduleBank;
+
 
   const container = $("quizSection");
   if (!container || !DISRUPTORS) return;
@@ -474,7 +477,8 @@ async function initQuiz() {
 
 async function initBuild() {
   const { moduleBank } = await loadModule("build");
-  const CHOICES = moduleBank.CEFR_SENTENCE_CHOICES;
+  const CHOICES = moduleBank;
+
 
   const container = $("buildSection");
   if (!container || !CHOICES) return;
@@ -527,7 +531,8 @@ async function initBuild() {
 
 async function initSentence() {
   const { moduleBank } = await loadModule("sentence");
-  const SENTENCES = moduleBank.CEFR_SENTENCES;
+  const SENTENCES = moduleBank;
+
 
   const container = $("sentenceSection");
   if (!container || !SENTENCES) return;
@@ -570,7 +575,8 @@ async function initSentence() {
 
 async function initConversation() {
   const { moduleBank } = await loadModule("conversation");
-  const CONVO = moduleBank.CEFR_CONVERSATION;
+  const CONVO = moduleBank;
+
 
   const container = $("conversationSection");
   if (!container || !CONVO) return;
@@ -606,7 +612,8 @@ async function initConversation() {
 
 async function initGrammar() {
   const { moduleBank } = await loadModule("grammar");
-  const LEVELS = moduleBank.CEFR_LEVELS;
+  const LEVELS = moduleBank;
+
 
   const container = $("grammarSection");
   if (!container || !LEVELS) return;
@@ -634,7 +641,8 @@ async function initGrammar() {
 
 async function initMining() {
   const { moduleBank } = await loadModule("mining");
-  const MINING = moduleBank.mining_references;
+  const MINING = moduleBank;
+
 
   const container = $("miningSection");
   if (!container || !MINING) return;
@@ -685,7 +693,8 @@ function renderMiningList(listEl) {
 
 async function initDictionary() {
   const { moduleBank } = await loadModule("dictionary");
-  const DICT = moduleBank.WORD_DICT;
+  const DICT = moduleBank;
+
 
   const container = $("dictionarySection");
   if (!container || !DICT) return;
