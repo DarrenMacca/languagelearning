@@ -4,6 +4,7 @@
 
 import { setLanguage, setLevel, loadModule } from "./LanguageLoader.js";
 
+
 // ---------- GLOBAL STATE ----------
 
 const appState = {
