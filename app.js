@@ -26,16 +26,12 @@ const appState = {
 };
 
 // ============================================================
-//  PART 1 — CORE STATE + HELPERS
+//  BASIC HELPERS
 // ============================================================
-
-// ---------- BASIC DOM HELPER ----------
 
 function $(id) {
   return document.getElementById(id);
 }
-
-// ---------- SPEECH SYNTHESIS HELPER ----------
 
 function speakText(text) {
   const utter = new SpeechSynthesisUtterance(text);
@@ -48,12 +44,9 @@ function speakText(text) {
     "es-ES";
 
   utter.rate = appState.speechRate;
-
   speechSynthesis.cancel();
   speechSynthesis.speak(utter);
 }
-
-// ---------- XP / SCORE / STREAK HELPERS ----------
 
 function addXP(amount = 1) {
   appState.levelStats[appState.activeLevel].xp += amount;
@@ -73,10 +66,8 @@ function totalXP() {
 }
 
 // ============================================================
-//  PART 2 — TAB ROUTER + LANGUAGE + CEFR CONTROLS
+//  TAB ROUTER
 // ============================================================
-
-// ---------- TAB SWITCHER ----------
 
 function switchTab(tabId) {
   appState.activeTab = tabId;
@@ -85,6 +76,7 @@ function switchTab(tabId) {
     sec.style.display = sec.id === tabId ? "block" : "none";
   });
 
+  if (tabId === "dashboard") initDashboard();
   if (tabId === "listenSection") initListen();
   if (tabId === "flashcardsSection") initFlashcards();
   if (tabId === "quizSection") initQuiz();
@@ -99,8 +91,6 @@ function switchTab(tabId) {
   if (tabId === "certificatesSection") initCertificates();
 }
 
-// ---------- TAB BUTTONS ----------
-
 function initTabs() {
   document.querySelectorAll("[data-tab-target]").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -110,42 +100,35 @@ function initTabs() {
   });
 }
 
-// ---------- LANGUAGE SWITCHING (es, fr, nl) ----------
+// ============================================================
+//  LANGUAGE + LEVEL + AUDIO
+// ============================================================
 
 function initLanguageControls() {
   document.querySelectorAll("[data-lang]").forEach(btn => {
     btn.addEventListener("click", () => {
       const lang = btn.dataset.lang;
-
       appState.activeLanguage = lang;
       setLanguage(lang);
-
       switchTab(appState.activeTab);
     });
   });
 }
-
-// ---------- CEFR LEVEL SWITCHING (A1–B2) ----------
 
 function initLevelControls() {
   document.querySelectorAll("[data-level]").forEach(btn => {
     btn.addEventListener("click", () => {
       const level = btn.dataset.level;
-
       appState.activeLevel = level;
       setLevel(level);
-
       switchTab(appState.activeTab);
     });
   });
 }
 
-// ---------- AUDIO SPEED SLIDER ----------
-
 function initAudioSpeed() {
   const slider = $("audioSpeed");
   const label = $("audioSpeedValue");
-
   if (!slider || !label) return;
 
   slider.addEventListener("input", () => {
@@ -155,10 +138,8 @@ function initAudioSpeed() {
 }
 
 // ============================================================
-//  PART 3 — DASHBOARD + PROGRESS SYSTEM + CERTIFICATE NAME
+//  DASHBOARD + PROGRESS + CERTIFICATE NAME
 // ============================================================
-
-// ---------- DASHBOARD INITIALIZER ----------
 
 function initDashboard() {
   switchTab("dashboard");
@@ -167,16 +148,12 @@ function initDashboard() {
   initLanguageControls();
   initLevelControls();
   initCertificateName();
-
   updateProgressMeters();
 }
-
-// ---------- CERTIFICATE NAME SAVING ----------
 
 function initCertificateName() {
   const input = $("certificateNameInput");
   const btn = $("saveCertificateName");
-
   if (!input || !btn) return;
 
   if (appState.certificateName.trim() !== "") {
@@ -188,8 +165,6 @@ function initCertificateName() {
     appState.certificateName = name;
   });
 }
-
-// ---------- PROGRESS METER UPDATES ----------
 
 function updateProgressMeters() {
   if ($("quizProgress")) {
@@ -225,7 +200,7 @@ function updateProgressMeters() {
 }
 
 // ============================================================
-//  PART 4 — LISTEN MODULE (FULLY WIRED)
+//  LISTEN MODULE
 // ============================================================
 
 let listenAutoPlay = {
@@ -237,8 +212,8 @@ let listenAutoPlay = {
 
 function speakWord(word) {
   const utter = new SpeechSynthesisUtterance(word);
-
   const lang = appState.activeLanguage;
+
   utter.lang =
     lang === "es" ? "es-ES" :
     lang === "fr" ? "fr-FR" :
@@ -246,7 +221,6 @@ function speakWord(word) {
     "es-ES";
 
   utter.rate = appState.speechRate;
-
   speechSynthesis.cancel();
   speechSynthesis.speak(utter);
 }
@@ -255,7 +229,6 @@ function playNextListenWord() {
   if (!listenAutoPlay.active || listenAutoPlay.paused) return;
 
   const list = listenAutoPlay.list;
-
   if (listenAutoPlay.index >= list.length) {
     listenAutoPlay.active = false;
     return;
@@ -263,7 +236,6 @@ function playNextListenWord() {
 
   const word = list[listenAutoPlay.index];
   speakWord(word);
-
   listenAutoPlay.index++;
 
   setTimeout(() => playNextListenWord(), 200);
@@ -286,12 +258,7 @@ async function initListen() {
     <div class="glass-panel quiz-card">
       <h2>Listen — Level ${appState.activeLevel}</h2>
       <p>Tap a word to hear it, or use the global controls.</p>
-      <div class="listen-player-controls" style="
-        display:flex;
-        gap:6px;
-        flex-wrap:wrap;
-        margin-top:6px;
-      ">
+      <div class="listen-player-controls">
         <button class="pill" id="listen-playall">Play All</button>
         <button class="pill" id="listen-pause">Pause</button>
         <button class="pill" id="listen-resume">Resume</button>
@@ -302,16 +269,10 @@ async function initListen() {
 
   Object.keys(levelData).forEach(categoryName => {
     const words = levelData[categoryName];
-
     html += `
       <div class="glass-panel">
         <h3>${categoryName}</h3>
-        <div class="listen-grid" style="
-          display:grid;
-          grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
-          gap:6px;
-          margin-top:8px;
-        ">
+        <div class="listen-grid">
           ${words.map(word => `
             <button class="pill listen-pill" data-word="${word}">
               ${word}
@@ -355,7 +316,6 @@ async function initListen() {
     btn.addEventListener("click", () => {
       const word = btn.dataset.word;
       speakWord(word);
-
       appState.levelStats[appState.activeLevel].listens++;
       updateProgressMeters();
     });
@@ -363,7 +323,7 @@ async function initListen() {
 }
 
 // ============================================================
-//  PART 5 — FLASHCARDS MODULE (FULLY WIRED)
+//  FLASHCARDS MODULE
 // ============================================================
 
 let flashcards = [];
@@ -381,7 +341,6 @@ function renderFlashcardUI(container) {
     <div class="glass-panel quiz-card" style="text-align:center;">
       <h2>Flashcards — Level ${appState.activeLevel}</h2>
       <p>Tap the card to flip it.</p>
-
       <div id="flashcard" class="flashcard">
         <div class="flashcard-inner">
           <div class="flashcard-front">
@@ -392,13 +351,7 @@ function renderFlashcardUI(container) {
           </div>
         </div>
       </div>
-
-      <div class="flashcard-controls" style="
-        display:flex;
-        justify-content:center;
-        gap:10px;
-        margin-top:15px;
-      ">
+      <div class="flashcard-controls">
         <button class="pill" id="flash-prev">Previous</button>
         <button class="pill" id="flash-next">Next</button>
       </div>
@@ -412,7 +365,6 @@ function setupFlashcardEvents() {
   const card = $("flashcard");
   const prevBtn = $("flash-prev");
   const nextBtn = $("flash-next");
-
   if (!card || !prevBtn || !nextBtn) return;
 
   card.addEventListener("click", () => {
@@ -434,7 +386,6 @@ function updateFlashcard() {
   const container = $("flashcardsSection");
   if (!container) return;
   renderFlashcardUI(container);
-
   addXP(1);
   addScore(1);
   updateProgressMeters();
@@ -461,12 +412,11 @@ async function initFlashcards() {
   }));
 
   flashIndex = 0;
-
   renderFlashcardUI(container);
 }
 
 // ============================================================
-//  PART 6 — QUIZ + BUILD + SENTENCE MODULES
+//  QUIZ + BUILD + SENTENCE MODULES
 // ============================================================
 
 async function initQuiz() {
@@ -488,11 +438,9 @@ async function initQuiz() {
     <div class="glass-panel quiz-card">
       <h2>Quiz — Level ${appState.activeLevel}</h2>
       <p>Select the correct answer.</p>
-
       <div class="quiz-question">
         <strong>${question.prompt}</strong>
       </div>
-
       <div class="quiz-options">
         ${question.options.map((opt, idx) => `
           <button class="pill quiz-option" data-index="${idx}">
@@ -500,8 +448,7 @@ async function initQuiz() {
           </button>
         `).join("")}
       </div>
-
-      <div id="quiz-feedback" style="margin-top:10px;"></div>
+      <div id="quiz-feedback"></div>
     </div>
   `;
 
@@ -544,11 +491,9 @@ async function initBuild() {
     <div class="glass-panel quiz-card">
       <h2>Build — Level ${appState.activeLevel}</h2>
       <p>Choose the correct sentence.</p>
-
       <div class="build-prompt">
         <strong>${item.prompt}</strong>
       </div>
-
       <div class="build-options">
         ${item.options.map((opt, idx) => `
           <button class="pill build-option" data-index="${idx}">
@@ -556,8 +501,7 @@ async function initBuild() {
           </button>
         `).join("")}
       </div>
-
-      <div id="build-feedback" style="margin-top:10px;"></div>
+      <div id="build-feedback"></div>
     </div>
   `;
 
@@ -600,16 +544,13 @@ async function initSentence() {
     <div class="glass-panel quiz-card">
       <h2>Sentence Trainer — Level ${appState.activeLevel}</h2>
       <p>Read and listen to the sentence.</p>
-
       <div class="sentence-block">
         <strong>${sentence.target}</strong>
       </div>
-
       <div class="sentence-translation">
         <em>${sentence.english}</em>
       </div>
-
-      <div class="sentence-controls" style="margin-top:10px;">
+      <div class="sentence-controls">
         <button class="pill" id="sentence-play">Play</button>
       </div>
     </div>
@@ -624,7 +565,7 @@ async function initSentence() {
 }
 
 // ============================================================
-//  PART 7 — CONVERSATION + GRAMMAR + MINING + DICTIONARY
+//  CONVERSATION + GRAMMAR + MINING + DICTIONARY
 // ============================================================
 
 async function initConversation() {
@@ -646,12 +587,10 @@ async function initConversation() {
     <div class="glass-panel quiz-card">
       <h2>Conversation — Level ${appState.activeLevel}</h2>
       <p>Listen and repeat the dialogue.</p>
-
       <div class="conversation-line">
         <strong>${turn.speaker}:</strong> ${turn.text}
       </div>
-
-      <div class="conversation-controls" style="margin-top:10px;">
+      <div class="conversation-controls">
         <button class="pill" id="conversation-play">Play</button>
       </div>
     </div>
@@ -704,13 +643,11 @@ async function initMining() {
     <div class="glass-panel quiz-card">
       <h2>Mining — Level ${appState.activeLevel}</h2>
       <p>Save interesting words or phrases for later review.</p>
-
-      <div class="mining-controls" style="margin-top:10px;">
+      <div class="mining-controls">
         <input id="mining-input" class="pill" placeholder="Type a word or phrase">
         <button class="pill" id="mining-add">Add to Mining</button>
       </div>
-
-      <div id="mining-list" style="margin-top:15px;"></div>
+      <div id="mining-list"></div>
     </div>
   `;
 
@@ -725,6 +662,7 @@ async function initMining() {
     appState.miningWords.push(text);
     input.value = "";
     renderMiningList(list);
+    updateProgressMeters();
   };
 
   renderMiningList(list);
@@ -756,13 +694,11 @@ async function initDictionary() {
     <div class="glass-panel quiz-card">
       <h2>Dictionary</h2>
       <p>Search for a word.</p>
-
-      <div class="dictionary-controls" style="margin-top:10px;">
+      <div class="dictionary-controls">
         <input id="dict-input" class="pill" placeholder="Enter word">
         <button class="pill" id="dict-search">Search</button>
       </div>
-
-      <div id="dict-result" style="margin-top:15px;"></div>
+      <div id="dict-result"></div>
     </div>
   `;
 
@@ -791,10 +727,10 @@ async function initDictionary() {
 }
 
 // ============================================================
-//  PART 8 — REVIEW + REPEAT PRACTICE + CERTIFICATES + APP INIT
+//  REVIEW + REPEAT + CERTIFICATES
 // ============================================================
 
-async function initReview() {
+function initReview() {
   const container = $("reviewSection");
   if (!container) return;
 
@@ -812,7 +748,6 @@ async function initReview() {
     <div class="glass-panel quiz-card">
       <h2>Review Mistakes</h2>
       <p>Retry the words or phrases you missed.</p>
-
       <ul id="review-list" class="review-list">
         ${appState.mistakes.map((m, i) => `
           <li>
@@ -832,7 +767,6 @@ async function initReview() {
       const word = appState.mistakes[idx];
 
       speakText(word);
-
       appState.mistakes.splice(idx, 1);
       updateProgressMeters();
       initReview();
@@ -859,12 +793,10 @@ async function initRepeat() {
     <div class="glass-panel quiz-card">
       <h2>Repeat Practice — Level ${appState.activeLevel}</h2>
       <p>Listen and repeat aloud.</p>
-
       <div class="repeat-line">
         <strong>${phrase}</strong>
       </div>
-
-      <div class="repeat-controls" style="margin-top:10px;">
+      <div class="repeat-controls">
         <button class="pill" id="repeat-play">Play</button>
       </div>
     </div>
@@ -888,14 +820,7 @@ function initCertificates() {
     <div class="glass-panel quiz-card">
       <h2>Certificate</h2>
       <p>Preview your CEFR certificate.</p>
-
-      <div class="certificate-preview" style="
-        margin-top:15px;
-        padding:20px;
-        border:2px solid #fff;
-        border-radius:10px;
-        text-align:center;
-      ">
+      <div class="certificate-preview">
         <h3>Certificate of Achievement</h3>
         <p>This certifies that</p>
         <h2>${name}</h2>
@@ -907,9 +832,11 @@ function initCertificates() {
   `;
 }
 
-// ---------- FINAL APP INITIALIZATION ----------
+// ============================================================
+//  FINAL APP INITIALIZATION
+// ============================================================
 
 window.addEventListener("DOMContentLoaded", () => {
   initTabs();
-  initDashboard();
+  switchTab("dashboard");
 });
