@@ -25,32 +25,28 @@ const appState = {
   certificateName: ""
 };
 
-// ---------- SIMPLE HELPERS ----------
-
-function $(id) {
-  return document.getElementById(id);
-}
-
+// ---------- TAB SWITCHER ----------
 function switchTab(tabId) {
-  appState.activeTab = tabId;
+    appState.activeTab = tabId;
 
-  document.querySelectorAll(".appSection").forEach(sec => {
-    sec.style.display = sec.id === tabId ? "block" : "none";
-  });
+    // show correct section
+    document.querySelectorAll(".appSection").forEach(sec => {
+        sec.style.display = sec.id === tabId ? "block" : "none";
+    });
 
-  // route to module init
-  if (tabId === "listenSection") initListen();
-  if (tabId === "flashcardsSection") initFlashcards();
-  if (tabId === "quizSection") initQuiz();
-  if (tabId === "buildSection") initBuild();
-  if (tabId === "sentenceSection") initSentence();
-  if (tabId === "conversationSection") initConversation();
-  if (tabId === "grammarSection") initGrammar();
-  if (tabId === "miningSection") initMining();
-  if (tabId === "dictionarySection") initDictionary();
-  if (tabId === "reviewSection") initReview();
-  if (tabId === "repeatSection") initRepeat();
-  if (tabId === "certificatesSection") initCertificates();
+    // route to module init
+    if (tabId === "listenSection") initListen();
+    if (tabId === "flashcardsSection") initFlashcards();
+    if (tabId === "quizSection") initQuiz();
+    if (tabId === "buildSection") initBuild();
+    if (tabId === "sentenceSection") initSentence();
+    if (tabId === "conversationSection") initConversation();
+    if (tabId === "grammarSection") initGrammar();
+    if (tabId === "miningSection") initMining();
+    if (tabId === "dictionarySection") initDictionary();
+    if (tabId === "reviewSection") initReview();
+    if (tabId === "repeatSection") initRepeat();
+    if (tabId === "certificatesSection") initCertificates();
 }
 
 // ---------- LANGUAGE + LEVEL ----------
@@ -441,33 +437,6 @@ function totalXP() {
 // ============================================================
 //  PART 2 — TAB ROUTER + LANGUAGE + CEFR CONTROLS
 // ============================================================
-
-// ---------- TAB SWITCHING ----------
-
-function switchTab(tabId) {
-    appState.activeTab = tabId;
-
-    // Show only the selected tab
-    document.querySelectorAll(".appSection").forEach(sec => {
-        sec.style.display = sec.id === tabId ? "block" : "none";
-    });
-
-    // Route to module initializer
-    if (tabId === "dashboard") initDashboard();
-    if (tabId === "listenSection") initListen();
-    if (tabId === "flashcardsSection") initFlashcards();
-    if (tabId === "quizSection") initQuiz();
-    if (tabId === "buildSection") initBuild();
-    if (tabId === "sentenceSection") initSentence();
-    if (tabId === "conversationSection") initConversation();
-    if (tabId === "grammarSection") initGrammar();
-    if (tabId === "miningSection") initMining();
-    if (tabId === "dictionarySection") initDictionary();
-    if (tabId === "reviewSection") initReview();
-    if (tabId === "repeatSection") initRepeat();
-    if (tabId === "certificatesSection") initCertificates();
-}
-
 
 // ---------- TAB BUTTONS ----------
 
