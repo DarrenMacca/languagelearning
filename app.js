@@ -19,7 +19,6 @@ const appState = {
   },
   streakDays: 0,
   scoreRating: 0,
-  dueReviewCount: 0,
   mistakes: [],
   miningWords: [],
   certificateName: ""
@@ -54,10 +53,6 @@ function addXP(amount = 1) {
 
 function addScore(amount = 1) {
   appState.scoreRating += amount;
-}
-
-function incrementStreak() {
-  appState.streakDays += 1;
 }
 
 function totalXP() {
@@ -138,12 +133,10 @@ function initAudioSpeed() {
 }
 
 // ============================================================
-//  DASHBOARD + PROGRESS + CERTIFICATE NAME
+//  DASHBOARD
 // ============================================================
 
 function initDashboard() {
-  switchTab("dashboard");
-
   initAudioSpeed();
   initLanguageControls();
   initLevelControls();
@@ -161,42 +154,24 @@ function initCertificateName() {
   }
 
   btn.addEventListener("click", () => {
-    const name = input.value.trim();
-    appState.certificateName = name;
+    appState.certificateName = input.value.trim();
   });
 }
 
 function updateProgressMeters() {
-  if ($("quizProgress")) {
-    $("quizProgress").textContent =
-      `${appState.levelStats[appState.activeLevel].quizzes}%`;
-  }
+  $("quizProgress").textContent =
+    `${appState.levelStats[appState.activeLevel].quizzes}%`;
 
-  if ($("buildProgress")) {
-    $("buildProgress").textContent =
-      `${appState.levelStats[appState.activeLevel].sentences}%`;
-  }
+  $("buildProgress").textContent =
+    `${appState.levelStats[appState.activeLevel].sentences}%`;
 
-  if ($("sentenceProgress")) {
-    $("sentenceProgress").textContent =
-      `${appState.levelStats[appState.activeLevel].sentences}%`;
-  }
+  $("sentenceProgress").textContent =
+    `${appState.levelStats[appState.activeLevel].sentences}%`;
 
-  if ($("xpProgress")) {
-    $("xpProgress").textContent = `${totalXP()} XP`;
-  }
-
-  if ($("streakCount")) {
-    $("streakCount").textContent = `${appState.streakDays} days`;
-  }
-
-  if ($("scoreRating")) {
-    $("scoreRating").textContent = `${appState.scoreRating} pts`;
-  }
-
-  if ($("dueReview")) {
-    $("dueReview").textContent = `${appState.mistakes.length} words`;
-  }
+  $("xpProgress").textContent = `${totalXP()} XP`;
+  $("streakCount").textContent = `${appState.streakDays} days`;
+  $("scoreRating").textContent = `${appState.scoreRating} pts`;
+  $("dueReview").textContent = `${appState.mistakes.length} words`;
 }
 
 // ============================================================
@@ -211,18 +186,7 @@ let listenAutoPlay = {
 };
 
 function speakWord(word) {
-  const utter = new SpeechSynthesisUtterance(word);
-  const lang = appState.activeLanguage;
-
-  utter.lang =
-    lang === "es" ? "es-ES" :
-    lang === "fr" ? "fr-FR" :
-    lang === "nl" ? "nl-NL" :
-    "es-ES";
-
-  utter.rate = appState.speechRate;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(utter);
+  speakText(word);
 }
 
 function playNextListenWord() {
@@ -245,20 +209,18 @@ async function initListen() {
   const { moduleBank } = await loadModule("listen");
   const LISTEN_VOCAB = moduleBank;
 
-
   const container = $("listenSection");
   if (!container || !LISTEN_VOCAB) return;
 
   const levelData = LISTEN_VOCAB[appState.activeLevel];
   if (!levelData) {
-    container.innerHTML = "<p>No listening data available for this level.</p>";
+    container.innerHTML = "<p>No listening data available.</p>";
     return;
   }
 
   let html = `
     <div class="glass-panel quiz-card">
       <h2>Listen — Level ${appState.activeLevel}</h2>
-      <p>Tap a word to hear it, or use the global controls.</p>
       <div class="listen-player-controls">
         <button class="pill" id="listen-playall">Play All</button>
         <button class="pill" id="listen-pause">Pause</button>
@@ -268,16 +230,14 @@ async function initListen() {
     </div>
   `;
 
-  Object.keys(levelData).forEach(categoryName => {
-    const words = levelData[categoryName];
+  Object.keys(levelData).forEach(category => {
+    const words = levelData[category];
     html += `
       <div class="glass-panel">
-        <h3>${categoryName}</h3>
+        <h3>${category}</h3>
         <div class="listen-grid">
-          ${words.map(word => `
-            <button class="pill listen-pill" data-word="${word}">
-              ${word}
-            </button>
+          ${words.map(w => `
+            <button class="pill listen-pill" data-word="${w}">${w}</button>
           `).join("")}
         </div>
       </div>
@@ -315,8 +275,7 @@ async function initListen() {
 
   document.querySelectorAll(".listen-pill").forEach(btn => {
     btn.addEventListener("click", () => {
-      const word = btn.dataset.word;
-      speakWord(word);
+      speakWord(btn.dataset.word);
       appState.levelStats[appState.activeLevel].listens++;
       updateProgressMeters();
     });
@@ -330,79 +289,16 @@ async function initListen() {
 let flashcards = [];
 let flashIndex = 0;
 
-function renderFlashcardUI(container) {
-  if (!flashcards.length) {
-    container.innerHTML = "<p>No flashcards available for this level.</p>";
-    return;
-  }
-
-  const card = flashcards[flashIndex];
-
-  container.innerHTML = `
-    <div class="glass-panel quiz-card" style="text-align:center;">
-      <h2>Flashcards — Level ${appState.activeLevel}</h2>
-      <p>Tap the card to flip it.</p>
-      <div id="flashcard" class="flashcard">
-        <div class="flashcard-inner">
-          <div class="flashcard-front">
-            <span>${card.english}</span>
-          </div>
-          <div class="flashcard-back">
-            <span>${card[appState.activeLanguage]}</span>
-          </div>
-        </div>
-      </div>
-      <div class="flashcard-controls">
-        <button class="pill" id="flash-prev">Previous</button>
-        <button class="pill" id="flash-next">Next</button>
-      </div>
-    </div>
-  `;
-
-  setupFlashcardEvents();
-}
-
-function setupFlashcardEvents() {
-  const card = $("flashcard");
-  const prevBtn = $("flash-prev");
-  const nextBtn = $("flash-next");
-  if (!card || !prevBtn || !nextBtn) return;
-
-  card.addEventListener("click", () => {
-    card.classList.toggle("flipped");
-  });
-
-  prevBtn.addEventListener("click", () => {
-    flashIndex = (flashIndex - 1 + flashcards.length) % flashcards.length;
-    updateFlashcard();
-  });
-
-  nextBtn.addEventListener("click", () => {
-    flashIndex = (flashIndex + 1) % flashcards.length;
-    updateFlashcard();
-  });
-}
-
-function updateFlashcard() {
-  const container = $("flashcardsSection");
-  if (!container) return;
-  renderFlashcardUI(container);
-  addXP(1);
-  addScore(1);
-  updateProgressMeters();
-}
-
 async function initFlashcards() {
   const { moduleBank } = await loadModule("flashcards");
   const PHRASES = moduleBank;
-
 
   const container = $("flashcardsSection");
   if (!container || !PHRASES) return;
 
   const levelData = PHRASES[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData)) {
-    container.innerHTML = "<p>No flashcards found for this level.</p>";
+  if (!levelData) {
+    container.innerHTML = "<p>No flashcards available.</p>";
     return;
   }
 
@@ -417,21 +313,54 @@ async function initFlashcards() {
   renderFlashcardUI(container);
 }
 
+function renderFlashcardUI(container) {
+  const card = flashcards[flashIndex];
+
+  container.innerHTML = `
+    <div class="glass-panel quiz-card">
+      <h2>Flashcards — Level ${appState.activeLevel}</h2>
+      <div id="flashcard" class="flashcard">
+        <div class="flashcard-inner">
+          <div class="flashcard-front">${card.english}</div>
+          <div class="flashcard-back">${card[appState.activeLanguage]}</div>
+        </div>
+      </div>
+      <div class="flashcard-controls">
+        <button class="pill" id="flash-prev">Previous</button>
+        <button class="pill" id="flash-next">Next</button>
+      </div>
+    </div>
+  `;
+
+  $("flashcard").onclick = () => {
+    $("flashcard").classList.toggle("flipped");
+  };
+
+  $("flash-prev").onclick = () => {
+    flashIndex = (flashIndex - 1 + flashcards.length) % flashcards.length;
+    renderFlashcardUI(container);
+  };
+
+  $("flash-next").onclick = () => {
+    flashIndex = (flashIndex + 1) % flashcards.length;
+    renderFlashcardUI(container);
+  };
+}
+
 // ============================================================
-//  QUIZ + BUILD + SENTENCE MODULES
+//  QUIZ MODULE
 // ============================================================
 
 async function initQuiz() {
   const { moduleBank } = await loadModule("quiz");
   const DISRUPTORS = moduleBank;
 
-
   const container = $("quizSection");
   if (!container || !DISRUPTORS) return;
 
   const levelData = DISRUPTORS[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData)) {
-    container.innerHTML = "<p>No quiz data for this level.</p>";
+  if (!levelData) {
+    container.innerHTML = "<p>No quiz data available.</p>";
     return;
   }
 
@@ -440,15 +369,10 @@ async function initQuiz() {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Quiz — Level ${appState.activeLevel}</h2>
-      <p>Select the correct answer.</p>
-      <div class="quiz-question">
-        <strong>${question.prompt}</strong>
-      </div>
+      <strong>${question.prompt}</strong>
       <div class="quiz-options">
         ${question.options.map((opt, idx) => `
-          <button class="pill quiz-option" data-index="${idx}">
-            ${opt}
-          </button>
+          <button class="pill quiz-option" data-index="${idx}">${opt}</button>
         `).join("")}
       </div>
       <div id="quiz-feedback"></div>
@@ -456,8 +380,8 @@ async function initQuiz() {
   `;
 
   document.querySelectorAll(".quiz-option").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const idx = parseInt(btn.dataset.index, 10);
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.index);
       const feedback = $("quiz-feedback");
 
       if (idx === question.correctIndex) {
@@ -466,26 +390,29 @@ async function initQuiz() {
         addScore(2);
         appState.levelStats[appState.activeLevel].quizzes += 10;
       } else {
-        feedback.textContent = "Try again.";
+        feedback.textContent = "Incorrect.";
         appState.mistakes.push(question.prompt);
       }
 
       updateProgressMeters();
-    });
+    };
   });
 }
+
+// ============================================================
+//  BUILD MODULE
+// ============================================================
 
 async function initBuild() {
   const { moduleBank } = await loadModule("build");
   const CHOICES = moduleBank;
 
-
   const container = $("buildSection");
   if (!container || !CHOICES) return;
 
   const levelData = CHOICES[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData)) {
-    container.innerHTML = "<p>No build data for this level.</p>";
+  if (!levelData) {
+    container.innerHTML = "<p>No build data available.</p>";
     return;
   }
 
@@ -494,15 +421,10 @@ async function initBuild() {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Build — Level ${appState.activeLevel}</h2>
-      <p>Choose the correct sentence.</p>
-      <div class="build-prompt">
-        <strong>${item.prompt}</strong>
-      </div>
+      <strong>${item.prompt}</strong>
       <div class="build-options">
         ${item.options.map((opt, idx) => `
-          <button class="pill build-option" data-index="${idx}">
-            ${opt}
-          </button>
+          <button class="pill build-option" data-index="${idx}">${opt}</button>
         `).join("")}
       </div>
       <div id="build-feedback"></div>
@@ -510,36 +432,39 @@ async function initBuild() {
   `;
 
   document.querySelectorAll(".build-option").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const idx = parseInt(btn.dataset.index, 10);
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.index);
       const feedback = $("build-feedback");
 
       if (idx === item.correctIndex) {
-        feedback.textContent = "Correct sentence!";
+        feedback.textContent = "Correct!";
         addXP(2);
         addScore(2);
         appState.levelStats[appState.activeLevel].sentences += 10;
       } else {
-        feedback.textContent = "Not quite. Try again.";
+        feedback.textContent = "Incorrect.";
         appState.mistakes.push(item.prompt);
       }
 
       updateProgressMeters();
-    });
+    };
   });
 }
+
+// ============================================================
+//  SENTENCE MODULE
+// ============================================================
 
 async function initSentence() {
   const { moduleBank } = await loadModule("sentence");
   const SENTENCES = moduleBank;
 
-
   const container = $("sentenceSection");
   if (!container || !SENTENCES) return;
 
   const levelData = SENTENCES[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData)) {
-    container.innerHTML = "<p>No sentence data for this level.</p>";
+  if (!levelData) {
+    container.innerHTML = "<p>No sentence data available.</p>";
     return;
   }
 
@@ -548,16 +473,9 @@ async function initSentence() {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Sentence Trainer — Level ${appState.activeLevel}</h2>
-      <p>Read and listen to the sentence.</p>
-      <div class="sentence-block">
-        <strong>${sentence.target}</strong>
-      </div>
-      <div class="sentence-translation">
-        <em>${sentence.english}</em>
-      </div>
-      <div class="sentence-controls">
-        <button class="pill" id="sentence-play">Play</button>
-      </div>
+      <strong>${sentence.target}</strong>
+      <em>${sentence.english}</em>
+      <button class="pill" id="sentence-play">Play</button>
     </div>
   `;
 
@@ -570,20 +488,19 @@ async function initSentence() {
 }
 
 // ============================================================
-//  CONVERSATION + GRAMMAR + MINING + DICTIONARY
+//  CONVERSATION MODULE
 // ============================================================
 
 async function initConversation() {
   const { moduleBank } = await loadModule("conversation");
   const CONVO = moduleBank;
 
-
   const container = $("conversationSection");
   if (!container || !CONVO) return;
 
   const levelData = CONVO[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData)) {
-    container.innerHTML = "<p>No conversation data for this level.</p>";
+  if (!levelData) {
+    container.innerHTML = "<p>No conversation data available.</p>";
     return;
   }
 
@@ -592,13 +509,8 @@ async function initConversation() {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Conversation — Level ${appState.activeLevel}</h2>
-      <p>Listen and repeat the dialogue.</p>
-      <div class="conversation-line">
-        <strong>${turn.speaker}:</strong> ${turn.text}
-      </div>
-      <div class="conversation-controls">
-        <button class="pill" id="conversation-play">Play</button>
-      </div>
+      <strong>${turn.speaker}:</strong> ${turn.text}
+      <button class="pill" id="conversation-play">Play</button>
     </div>
   `;
 
@@ -610,39 +522,42 @@ async function initConversation() {
   };
 }
 
+// ============================================================
+//  GRAMMAR MODULE
+// ============================================================
+
 async function initGrammar() {
   const { moduleBank } = await loadModule("grammar");
   const LEVELS = moduleBank;
-
 
   const container = $("grammarSection");
   if (!container || !LEVELS) return;
 
   const levelData = LEVELS[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData)) {
-    container.innerHTML = "<p>No grammar data for this level.</p>";
+  if (!levelData) {
+    container.innerHTML = "<p>No grammar data available.</p>";
     return;
   }
 
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Grammar — Level ${appState.activeLevel}</h2>
-      <ul class="grammar-list">
+      <ul>
         ${levelData.map(rule => `
-          <li>
-            <strong>${rule.title}</strong><br>
-            <span>${rule.explanation}</span>
-          </li>
+          <li><strong>${rule.title}</strong><br>${rule.explanation}</li>
         `).join("")}
       </ul>
     </div>
   `;
 }
 
+// ============================================================
+//  MINING MODULE
+// ============================================================
+
 async function initMining() {
   const { moduleBank } = await loadModule("mining");
   const MINING = moduleBank;
-
 
   const container = $("miningSection");
   if (!container || !MINING) return;
@@ -650,34 +565,26 @@ async function initMining() {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Mining — Level ${appState.activeLevel}</h2>
-      <p>Save interesting words or phrases for later review.</p>
-      <div class="mining-controls">
-        <input id="mining-input" class="pill" placeholder="Type a word or phrase">
-        <button class="pill" id="mining-add">Add to Mining</button>
-      </div>
+      <input id="mining-input" class="pill" placeholder="Type a word">
+      <button class="pill" id="mining-add">Add</button>
       <div id="mining-list"></div>
     </div>
   `;
 
-  const input = $("mining-input");
-  const addBtn = $("mining-add");
-  const list = $("mining-list");
-
-  addBtn.onclick = () => {
-    const text = (input.value || "").trim();
+  $("mining-add").onclick = () => {
+    const text = $("mining-input").value.trim();
     if (!text) return;
 
     appState.miningWords.push(text);
-    input.value = "";
-    renderMiningList(list);
-    updateProgressMeters();
+    $("mining-input").value = "";
+    renderMiningList();
   };
 
-  renderMiningList(list);
+  renderMiningList();
 }
 
-function renderMiningList(listEl) {
-  if (!listEl) return;
+function renderMiningList() {
+  const listEl = $("mining-list");
 
   if (!appState.miningWords.length) {
     listEl.innerHTML = "<p>No mined items yet.</p>";
@@ -691,161 +598,9 @@ function renderMiningList(listEl) {
   `;
 }
 
+// ============================================================
+//  DICTIONARY MODULE
+// ============================================================
+
 async function initDictionary() {
-  const { moduleBank } = await loadModule("dictionary");
-  const DICT = moduleBank;
-
-
-  const container = $("dictionarySection");
-  if (!container || !DICT) return;
-
-  container.innerHTML = `
-    <div class="glass-panel quiz-card">
-      <h2>Dictionary</h2>
-      <p>Search for a word.</p>
-      <div class="dictionary-controls">
-        <input id="dict-input" class="pill" placeholder="Enter word">
-        <button class="pill" id="dict-search">Search</button>
-      </div>
-      <div id="dict-result"></div>
-    </div>
-  `;
-
-  const input = $("dict-input");
-  const btn = $("dict-search");
-  const result = $("dict-result");
-
-  btn.onclick = () => {
-    const query = (input.value || "").trim().toLowerCase();
-    if (!query) {
-      result.innerHTML = "<p>Please enter a word.</p>";
-      return;
-    }
-
-    const entry = DICT[query];
-    if (!entry) {
-      result.innerHTML = "<p>No entry found.</p>";
-      return;
-    }
-
-    result.innerHTML = `
-      <p><strong>${query}</strong><br>
-      <em>${entry.definition}</em></p>
-    `;
-  };
-}
-
-// ============================================================
-//  REVIEW + REPEAT + CERTIFICATES
-// ============================================================
-
-function initReview() {
-  const container = $("reviewSection");
-  if (!container) return;
-
-  if (appState.mistakes.length === 0) {
-    container.innerHTML = `
-      <div class="glass-panel quiz-card">
-        <h2>Review</h2>
-        <p>No mistakes yet. Great job!</p>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = `
-    <div class="glass-panel quiz-card">
-      <h2>Review Mistakes</h2>
-      <p>Retry the words or phrases you missed.</p>
-      <ul id="review-list" class="review-list">
-        ${appState.mistakes.map((m, i) => `
-          <li>
-            ${m}
-            <button class="pill review-retry" data-index="${i}">
-              Retry
-            </button>
-          </li>
-        `).join("")}
-      </ul>
-    </div>
-  `;
-
-  document.querySelectorAll(".review-retry").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const idx = parseInt(btn.dataset.index, 10);
-      const word = appState.mistakes[idx];
-
-      speakText(word);
-      appState.mistakes.splice(idx, 1);
-      updateProgressMeters();
-      initReview();
-    });
-  });
-}
-
-async function initRepeat() {
-  const { moduleBank } = await loadModule("repeat");
-  const REPEAT_BANK = moduleBank;
-
-  const container = $("repeatSection");
-  if (!container || !REPEAT_BANK) return;
-
-  const levelData = REPEAT_BANK[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData)) {
-    container.innerHTML = "<p>No repeat practice data for this level.</p>";
-    return;
-  }
-
-  const phrase = levelData[0];
-
-  container.innerHTML = `
-    <div class="glass-panel quiz-card">
-      <h2>Repeat Practice — Level ${appState.activeLevel}</h2>
-      <p>Listen and repeat aloud.</p>
-      <div class="repeat-line">
-        <strong>${phrase}</strong>
-      </div>
-      <div class="repeat-controls">
-        <button class="pill" id="repeat-play">Play</button>
-      </div>
-    </div>
-  `;
-
-  $("repeat-play").onclick = () => {
-    speakText(phrase);
-    addXP(1);
-    addScore(1);
-    updateProgressMeters();
-  };
-}
-
-function initCertificates() {
-  const container = $("certificatesSection");
-  if (!container) return;
-
-  const name = appState.certificateName || "Learner";
-
-  container.innerHTML = `
-    <div class="glass-panel quiz-card">
-      <h2>Certificate</h2>
-      <p>Preview your CEFR certificate.</p>
-      <div class="certificate-preview">
-        <h3>Certificate of Achievement</h3>
-        <p>This certifies that</p>
-        <h2>${name}</h2>
-        <p>has completed CEFR Level</p>
-        <h2>${appState.activeLevel}</h2>
-        <p>Total XP: ${totalXP()}</p>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-//  FINAL APP INITIALIZATION
-// ============================================================
-
-window.addEventListener("DOMContentLoaded", () => {
-  initTabs();
-  switchTab("dashboard");
-});
+  const { moduleBank } = await loadModule
