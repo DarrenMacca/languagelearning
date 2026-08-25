@@ -17,8 +17,8 @@ const MODULE_FILES = {
     grammar: "CEFR_LEVELS.js",
     mining: "mining_references.js",
     dictionary: "WORD_DICT.js",
-    review: "repeat",
-    repeat: "repeat"
+    review: null,        // review uses mistakes[] only
+    repeat: "repeat"     // repeat loads repeat/A1.js etc
 };
 
 // Load CEFR level file (A1.js, A2.js, B1.js, B2.js)
@@ -31,7 +31,12 @@ async function loadLevelBank(level = activeLevel) {
 async function loadModuleBank(moduleName) {
     const file = MODULE_FILES[moduleName];
 
-    // Repeat practice uses folder structure
+    // REVIEW MODE: no wordbank needed
+    if (moduleName === "review") {
+        return { reviewMode: true };
+    }
+
+    // REPEAT MODE: uses folder structure
     if (moduleName === "repeat") {
         const path = `wordbanks/${activeLanguage}/repeat/${activeLevel}.js`;
         return import(`../${path}`);
@@ -40,6 +45,7 @@ async function loadModuleBank(moduleName) {
     const path = `wordbanks/${activeLanguage}/${file}`;
     return import(`../${path}`);
 }
+
 
 // Change language
 function setLanguage(lang) {
