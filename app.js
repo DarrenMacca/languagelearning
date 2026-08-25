@@ -390,29 +390,6 @@ window.addEventListener("DOMContentLoaded", () => {
 //  PART 1 — CORE STATE + HELPERS
 // ============================================================
 
-// ---------- GLOBAL APPLICATION STATE ----------
-
-const appState = {
-    activeTab: "dashboard",      // current visible tab
-    activeLanguage: "es",        // "es", "fr", "nl"
-    activeLevel: "A1",           // "A1", "A2", "B1", "B2"
-    speechRate: 1.0,             // global audio speed
-
-    // CEFR progress tracking
-    levelStats: {
-        A1: { xp: 0, quizzes: 0, sentences: 0, listens: 0 },
-        A2: { xp: 0, quizzes: 0, sentences: 0, listens: 0 },
-        B1: { xp: 0, quizzes: 0, sentences: 0, listens: 0 },
-        B2: { xp: 0, quizzes: 0, sentences: 0, listens: 0 }
-    },
-
-    streakDays: 0,
-    scoreRating: 0,
-
-    mistakes: [],          // REVIEW mode uses this
-    miningWords: [],       // MINING mode uses this
-    certificateName: "",   // used in Certificates tab
-};
 
 
 // ---------- BASIC DOM HELPERS ----------
