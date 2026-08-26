@@ -307,30 +307,38 @@ function playNextListenWord() {
   speechSynthesis.speak(utter);
 }
 
-
 async function initListen() {
   const container = $("listenSection");
   if (!container) return;
 
   let moduleBank;
   try {
-    const loaded = await loadModule("listen");
+    const loaded = await loadModule("levels");   // IMPORTANT
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load listening data.</p>";
     return;
   }
 
-  const LISTEN_VOCAB = moduleBank;
-  const levelData = LISTEN_VOCAB[appState.activeLevel];
-  if (!levelData) {
+  const LEVELS = moduleBank;
+  const levelData = LEVELS[appState.activeLevel];
+
+  if (!levelData || !Array.isArray(levelData)) {
     container.innerHTML = "<p>No listening data available for this level.</p>";
     return;
   }
 
+  // Group by category
+  const categories = {};
+  levelData.forEach(item => {
+    if (!categories[item.category]) categories[item.category] = [];
+    categories[item.category].push(item);
+  });
+
   let html = `
     <div class="glass-panel quiz-card">
       <h2>Listen — Level ${appState.activeLevel}</h2>
+      <p>Tap a category, then click a word pill to hear it.</p>
       <div class="listen-player-controls">
         <button class="pill" id="listen-playall">Play All</button>
         <button class="pill" id="listen-pause">Pause</button>
@@ -340,14 +348,15 @@ async function initListen() {
     </div>
   `;
 
-  Object.keys(levelData).forEach(category => {
-    const words = levelData[category];
+  Object.keys(categories).forEach(cat => {
     html += `
       <div class="glass-panel">
-        <h3>${category}</h3>
+        <h3>${cat}</h3>
         <div class="listen-grid">
-          ${words.map(w => `
-            <button class="pill listen-pill" data-word="${w}">${w}</button>
+          ${categories[cat].map(w => `
+            <button class="pill listen-pill" data-word="${w.spanish}">
+              ${w.english} — ${w.spanish}
+            </button>
           `).join("")}
         </div>
       </div>
@@ -356,57 +365,43 @@ async function initListen() {
 
   container.innerHTML = html;
 
-  listenAutoPlay.list = Object.values(levelData).flat();
+  // Autoplay list
+  listenAutoPlay.list = levelData.map(w => w.spanish);
 
-  const playAllBtn = $("listen-playall");
-  const pauseBtn = $("listen-pause");
-  const resumeBtn = $("listen-resume");
-  const stopBtn = $("listen-stop");
+  // Controls
+  $("listen-playall").onclick = () => {
+    listenAutoPlay.active = true;
+    listenAutoPlay.paused = false;
+    listenAutoPlay.index = 0;
+    playNextListenWord();
+  };
 
-  if (playAllBtn) {
-    playAllBtn.onclick = () => {
-      listenAutoPlay.active = true;
-      listenAutoPlay.paused = false;
-      listenAutoPlay.index = 0;
-      playNextListenWord();
-      appState.levelStats[appState.activeLevel].listens += listenAutoPlay.list.length;
-      updateProgressMeters();
-    };
-  }
+  $("listen-pause").onclick = () => {
+    listenAutoPlay.paused = true;
+    speechSynthesis.pause();
+  };
 
-  if (pauseBtn) {
-    pauseBtn.onclick = () => {
-      listenAutoPlay.paused = true;
-      speechSynthesis.pause();
-    };
-  }
+  $("listen-resume").onclick = () => {
+    listenAutoPlay.paused = false;
+    speechSynthesis.resume();
+    playNextListenWord();
+  };
 
-  if (resumeBtn) {
-    resumeBtn.onclick = () => {
-      listenAutoPlay.paused = false;
-      speechSynthesis.resume();
-      playNextListenWord();
-    };
-  }
+  $("listen-stop").onclick = () => {
+    listenAutoPlay.active = false;
+    listenAutoPlay.paused = false;
+    listenAutoPlay.index = 0;
+    speechSynthesis.cancel();
+  };
 
-  if (stopBtn) {
-    stopBtn.onclick = () => {
-      listenAutoPlay.active = false;
-      listenAutoPlay.paused = false;
-      listenAutoPlay.index = 0;
-      speechSynthesis.cancel();
-    };
-  }
-
+  // Individual word playback
   document.querySelectorAll(".listen-pill").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const word = btn.dataset.word;
-      speakWord(word);
-      appState.levelStats[appState.activeLevel].listens++;
-      updateProgressMeters();
-    });
+    btn.onclick = () => {
+      speakText(btn.dataset.word);
+    };
   });
 }
+
 
 // ============================================================
 // FLASHCARDS MODULE — Uses Listen words
@@ -421,30 +416,25 @@ async function initFlashcards() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("listen");   // IMPORTANT: use Listen words
+    const loaded = await loadModule("levels");   // IMPORTANT
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load flashcards.</p>";
     return;
   }
 
-  const LISTEN_VOCAB = moduleBank;
-  const levelData = LISTEN_VOCAB[appState.activeLevel];
+  const LEVELS = moduleBank;
+  const levelData = LEVELS[appState.activeLevel];
 
-  if (!levelData) {
+  if (!levelData || !Array.isArray(levelData)) {
     container.innerHTML = "<p>No flashcards available for this level.</p>";
     return;
   }
 
-  // Flatten categories → ["hello", "good morning", ...]
-  const words = Object.values(levelData).flat();
-
-  // Build flashcards from strings
-  flashcards = words.map(word => ({
-    english: word,
-    es: word,   // Spanish site uses TTS translation, not stored translation
-    fr: word,
-    nl: word
+  // Build flashcards
+  flashcards = levelData.map(item => ({
+    english: item.english,
+    spanish: item.spanish
   }));
 
   renderFlashcardWordList(container);
@@ -481,13 +471,11 @@ function renderFlashcardCard() {
   const container = $("flashcard-card-container");
   if (!container || !currentFlashcard) return;
 
-  const backText = currentFlashcard.english; // Spanish site uses TTS translation
-
   container.innerHTML = `
     <div id="flashcard" class="flashcard">
       <div class="flashcard-inner">
         <div class="flashcard-front">${currentFlashcard.english}</div>
-        <div class="flashcard-back">${backText}</div>
+        <div class="flashcard-back">${currentFlashcard.spanish}</div>
       </div>
     </div>
   `;
@@ -497,7 +485,7 @@ function renderFlashcardCard() {
   cardEl.onclick = () => {
     cardEl.classList.toggle("flipped");
     if (cardEl.classList.contains("flipped")) {
-      speakText(backText);
+      speakText(currentFlashcard.spanish);
     }
   };
 }
