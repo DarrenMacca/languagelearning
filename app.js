@@ -1,9 +1,8 @@
 // ============================================================
-//  APP CORE — MULTI-LANGUAGE CEFR PLATFORM
+// APP CORE — MULTI-LANGUAGE CEFR PLATFORM
 // ============================================================
 
 import { setLanguage, setLevel, loadModule } from "./LanguageLoader.js";
-
 
 // ---------- GLOBAL STATE ----------
 
@@ -26,7 +25,7 @@ const appState = {
 };
 
 // ============================================================
-//  BASIC HELPERS
+// BASIC HELPERS
 // ============================================================
 
 function $(id) {
@@ -62,7 +61,7 @@ function totalXP() {
 }
 
 // ============================================================
-//  TAB ROUTER
+// TAB ROUTER
 // ============================================================
 
 function switchTab(tabId) {
@@ -85,6 +84,7 @@ function switchTab(tabId) {
   if (tabId === "reviewSection") initReview();
   if (tabId === "repeatSection") initRepeat();
   if (tabId === "certificatesSection") initCertificates();
+  if (tabId === "certificateGeneratorPage") initCertificatePage();
 }
 
 function initTabs() {
@@ -97,7 +97,7 @@ function initTabs() {
 }
 
 // ============================================================
-//  LANGUAGE + LEVEL + AUDIO
+// LANGUAGE + LEVEL + AUDIO
 // ============================================================
 
 function initLanguageControls() {
@@ -134,7 +134,7 @@ function initAudioSpeed() {
 }
 
 // ============================================================
-//  DASHBOARD
+// DASHBOARD
 // ============================================================
 
 function initDashboard() {
@@ -142,6 +142,9 @@ function initDashboard() {
   initLanguageControls();
   initLevelControls();
   initCertificateName();
+  initSandbox();
+  initDictionaryQuickSearch();
+  initResetAll();
   updateProgressMeters();
 }
 
@@ -160,23 +163,107 @@ function initCertificateName() {
 }
 
 function updateProgressMeters() {
-  $("quizProgress").textContent =
-    `${appState.levelStats[appState.activeLevel].quizzes}%`;
+  const stats = appState.levelStats[appState.activeLevel];
 
-  $("buildProgress").textContent =
-    `${appState.levelStats[appState.activeLevel].sentences}%`;
+  if ($("quizProgress")) $("quizProgress").textContent = `${stats.quizzes}%`;
+  if ($("buildProgress")) $("buildProgress").textContent = `${stats.sentences}%`;
+  if ($("sentenceProgress")) $("sentenceProgress").textContent = `${stats.sentences}%`;
+  if ($("xpProgress")) $("xpProgress").textContent = `${totalXP()} XP`;
+  if ($("streakCount")) $("streakCount").textContent = `${appState.streakDays} days`;
+  if ($("scoreRating")) $("scoreRating").textContent = `${appState.scoreRating} pts`;
+  if ($("dueReview")) $("dueReview").textContent = `${appState.mistakes.length} words`;
+}
 
-  $("sentenceProgress").textContent =
-    `${appState.levelStats[appState.activeLevel].sentences}%`;
+function initResetAll() {
+  const btn = $("resetAll");
+  if (!btn) return;
 
-  $("xpProgress").textContent = `${totalXP()} XP`;
-  $("streakCount").textContent = `${appState.streakDays} days`;
-  $("scoreRating").textContent = `${appState.scoreRating} pts`;
-  $("dueReview").textContent = `${appState.mistakes.length} words`;
+  btn.addEventListener("click", () => {
+    Object.keys(appState.levelStats).forEach(level => {
+      appState.levelStats[level] = { xp: 0, quizzes: 0, sentences: 0, listens: 0 };
+    });
+    appState.streakDays = 0;
+    appState.scoreRating = 0;
+    appState.mistakes = [];
+    appState.miningWords = [];
+    updateProgressMeters();
+    const badgeList = $("badge-list");
+    if (badgeList) badgeList.textContent = "No badges yet. Keep training!";
+  });
 }
 
 // ============================================================
-//  LISTEN MODULE
+// SANDBOX + QUICK DICTIONARY SEARCH
+// ============================================================
+
+function initSandbox() {
+  const promptEl = $("sandboxPrompt");
+  const inputEl = $("sandboxInput");
+  const checkBtn = $("sandboxCheck");
+  const skipBtn = $("sandboxSkip");
+  const outputEl = $("sandboxOutput");
+
+  if (!promptEl || !inputEl || !checkBtn || !skipBtn || !outputEl) return;
+
+  let currentPrompt = { word: "likes", level: "A1", lang: "es", answer: "gusta" };
+
+  promptEl.textContent = `${currentPrompt.word} (${currentPrompt.level})`;
+
+  checkBtn.addEventListener("click", () => {
+    const val = inputEl.value.trim().toLowerCase();
+    if (!val) return;
+
+    if (val === currentPrompt.answer.toLowerCase()) {
+      outputEl.textContent = "Correct!";
+      addXP(1);
+      addScore(1);
+    } else {
+      outputEl.textContent = `Not quite. Expected: ${currentPrompt.answer}`;
+      appState.mistakes.push(currentPrompt.word);
+    }
+    updateProgressMeters();
+  });
+
+  skipBtn.addEventListener("click", () => {
+    outputEl.textContent = "Skipped. Try another one!";
+  });
+}
+
+async function initDictionaryQuickSearch() {
+  const inputEl = $("dictionarySearchInput");
+  const outputEl = $("dictionarySearchOutput");
+  if (!inputEl || !outputEl) return;
+
+  let dictBank = null;
+  try {
+    const { moduleBank } = await loadModule("dictionary");
+    dictBank = moduleBank;
+  } catch (e) {
+    outputEl.textContent = "Dictionary not available.";
+    return;
+  }
+
+  inputEl.addEventListener("input", () => {
+    const query = inputEl.value.trim().toLowerCase();
+    if (!query) {
+      outputEl.textContent = "";
+      return;
+    }
+
+    const entry = dictBank[query];
+    if (!entry) {
+      outputEl.textContent = "No match found.";
+      return;
+    }
+
+    const lang = appState.activeLanguage;
+    const translation = entry[lang] || entry.es || "";
+    outputEl.textContent = translation ? translation : "No translation for this language.";
+  });
+}
+
+// ============================================================
+// LISTEN MODULE
 // ============================================================
 
 let listenAutoPlay = {
@@ -203,19 +290,26 @@ function playNextListenWord() {
   speakWord(word);
   listenAutoPlay.index++;
 
-  setTimeout(() => playNextListenWord(), 200);
+  setTimeout(() => playNextListenWord(), 250);
 }
 
 async function initListen() {
-  const { moduleBank } = await loadModule("listen");
-  const LISTEN_VOCAB = moduleBank;
-
   const container = $("listenSection");
-  if (!container || !LISTEN_VOCAB) return;
+  if (!container) return;
 
+  let moduleBank;
+  try {
+    const loaded = await loadModule("listen");
+    moduleBank = loaded.moduleBank;
+  } catch (e) {
+    container.innerHTML = "<p>Unable to load listening data.</p>";
+    return;
+  }
+
+  const LISTEN_VOCAB = moduleBank;
   const levelData = LISTEN_VOCAB[appState.activeLevel];
   if (!levelData) {
-    container.innerHTML = "<p>No listening data available.</p>";
+    container.innerHTML = "<p>No listening data available for this level.</p>";
     return;
   }
 
@@ -249,34 +343,50 @@ async function initListen() {
 
   listenAutoPlay.list = Object.values(levelData).flat();
 
-  $("listen-playall").onclick = () => {
-    listenAutoPlay.active = true;
-    listenAutoPlay.paused = false;
-    listenAutoPlay.index = 0;
-    playNextListenWord();
-  };
+  const playAllBtn = $("listen-playall");
+  const pauseBtn = $("listen-pause");
+  const resumeBtn = $("listen-resume");
+  const stopBtn = $("listen-stop");
 
-  $("listen-pause").onclick = () => {
-    listenAutoPlay.paused = true;
-    speechSynthesis.pause();
-  };
+  if (playAllBtn) {
+    playAllBtn.onclick = () => {
+      listenAutoPlay.active = true;
+      listenAutoPlay.paused = false;
+      listenAutoPlay.index = 0;
+      playNextListenWord();
+      appState.levelStats[appState.activeLevel].listens += listenAutoPlay.list.length;
+      updateProgressMeters();
+    };
+  }
 
-  $("listen-resume").onclick = () => {
-    listenAutoPlay.paused = false;
-    speechSynthesis.resume();
-    playNextListenWord();
-  };
+  if (pauseBtn) {
+    pauseBtn.onclick = () => {
+      listenAutoPlay.paused = true;
+      speechSynthesis.pause();
+    };
+  }
 
-  $("listen-stop").onclick = () => {
-    listenAutoPlay.active = false;
-    listenAutoPlay.paused = false;
-    listenAutoPlay.index = 0;
-    speechSynthesis.cancel();
-  };
+  if (resumeBtn) {
+    resumeBtn.onclick = () => {
+      listenAutoPlay.paused = false;
+      speechSynthesis.resume();
+      playNextListenWord();
+    };
+  }
+
+  if (stopBtn) {
+    stopBtn.onclick = () => {
+      listenAutoPlay.active = false;
+      listenAutoPlay.paused = false;
+      listenAutoPlay.index = 0;
+      speechSynthesis.cancel();
+    };
+  }
 
   document.querySelectorAll(".listen-pill").forEach(btn => {
     btn.addEventListener("click", () => {
-      speakWord(btn.dataset.word);
+      const word = btn.dataset.word;
+      speakWord(word);
       appState.levelStats[appState.activeLevel].listens++;
       updateProgressMeters();
     });
@@ -284,30 +394,38 @@ async function initListen() {
 }
 
 // ============================================================
-//  FLASHCARDS MODULE
+// FLASHCARDS MODULE
 // ============================================================
 
 let flashcards = [];
 let flashIndex = 0;
 
 async function initFlashcards() {
-  const { moduleBank } = await loadModule("flashcards");
-  const PHRASES = moduleBank;
-
   const container = $("flashcardsSection");
-  if (!container || !PHRASES) return;
+  if (!container) return;
 
-  const levelData = PHRASES[appState.activeLevel];
-  if (!levelData) {
-    container.innerHTML = "<p>No flashcards available.</p>";
+  let moduleBank;
+  try {
+    const loaded = await loadModule("flashcards");
+    moduleBank = loaded.moduleBank;
+  } catch (e) {
+    container.innerHTML = "<p>Unable to load flashcards.</p>";
     return;
   }
 
+  const PHRASES = moduleBank;
+  const levelData = PHRASES[appState.activeLevel];
+  if (!levelData || !Array.isArray(levelData)) {
+    container.innerHTML = "<p>No flashcards available for this level.</p>";
+    return;
+  }
+
+  // Expect entries like { english: "...", spanish: "...", french: "...", dutch: "..." }
   flashcards = levelData.map(entry => ({
-    english: entry.english,
-    es: entry.spanish,
-    fr: entry.french,
-    nl: entry.dutch
+    english: entry.english || "",
+    es: entry.spanish || entry.es || "",
+    fr: entry.french || entry.fr || "",
+    nl: entry.dutch || entry.nl || ""
   }));
 
   flashIndex = 0;
@@ -315,7 +433,13 @@ async function initFlashcards() {
 }
 
 function renderFlashcardUI(container) {
+  if (!flashcards.length) {
+    container.innerHTML = "<p>No flashcards loaded.</p>";
+    return;
+  }
+
   const card = flashcards[flashIndex];
+  const backText = card[appState.activeLanguage] || card.es || "";
 
   container.innerHTML = `
     <div class="glass-panel quiz-card">
@@ -323,7 +447,7 @@ function renderFlashcardUI(container) {
       <div id="flashcard" class="flashcard">
         <div class="flashcard-inner">
           <div class="flashcard-front">${card.english}</div>
-          <div class="flashcard-back">${card[appState.activeLanguage]}</div>
+          <div class="flashcard-back">${backText}</div>
         </div>
       </div>
       <div class="flashcard-controls">
@@ -333,35 +457,52 @@ function renderFlashcardUI(container) {
     </div>
   `;
 
-  $("flashcard").onclick = () => {
-    $("flashcard").classList.toggle("flipped");
-  };
+  const cardEl = $("flashcard");
+  const prevBtn = $("flash-prev");
+  const nextBtn = $("flash-next");
 
-  $("flash-prev").onclick = () => {
-    flashIndex = (flashIndex - 1 + flashcards.length) % flashcards.length;
-    renderFlashcardUI(container);
-  };
+  if (cardEl) {
+    cardEl.onclick = () => {
+      cardEl.classList.toggle("flipped");
+    };
+  }
 
-  $("flash-next").onclick = () => {
-    flashIndex = (flashIndex + 1) % flashcards.length;
-    renderFlashcardUI(container);
-  };
+  if (prevBtn) {
+    prevBtn.onclick = () => {
+      flashIndex = (flashIndex - 1 + flashcards.length) % flashcards.length;
+      renderFlashcardUI(container);
+    };
+  }
+
+  if (nextBtn) {
+    nextBtn.onclick = () => {
+      flashIndex = (flashIndex + 1) % flashcards.length;
+      renderFlashcardUI(container);
+    };
+  }
 }
 
 // ============================================================
-//  QUIZ MODULE
+// QUIZ MODULE
 // ============================================================
 
 async function initQuiz() {
-  const { moduleBank } = await loadModule("quiz");
-  const DISRUPTORS = moduleBank;
-
   const container = $("quizSection");
-  if (!container || !DISRUPTORS) return;
+  if (!container) return;
 
+  let moduleBank;
+  try {
+    const loaded = await loadModule("quiz");
+    moduleBank = loaded.moduleBank;
+  } catch (e) {
+    container.innerHTML = "<p>Unable to load quiz data.</p>";
+    return;
+  }
+
+  const DISRUPTORS = moduleBank;
   const levelData = DISRUPTORS[appState.activeLevel];
-  if (!levelData) {
-    container.innerHTML = "<p>No quiz data available.</p>";
+  if (!levelData || !Array.isArray(levelData) || !levelData.length) {
+    container.innerHTML = "<p>No quiz data available for this level.</p>";
     return;
   }
 
@@ -380,18 +521,19 @@ async function initQuiz() {
     </div>
   `;
 
+  const feedbackEl = $("quiz-feedback");
+
   document.querySelectorAll(".quiz-option").forEach(btn => {
     btn.onclick = () => {
-      const idx = parseInt(btn.dataset.index);
-      const feedback = $("quiz-feedback");
+      const idx = parseInt(btn.dataset.index, 10);
 
       if (idx === question.correctIndex) {
-        feedback.textContent = "Correct!";
+        if (feedbackEl) feedbackEl.textContent = "Correct!";
         addXP(2);
         addScore(2);
         appState.levelStats[appState.activeLevel].quizzes += 10;
       } else {
-        feedback.textContent = "Incorrect.";
+        if (feedbackEl) feedbackEl.textContent = "Incorrect.";
         appState.mistakes.push(question.prompt);
       }
 
@@ -401,19 +543,26 @@ async function initQuiz() {
 }
 
 // ============================================================
-//  BUILD MODULE
+// BUILD MODULE
 // ============================================================
 
 async function initBuild() {
-  const { moduleBank } = await loadModule("build");
-  const CHOICES = moduleBank;
-
   const container = $("buildSection");
-  if (!container || !CHOICES) return;
+  if (!container) return;
 
+  let moduleBank;
+  try {
+    const loaded = await loadModule("build");
+    moduleBank = loaded.moduleBank;
+  } catch (e) {
+    container.innerHTML = "<p>Unable to load build data.</p>";
+    return;
+  }
+
+  const CHOICES = moduleBank;
   const levelData = CHOICES[appState.activeLevel];
-  if (!levelData) {
-    container.innerHTML = "<p>No build data available.</p>";
+  if (!levelData || !Array.isArray(levelData) || !levelData.length) {
+    container.innerHTML = "<p>No build data available for this level.</p>";
     return;
   }
 
@@ -432,18 +581,19 @@ async function initBuild() {
     </div>
   `;
 
+  const feedbackEl = $("build-feedback");
+
   document.querySelectorAll(".build-option").forEach(btn => {
     btn.onclick = () => {
-      const idx = parseInt(btn.dataset.index);
-      const feedback = $("build-feedback");
+      const idx = parseInt(btn.dataset.index, 10);
 
       if (idx === item.correctIndex) {
-        feedback.textContent = "Correct!";
+        if (feedbackEl) feedbackEl.textContent = "Correct!";
         addXP(2);
         addScore(2);
         appState.levelStats[appState.activeLevel].sentences += 10;
       } else {
-        feedback.textContent = "Incorrect.";
+        if (feedbackEl) feedbackEl.textContent = "Incorrect.";
         appState.mistakes.push(item.prompt);
       }
 
@@ -453,19 +603,26 @@ async function initBuild() {
 }
 
 // ============================================================
-//  SENTENCE MODULE
+// SENTENCE MODULE
 // ============================================================
 
 async function initSentence() {
-  const { moduleBank } = await loadModule("sentence");
-  const SENTENCES = moduleBank;
-
   const container = $("sentenceSection");
-  if (!container || !SENTENCES) return;
+  if (!container) return;
 
+  let moduleBank;
+  try {
+    const loaded = await loadModule("sentence");
+    moduleBank = loaded.moduleBank;
+  } catch (e) {
+    container.innerHTML = "<p>Unable to load sentence data.</p>";
+    return;
+  }
+
+  const SENTENCES = moduleBank;
   const levelData = SENTENCES[appState.activeLevel];
-  if (!levelData) {
-    container.innerHTML = "<p>No sentence data available.</p>";
+  if (!levelData || !Array.isArray(levelData) || !levelData.length) {
+    container.innerHTML = "<p>No sentence data available for this level.</p>";
     return;
   }
 
@@ -480,28 +637,38 @@ async function initSentence() {
     </div>
   `;
 
-  $("sentence-play").onclick = () => {
-    speakText(sentence.target);
-    addXP(1);
-    appState.levelStats[appState.activeLevel].sentences += 5;
-    updateProgressMeters();
-  };
+  const playBtn = $("sentence-play");
+  if (playBtn) {
+    playBtn.onclick = () => {
+      speakText(sentence.target);
+      addXP(1);
+      appState.levelStats[appState.activeLevel].sentences += 5;
+      updateProgressMeters();
+    };
+  }
 }
 
 // ============================================================
-//  CONVERSATION MODULE
+// CONVERSATION MODULE
 // ============================================================
 
 async function initConversation() {
-  const { moduleBank } = await loadModule("conversation");
-  const CONVO = moduleBank;
-
   const container = $("conversationSection");
-  if (!container || !CONVO) return;
+  if (!container) return;
 
+  let moduleBank;
+  try {
+    const loaded = await loadModule("conversation");
+    moduleBank = loaded.moduleBank;
+  } catch (e) {
+    container.innerHTML = "<p>Unable to load conversation data.</p>";
+    return;
+  }
+
+  const CONVO = moduleBank;
   const levelData = CONVO[appState.activeLevel];
-  if (!levelData) {
-    container.innerHTML = "<p>No conversation data available.</p>";
+  if (!levelData || !Array.isArray(levelData) || !levelData.length) {
+    container.innerHTML = "<p>No conversation data available for this level.</p>";
     return;
   }
 
@@ -515,28 +682,38 @@ async function initConversation() {
     </div>
   `;
 
-  $("conversation-play").onclick = () => {
-    speakText(turn.text);
-    addXP(2);
-    addScore(1);
-    updateProgressMeters();
-  };
+  const playBtn = $("conversation-play");
+  if (playBtn) {
+    playBtn.onclick = () => {
+      speakText(turn.text);
+      addXP(2);
+      addScore(1);
+      updateProgressMeters();
+    };
+  }
 }
 
 // ============================================================
-//  GRAMMAR MODULE
+// GRAMMAR MODULE
 // ============================================================
 
 async function initGrammar() {
-  const { moduleBank } = await loadModule("grammar");
-  const LEVELS = moduleBank;
-
   const container = $("grammarSection");
-  if (!container || !LEVELS) return;
+  if (!container) return;
 
+  let moduleBank;
+  try {
+    const loaded = await loadModule("grammar");
+    moduleBank = loaded.moduleBank;
+  } catch (e) {
+    container.innerHTML = "<p>Unable to load grammar data.</p>";
+    return;
+  }
+
+  const LEVELS = moduleBank;
   const levelData = LEVELS[appState.activeLevel];
-  if (!levelData) {
-    container.innerHTML = "<p>No grammar data available.</p>";
+  if (!levelData || !Array.isArray(levelData) || !levelData.length) {
+    container.innerHTML = "<p>No grammar data available for this level.</p>";
     return;
   }
 
@@ -553,15 +730,12 @@ async function initGrammar() {
 }
 
 // ============================================================
-//  MINING MODULE
+// MINING MODULE
 // ============================================================
 
 async function initMining() {
-  const { moduleBank } = await loadModule("mining");
-  const MINING = moduleBank;
-
   const container = $("miningSection");
-  if (!container || !MINING) return;
+  if (!container) return;
 
   container.innerHTML = `
     <div class="glass-panel quiz-card">
@@ -572,20 +746,26 @@ async function initMining() {
     </div>
   `;
 
-  $("mining-add").onclick = () => {
-    const text = $("mining-input").value.trim();
-    if (!text) return;
+  const inputEl = $("mining-input");
+  const addBtn = $("mining-add");
 
-    appState.miningWords.push(text);
-    $("mining-input").value = "";
-    renderMiningList();
-  };
+  if (addBtn && inputEl) {
+    addBtn.onclick = () => {
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      appState.miningWords.push(text);
+      inputEl.value = "";
+      renderMiningList();
+    };
+  }
 
   renderMiningList();
 }
 
 function renderMiningList() {
   const listEl = $("mining-list");
+  if (!listEl) return;
 
   if (!appState.miningWords.length) {
     listEl.innerHTML = "<p>No mined items yet.</p>";
@@ -600,8 +780,194 @@ function renderMiningList() {
 }
 
 // ============================================================
-//  DICTIONARY MODULE
+// DICTIONARY MODULE
 // ============================================================
 
 async function initDictionary() {
-  const { moduleBank } = await loadModule
+  const container = $("dictionarySection");
+  if (!container) return;
+
+  let moduleBank;
+  try {
+    const loaded = await loadModule("dictionary");
+    moduleBank = loaded.moduleBank;
+  } catch (e) {
+    container.innerHTML = "<p>Unable to load dictionary.</p>";
+    return;
+  }
+
+  const DICT = moduleBank;
+
+  container.innerHTML = `
+    <div class="glass-panel quiz-card">
+      <h2>Dictionary — Level ${appState.activeLevel}</h2>
+      <input id="dict-input" class="ui-input" placeholder="Type a word (English or target language)">
+      <button class="pill" id="dict-search">Search</button>
+      <div id="dict-output"></div>
+    </div>
+  `;
+
+  const inputEl = $("dict-input");
+  const searchBtn = $("dict-search");
+  const outputEl = $("dict-output");
+
+  if (!inputEl || !searchBtn || !outputEl) return;
+
+  searchBtn.onclick = () => {
+    const query = inputEl.value.trim().toLowerCase();
+    if (!query) {
+      outputEl.textContent = "";
+      return;
+    }
+
+    const entry = DICT[query];
+    if (!entry) {
+      outputEl.textContent = "No entry found.";
+      return;
+    }
+
+    const lang = appState.activeLanguage;
+    const translation = entry[lang] || entry.es || "";
+    outputEl.textContent = translation ? translation : "No translation for this language.";
+  };
+}
+
+// ============================================================
+// REVIEW MODULE
+// ============================================================
+
+function initReview() {
+  const container = $("reviewSection");
+  if (!container) return;
+
+  if (!appState.mistakes.length) {
+    container.innerHTML = `
+      <div class="glass-panel quiz-card">
+        <h2>Review — Level ${appState.activeLevel}</h2>
+        <p>No mistakes yet. Keep training!</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="glass-panel quiz-card">
+      <h2>Review — Level ${appState.activeLevel}</h2>
+      <ul>
+        ${appState.mistakes.map(w => `<li>${w}</li>`).join("")}
+      </ul>
+    </div>
+  `;
+}
+
+// ============================================================
+// REPEAT MODULE
+// ============================================================
+
+async function initRepeat() {
+  const container = $("repeatSection");
+  if (!container) return;
+
+  let moduleBank;
+  try {
+    const loaded = await loadModule("repeat");
+    moduleBank = loaded.moduleBank;
+  } catch (e) {
+    container.innerHTML = "<p>Unable to load repeat practice.</p>";
+    return;
+  }
+
+  const REPEAT_BANK = moduleBank;
+  const items = REPEAT_BANK[appState.activeLevel] || REPEAT_BANK;
+
+  if (!items || !Array.isArray(items) || !items.length) {
+    container.innerHTML = "<p>No repeat items available for this level.</p>";
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="glass-panel quiz-card">
+      <h2>Repeat Practice — Level ${appState.activeLevel}</h2>
+      <div id="repeat-list">
+        ${items.map(w => `
+          <button class="pill repeat-pill" data-word="${w}">${w}</button>
+        `).join("")}
+      </div>
+    </div>
+  `;
+
+  document.querySelectorAll(".repeat-pill").forEach(btn => {
+    btn.onclick = () => {
+      const word = btn.dataset.word;
+      speakText(word);
+      addXP(1);
+      updateProgressMeters();
+    };
+  });
+}
+
+// ============================================================
+// CERTIFICATES MODULE
+// ============================================================
+
+function initCertificates() {
+  const container = $("certificatesSection");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="glass-panel quiz-card">
+      <h2>Certificates</h2>
+      <p>Generate a certificate for your current level.</p>
+      <button class="pill" id="generate-cert">Generate Certificate</button>
+    </div>
+  `;
+
+  const btn = $("generate-cert");
+  if (btn) {
+    btn.onclick = () => {
+      switchTab("certificateGeneratorPage");
+    };
+  }
+}
+
+function initCertificatePage() {
+  const nameEl = $("certStudentName");
+  const levelBadgeEl = $("certLevelBadge");
+  const descriptorEl = $("certDescriptor");
+  const dateEl = $("certDate");
+  const idEl = $("certID");
+
+  if (!nameEl || !levelBadgeEl || !descriptorEl || !dateEl || !idEl) return;
+
+  const name = appState.certificateName || "[Student Name]";
+  const level = appState.activeLevel;
+
+  nameEl.textContent = name;
+  levelBadgeEl.textContent = level;
+
+  const descriptors = {
+    A1: "Can understand and use familiar everyday expressions and very basic phrases.",
+    A2: "Can communicate in simple and routine tasks requiring a simple exchange of information.",
+    B1: "Can deal with most situations likely to arise whilst travelling.",
+    B2: "Can interact with a degree of fluency and spontaneity."
+  };
+
+  descriptorEl.textContent = descriptors[level] || "Level descriptor not available.";
+
+  const today = new Date();
+  dateEl.textContent = today.toLocaleDateString();
+
+  const randomId = `LLT-${Math.floor(Math.random() * 900000 + 100000)}`;
+  idEl.textContent = randomId;
+}
+
+// ============================================================
+// INIT APP
+// ============================================================
+
+function initApp() {
+  initTabs();
+  switchTab("dashboard");
+}
+
+document.addEventListener("DOMContentLoaded", initApp);
