@@ -409,7 +409,7 @@ async function initListen() {
 }
 
 // ============================================================
-// FLASHCARDS MODULE — Spanish-site behavior
+// FLASHCARDS MODULE — Uses Listen words
 // ============================================================
 
 let flashcards = [];
@@ -421,27 +421,30 @@ async function initFlashcards() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("flashcards");
+    const loaded = await loadModule("listen");   // IMPORTANT: use Listen words
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load flashcards.</p>";
     return;
   }
 
-  const PHRASES = moduleBank;
-  const levelData = PHRASES[appState.activeLevel];
+  const LISTEN_VOCAB = moduleBank;
+  const levelData = LISTEN_VOCAB[appState.activeLevel];
 
-  if (!levelData || !Array.isArray(levelData)) {
+  if (!levelData) {
     container.innerHTML = "<p>No flashcards available for this level.</p>";
     return;
   }
 
-  // Normalize entries
-  flashcards = levelData.map(entry => ({
-    english: entry.english || "",
-    es: entry.spanish || entry.es || "",
-    fr: entry.french || entry.fr || "",
-    nl: entry.dutch || entry.nl || ""
+  // Flatten categories → ["hello", "good morning", ...]
+  const words = Object.values(levelData).flat();
+
+  // Build flashcards from strings
+  flashcards = words.map(word => ({
+    english: word,
+    es: word,   // Spanish site uses TTS translation, not stored translation
+    fr: word,
+    nl: word
   }));
 
   renderFlashcardWordList(container);
@@ -478,7 +481,7 @@ function renderFlashcardCard() {
   const container = $("flashcard-card-container");
   if (!container || !currentFlashcard) return;
 
-  const backText = currentFlashcard[appState.activeLanguage] || currentFlashcard.es;
+  const backText = currentFlashcard.english; // Spanish site uses TTS translation
 
   container.innerHTML = `
     <div id="flashcard" class="flashcard">
@@ -498,6 +501,7 @@ function renderFlashcardCard() {
     }
   };
 }
+
 
 // ============================================================
 // QUIZ MODULE
