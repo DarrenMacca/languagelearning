@@ -409,11 +409,11 @@ async function initListen() {
 }
 
 // ============================================================
-// FLASHCARDS MODULE
+// FLASHCARDS MODULE — Spanish-site behavior
 // ============================================================
 
 let flashcards = [];
-let flashIndex = 0;
+let currentFlashcard = null;
 
 async function initFlashcards() {
   const container = $("flashcardsSection");
@@ -430,12 +430,13 @@ async function initFlashcards() {
 
   const PHRASES = moduleBank;
   const levelData = PHRASES[appState.activeLevel];
+
   if (!levelData || !Array.isArray(levelData)) {
     container.innerHTML = "<p>No flashcards available for this level.</p>";
     return;
   }
 
-  // Expect entries like { english: "...", spanish: "...", french: "...", dutch: "..." }
+  // Normalize entries
   flashcards = levelData.map(entry => ({
     english: entry.english || "",
     es: entry.spanish || entry.es || "",
@@ -443,58 +444,59 @@ async function initFlashcards() {
     nl: entry.dutch || entry.nl || ""
   }));
 
-  flashIndex = 0;
-  renderFlashcardUI(container);
+  renderFlashcardWordList(container);
 }
 
-function renderFlashcardUI(container) {
-  if (!flashcards.length) {
-    container.innerHTML = "<p>No flashcards loaded.</p>";
-    return;
-  }
-
-  const card = flashcards[flashIndex];
-  const backText = card[appState.activeLanguage] || card.es || "";
-
+function renderFlashcardWordList(container) {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Flashcards — Level ${appState.activeLevel}</h2>
-      <div id="flashcard" class="flashcard">
-        <div class="flashcard-inner">
-          <div class="flashcard-front">${card.english}</div>
-          <div class="flashcard-back">${backText}</div>
-        </div>
-      </div>
-      <div class="flashcard-controls">
-        <button class="pill" id="flash-prev">Previous</button>
-        <button class="pill" id="flash-next">Next</button>
+      <p>Select a word to reveal the translation.</p>
+      <div id="flashcard-word-grid" class="listen-grid"></div>
+      <div id="flashcard-card-container"></div>
+    </div>
+  `;
+
+  const grid = $("flashcard-word-grid");
+
+  grid.innerHTML = flashcards.map((fc, idx) => `
+    <button class="pill flashcard-pill" data-index="${idx}">
+      ${fc.english}
+    </button>
+  `).join("");
+
+  document.querySelectorAll(".flashcard-pill").forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.index, 10);
+      currentFlashcard = flashcards[idx];
+      renderFlashcardCard();
+    };
+  });
+}
+
+function renderFlashcardCard() {
+  const container = $("flashcard-card-container");
+  if (!container || !currentFlashcard) return;
+
+  const backText = currentFlashcard[appState.activeLanguage] || currentFlashcard.es;
+
+  container.innerHTML = `
+    <div id="flashcard" class="flashcard">
+      <div class="flashcard-inner">
+        <div class="flashcard-front">${currentFlashcard.english}</div>
+        <div class="flashcard-back">${backText}</div>
       </div>
     </div>
   `;
 
   const cardEl = $("flashcard");
-  const prevBtn = $("flash-prev");
-  const nextBtn = $("flash-next");
 
-  if (cardEl) {
-    cardEl.onclick = () => {
-      cardEl.classList.toggle("flipped");
-    };
-  }
-
-  if (prevBtn) {
-    prevBtn.onclick = () => {
-      flashIndex = (flashIndex - 1 + flashcards.length) % flashcards.length;
-      renderFlashcardUI(container);
-    };
-  }
-
-  if (nextBtn) {
-    nextBtn.onclick = () => {
-      flashIndex = (flashIndex + 1) % flashcards.length;
-      renderFlashcardUI(container);
-    };
-  }
+  cardEl.onclick = () => {
+    cardEl.classList.toggle("flipped");
+    if (cardEl.classList.contains("flipped")) {
+      speakText(backText);
+    }
+  };
 }
 
 // ============================================================
@@ -961,10 +963,10 @@ function initCertificatePage() {
   levelBadgeEl.textContent = level;
 
   const descriptors = {
-    A1: "Can understand and use familiar everyday expressions and very basic phrases.",
-    A2: "Can communicate in simple and routine tasks requiring a simple exchange of information.",
-    B1: "Can deal with most situations likely to arise whilst travelling.",
-    B2: "Can interact with a degree of fluency and spontaneity."
+    A1: "Can understand and use very basic everyday expressions to satisfy concrete needs. Can introduce themselves and ask simple questions about personal details.",
+    A2: "Can understand frequently used sentences related to direct areas of relevance like shopping, work, and local geography. Can communicate in simple, routine tasks.",
+    B1: "Can deal with most situations likely to arise while traveling in an area where the language is spoken. Can produce simple connected text on familiar topics and describe experiences, hopes, and ambitions.",
+    B2: "Can understand the main ideas of complex text on concrete and abstract topics. Can interact with a degree of fluency and spontaneity that makes regular interaction with native speakers quite easy."
   };
 
   descriptorEl.textContent = descriptors[level] || "Level descriptor not available.";
