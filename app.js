@@ -287,11 +287,26 @@ function playNextListenWord() {
   }
 
   const word = list[listenAutoPlay.index];
-  speakWord(word);
-  listenAutoPlay.index++;
 
-  setTimeout(() => playNextListenWord(), 250);
+  // IMPORTANT FIX: cancel before speaking
+  speechSynthesis.cancel();
+
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.lang = appState.activeLanguage === "es" ? "es-ES" :
+               appState.activeLanguage === "fr" ? "fr-FR" :
+               appState.activeLanguage === "nl" ? "nl-NL" : "es-ES";
+  utter.rate = appState.speechRate;
+
+  utter.onend = () => {
+    if (!listenAutoPlay.paused) {
+      listenAutoPlay.index++;
+      setTimeout(playNextListenWord, 200);
+    }
+  };
+
+  speechSynthesis.speak(utter);
 }
+
 
 async function initListen() {
   const container = $("listenSection");
