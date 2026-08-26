@@ -104,23 +104,19 @@ function initLanguageControls() {
   const selector = $("language-select");
   if (!selector) return;
 
+  // Keep selector synced with current language
   selector.value = appState.activeLanguage;
 
-  selector.addEventListener("change", async (e) => {
+  selector.addEventListener("change", (e) => {
     const newLang = e.target.value;
 
     appState.activeLanguage = newLang;
     setLanguage(newLang);
 
-    // Reload CEFR levels for the new language
-    await loadModule("levels");
-
-    // Refresh the current tab
+    // Refresh the current tab (this safely reloads Listen, Flashcards, etc.)
     switchTab(appState.activeTab);
   });
 }
-
-
 
 function initLevelControls() {
   document.querySelectorAll("[data-level]").forEach(btn => {
