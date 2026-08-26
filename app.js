@@ -101,15 +101,25 @@ function initTabs() {
 // ============================================================
 
 function initLanguageControls() {
-  document.querySelectorAll("[data-lang]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const lang = btn.dataset.lang;
-      appState.activeLanguage = lang;
-      setLanguage(lang);
-      switchTab(appState.activeTab);
-    });
+  const selector = $("language-select");
+  if (!selector) return;
+
+  selector.value = appState.activeLanguage;
+
+  selector.addEventListener("change", async (e) => {
+    const newLang = e.target.value;
+
+    appState.activeLanguage = newLang;
+    setLanguage(newLang);
+
+    // Reload CEFR modules
+    await loadModule("levels");
+
+    // Refresh the current tab
+    switchTab(appState.activeTab);
   });
 }
+
 
 function initLevelControls() {
   document.querySelectorAll("[data-level]").forEach(btn => {
