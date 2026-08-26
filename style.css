@@ -1381,3 +1381,25 @@ img, video {
 #dashboard #badge-list {
     margin-top: 10px;
 }
+.pill {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: #ffffff22;
+  border: 1px solid #ffffff55;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.pill:hover {
+  background: #ffffff44;
+}
+
+.listen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
