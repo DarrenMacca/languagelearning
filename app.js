@@ -324,7 +324,7 @@ async function initListen() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("levels");   // IMPORTANT
+    const loaded = await loadModule("levels");   // ⭐ FIXED
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load listening data.</p>";
@@ -347,25 +347,25 @@ async function initListen() {
   });
 
   let html = `
-    <div class="glass-panel quiz-card">
-      <h2>Listen — Level ${appState.activeLevel}</h2>
+    <div class="ui-panel">
+      <h2 class="ui-section-title">Listen — Level ${appState.activeLevel}</h2>
       <p>Tap a category, then click a word pill to hear it.</p>
-      <div class="listen-player-controls">
-        <button class="pill" id="listen-playall">Play All</button>
-        <button class="pill" id="listen-pause">Pause</button>
-        <button class="pill" id="listen-resume">Resume</button>
-        <button class="pill" id="listen-stop">Stop</button>
+      <div class="u-row u-gap-sm">
+        <button class="ui-pill" id="listen-playall">Play All</button>
+        <button class="ui-pill" id="listen-pause">Pause</button>
+        <button class="ui-pill" id="listen-resume">Resume</button>
+        <button class="ui-pill" id="listen-stop">Stop</button>
       </div>
     </div>
   `;
 
   Object.keys(categories).forEach(cat => {
     html += `
-      <div class="glass-panel">
+      <div class="ui-panel">
         <h3>${cat}</h3>
         <div class="listen-grid">
           ${categories[cat].map(w => `
-            <button class="pill listen-pill" data-word="${w.spanish}">
+            <button class="ui-pill listen-pill" data-word="${w.spanish}">
               ${w.english} — ${w.spanish}
             </button>
           `).join("")}
