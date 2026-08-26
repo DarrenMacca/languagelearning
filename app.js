@@ -112,13 +112,14 @@ function initLanguageControls() {
     appState.activeLanguage = newLang;
     setLanguage(newLang);
 
-    // Reload CEFR modules
+    // Reload CEFR levels for the new language
     await loadModule("levels");
 
     // Refresh the current tab
     switchTab(appState.activeTab);
   });
 }
+
 
 
 function initLevelControls() {
