@@ -15,13 +15,14 @@ const MODULE_FILES = {
     conversation: "CEFR_LEVELS.js",
     conversationAudio: "CEFR_LEVELS.js",
     grammar: "CEFR_LEVELS.js",
-    mining: "CEFR_LEVELS.js",
-    dictionary: "CEFR_LEVELS.js",
+
+    // FIXED
+    mining: "mining_references.js",
+    dictionary: "WORD_DICT.js",
+
     review: null,
     repeat: "repeat"
 };
-
-
 
 // Load unified CEFR file
 async function loadLevelBank() {
