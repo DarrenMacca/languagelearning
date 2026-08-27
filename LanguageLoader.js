@@ -1,30 +1,31 @@
 // ============================================================
-// MULTI-LANGUAGE + MULTI-MODULE LOADER
+// MULTI-LANGUAGE CEFR LOADER (Unified CEFR System)
 // ============================================================
 
 let activeLanguage = "es";   // default
 let activeLevel = "A1";      // default
 
+// All modules now use CEFR_LEVELS.js
 const MODULE_FILES = {
-    listen: "LISTEN_VOCAB.js",
-    flashcards: "CEFR_PHRASES.js",
-    quiz: "DISRUPTORS.js",
-    build: "CEFR_SENTENCE_CHOICES.js",
-    sentence: "CEFR_SENTENCES.js",
-    conversation: "CEFR_CONVERSATION.js",
-    conversationAudio: "CEFR_CONVERSATION_AUDIO.js",
+    listen: "CEFR_LEVELS.js",
+    flashcards: "CEFR_LEVELS.js",
+    quiz: "CEFR_LEVELS.js",
+    build: "CEFR_LEVELS.js",
+    sentence: "CEFR_LEVELS.js",
+    conversation: "CEFR_LEVELS.js",
+    conversationAudio: "CEFR_LEVELS.js",
     grammar: "CEFR_LEVELS.js",
-    mining: "mining_references.js",
-    dictionary: "WORD_DICT.js",
+    mining: "CEFR_LEVELS.js",
+    dictionary: "CEFR_LEVELS.js",
     review: null,
     repeat: "repeat"
 };
 
-// Load CEFR level file (A1.js, A2.js, B1.js, B2.js)
-async function loadLevelBank(level = activeLevel) {
-    const path = `./wordbanks/${activeLanguage}/${level}.js`;
+// Load unified CEFR file
+async function loadLevelBank() {
+    const path = `./wordbanks/${activeLanguage}/CEFR_LEVELS.js`;
     const raw = await import(path);
-    return raw.default ?? raw;   // normalize default export
+    return raw.default ?? raw;
 }
 
 // Load module file
@@ -41,9 +42,10 @@ async function loadModuleBank(moduleName) {
         return raw.default ?? raw;
     }
 
+    // All other modules use CEFR_LEVELS.js
     const path = `./wordbanks/${activeLanguage}/${file}`;
     const raw = await import(path);
-    return raw.default ?? raw;   // normalize default export
+    return raw.default ?? raw;
 }
 
 function setLanguage(lang) {
@@ -55,11 +57,8 @@ function setLevel(level) {
 }
 
 async function loadModule(moduleName) {
-    const levelBankRaw = await loadLevelBank(activeLevel);
-    const moduleBankRaw = await loadModuleBank(moduleName);
-
-    const levelBank = levelBankRaw.default ?? levelBankRaw;
-    const moduleBank = moduleBankRaw.default ?? moduleBankRaw;
+    const levelBank = await loadLevelBank();
+    const moduleBank = await loadModuleBank(moduleName);
 
     return {
         levelBank,
