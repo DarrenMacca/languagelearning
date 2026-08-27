@@ -22,6 +22,7 @@ const MODULE_FILES = {
 };
 
 
+
 // Load unified CEFR file
 async function loadLevelBank() {
     const path = `./wordbanks/${activeLanguage}/CEFR_LEVELS.js`;
