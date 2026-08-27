@@ -104,16 +104,12 @@ function initLanguageControls() {
   const selector = $("language-select");
   if (!selector) return;
 
-  // Keep selector synced with current language
   selector.value = appState.activeLanguage;
 
   selector.addEventListener("change", (e) => {
     const newLang = e.target.value;
-
     appState.activeLanguage = newLang;
     setLanguage(newLang);
-
-    // Refresh the current tab (this safely reloads Listen, Flashcards, etc.)
     switchTab(appState.activeTab);
   });
 }
@@ -280,10 +276,6 @@ let listenAutoPlay = {
   list: []
 };
 
-function speakWord(word) {
-  speakText(word);
-}
-
 function playNextListenWord() {
   if (!listenAutoPlay.active || listenAutoPlay.paused) return;
 
@@ -295,13 +287,13 @@ function playNextListenWord() {
 
   const word = list[listenAutoPlay.index];
 
-  // IMPORTANT FIX: cancel before speaking
   speechSynthesis.cancel();
 
   const utter = new SpeechSynthesisUtterance(word);
-  utter.lang = appState.activeLanguage === "es" ? "es-ES" :
-               appState.activeLanguage === "fr" ? "fr-FR" :
-               appState.activeLanguage === "nl" ? "nl-NL" : "es-ES";
+  utter.lang =
+    appState.activeLanguage === "es" ? "es-ES" :
+    appState.activeLanguage === "fr" ? "fr-FR" :
+    appState.activeLanguage === "nl" ? "nl-NL" : "es-ES";
   utter.rate = appState.speechRate;
 
   utter.onend = () => {
@@ -320,7 +312,7 @@ async function initListen() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("levels");   // ⭐ FIXED
+    const loaded = await loadModule("levels");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load listening data.</p>";
@@ -335,17 +327,17 @@ async function initListen() {
     return;
   }
 
-  // Group by category
   const categories = {};
   levelData.forEach(item => {
-    if (!categories[item.category]) categories[item.category] = [];
-    categories[item.category].push(item);
+    const cat = item.category || "General";
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push(item);
   });
 
   let html = `
     <div class="ui-panel">
       <h2 class="ui-section-title">Listen — Level ${appState.activeLevel}</h2>
-      <p>Tap a category, then click a word pill to hear it.</p>
+      <p>Tap a word pill to hear it.</p>
       <div class="u-row u-gap-sm">
         <button class="ui-pill" id="listen-playall">Play All</button>
         <button class="ui-pill" id="listen-pause">Pause</button>
@@ -372,10 +364,8 @@ async function initListen() {
 
   container.innerHTML = html;
 
-  // Autoplay list
   listenAutoPlay.list = levelData.map(w => w.spanish);
 
-  // Controls
   $("listen-playall").onclick = () => {
     listenAutoPlay.active = true;
     listenAutoPlay.paused = false;
@@ -401,7 +391,6 @@ async function initListen() {
     speechSynthesis.cancel();
   };
 
-  // Individual word playback
   document.querySelectorAll(".listen-pill").forEach(btn => {
     btn.onclick = () => {
       speakText(btn.dataset.word);
@@ -409,9 +398,8 @@ async function initListen() {
   });
 }
 
-
 // ============================================================
-// FLASHCARDS MODULE — Uses Listen words
+// FLASHCARDS MODULE
 // ============================================================
 
 let flashcards = [];
@@ -423,7 +411,7 @@ async function initFlashcards() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("levels");   // IMPORTANT
+    const loaded = await loadModule("levels");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load flashcards.</p>";
@@ -438,7 +426,6 @@ async function initFlashcards() {
     return;
   }
 
-  // Build flashcards
   flashcards = levelData.map(item => ({
     english: item.english,
     spanish: item.spanish
@@ -497,9 +484,8 @@ function renderFlashcardCard() {
   };
 }
 
-
 // ============================================================
-// QUIZ MODULE
+// QUIZ MODULE — uses LEVELS vocab
 // ============================================================
 
 async function initQuiz() {
@@ -508,28 +494,38 @@ async function initQuiz() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("quiz");
+    const loaded = await loadModule("levels");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load quiz data.</p>";
     return;
   }
 
-  const DISRUPTORS = moduleBank;
-  const levelData = DISRUPTORS[appState.activeLevel];
+  const LEVELS = moduleBank;
+  const levelData = LEVELS[appState.activeLevel];
   if (!levelData || !Array.isArray(levelData) || !levelData.length) {
     container.innerHTML = "<p>No quiz data available for this level.</p>";
     return;
   }
 
-  const question = levelData[0];
+  const question = levelData[0]; // { english, spanish }
+
+  const allSpanish = levelData.map(w => w.spanish);
+  const correct = question.spanish;
+  const distractors = allSpanish
+    .filter(w => w !== correct)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3);
+
+  const options = [correct, ...distractors].sort(() => Math.random() - 0.5);
+  const correctIndex = options.indexOf(correct);
 
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Quiz — Level ${appState.activeLevel}</h2>
-      <strong>${question.prompt}</strong>
+      <strong>${question.english}</strong>
       <div class="quiz-options">
-        ${question.options.map((opt, idx) => `
+        ${options.map((opt, idx) => `
           <button class="pill quiz-option" data-index="${idx}">${opt}</button>
         `).join("")}
       </div>
@@ -543,14 +539,14 @@ async function initQuiz() {
     btn.onclick = () => {
       const idx = parseInt(btn.dataset.index, 10);
 
-      if (idx === question.correctIndex) {
+      if (idx === correctIndex) {
         if (feedbackEl) feedbackEl.textContent = "Correct!";
         addXP(2);
         addScore(2);
         appState.levelStats[appState.activeLevel].quizzes += 10;
       } else {
         if (feedbackEl) feedbackEl.textContent = "Incorrect.";
-        appState.mistakes.push(question.prompt);
+        appState.mistakes.push(question.english);
       }
 
       updateProgressMeters();
@@ -559,7 +555,7 @@ async function initQuiz() {
 }
 
 // ============================================================
-// BUILD MODULE
+// BUILD MODULE — simple “play Spanish” sentence
 // ============================================================
 
 async function initBuild() {
@@ -568,58 +564,44 @@ async function initBuild() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("build");
+    const loaded = await loadModule("levels");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load build data.</p>";
     return;
   }
 
-  const CHOICES = moduleBank;
-  const levelData = CHOICES[appState.activeLevel];
+  const LEVELS = moduleBank;
+  const levelData = LEVELS[appState.activeLevel];
   if (!levelData || !Array.isArray(levelData) || !levelData.length) {
     container.innerHTML = "<p>No build data available for this level.</p>";
     return;
   }
 
-  const item = levelData[0];
+  const item = levelData[0]; // { english, spanish }
 
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Build — Level ${appState.activeLevel}</h2>
-      <strong>${item.prompt}</strong>
-      <div class="build-options">
-        ${item.options.map((opt, idx) => `
-          <button class="pill build-option" data-index="${idx}">${opt}</button>
-        `).join("")}
-      </div>
-      <div id="build-feedback"></div>
+      <strong>${item.english}</strong>
+      <p>Click play, then try to say the Spanish aloud.</p>
+      <button class="pill" id="build-play">Play Spanish</button>
     </div>
   `;
 
-  const feedbackEl = $("build-feedback");
-
-  document.querySelectorAll(".build-option").forEach(btn => {
-    btn.onclick = () => {
-      const idx = parseInt(btn.dataset.index, 10);
-
-      if (idx === item.correctIndex) {
-        if (feedbackEl) feedbackEl.textContent = "Correct!";
-        addXP(2);
-        addScore(2);
-        appState.levelStats[appState.activeLevel].sentences += 10;
-      } else {
-        if (feedbackEl) feedbackEl.textContent = "Incorrect.";
-        appState.mistakes.push(item.prompt);
-      }
-
+  const playBtn = $("build-play");
+  if (playBtn) {
+    playBtn.onclick = () => {
+      speakText(item.spanish);
+      addXP(2);
+      appState.levelStats[appState.activeLevel].sentences += 10;
       updateProgressMeters();
     };
-  });
+  }
 }
 
 // ============================================================
-// SENTENCE MODULE
+// SENTENCE MODULE — uses LEVELS
 // ============================================================
 
 async function initSentence() {
@@ -628,15 +610,15 @@ async function initSentence() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("sentence");
+    const loaded = await loadModule("levels");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load sentence data.</p>";
     return;
   }
 
-  const SENTENCES = moduleBank;
-  const levelData = SENTENCES[appState.activeLevel];
+  const LEVELS = moduleBank;
+  const levelData = LEVELS[appState.activeLevel];
   if (!levelData || !Array.isArray(levelData) || !levelData.length) {
     container.innerHTML = "<p>No sentence data available for this level.</p>";
     return;
@@ -647,7 +629,7 @@ async function initSentence() {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Sentence Trainer — Level ${appState.activeLevel}</h2>
-      <strong>${sentence.target}</strong>
+      <strong>${sentence.spanish}</strong>
       <em>${sentence.english}</em>
       <button class="pill" id="sentence-play">Play</button>
     </div>
@@ -656,7 +638,7 @@ async function initSentence() {
   const playBtn = $("sentence-play");
   if (playBtn) {
     playBtn.onclick = () => {
-      speakText(sentence.target);
+      speakText(sentence.spanish);
       addXP(1);
       appState.levelStats[appState.activeLevel].sentences += 5;
       updateProgressMeters();
@@ -665,7 +647,7 @@ async function initSentence() {
 }
 
 // ============================================================
-// CONVERSATION MODULE
+// CONVERSATION MODULE — placeholder using LEVELS
 // ============================================================
 
 async function initConversation() {
@@ -674,15 +656,15 @@ async function initConversation() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("conversation");
+    const loaded = await loadModule("levels");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load conversation data.</p>";
     return;
   }
 
-  const CONVO = moduleBank;
-  const levelData = CONVO[appState.activeLevel];
+  const LEVELS = moduleBank;
+  const levelData = LEVELS[appState.activeLevel];
   if (!levelData || !Array.isArray(levelData) || !levelData.length) {
     container.innerHTML = "<p>No conversation data available for this level.</p>";
     return;
@@ -693,7 +675,7 @@ async function initConversation() {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Conversation — Level ${appState.activeLevel}</h2>
-      <strong>${turn.speaker}:</strong> ${turn.text}
+      <strong>Speaker:</strong> ${turn.spanish}
       <button class="pill" id="conversation-play">Play</button>
     </div>
   `;
@@ -701,7 +683,7 @@ async function initConversation() {
   const playBtn = $("conversation-play");
   if (playBtn) {
     playBtn.onclick = () => {
-      speakText(turn.text);
+      speakText(turn.spanish);
       addXP(2);
       addScore(1);
       updateProgressMeters();
@@ -710,7 +692,7 @@ async function initConversation() {
 }
 
 // ============================================================
-// GRAMMAR MODULE
+// GRAMMAR MODULE — uses LEVELS as rules
 // ============================================================
 
 async function initGrammar() {
@@ -719,7 +701,7 @@ async function initGrammar() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("grammar");
+    const loaded = await loadModule("levels");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load grammar data.</p>";
@@ -738,7 +720,7 @@ async function initGrammar() {
       <h2>Grammar — Level ${appState.activeLevel}</h2>
       <ul>
         ${levelData.map(rule => `
-          <li><strong>${rule.title}</strong><br>${rule.explanation}</li>
+          <li><strong>${rule.english}</strong><br>${rule.spanish}</li>
         `).join("")}
       </ul>
     </div>
@@ -906,7 +888,9 @@ async function initRepeat() {
       <h2>Repeat Practice — Level ${appState.activeLevel}</h2>
       <div id="repeat-list">
         ${items.map(w => `
-          <button class="pill repeat-pill" data-word="${w}">${w}</button>
+          <button class="pill repeat-pill" data-word="${w.spanish}">
+            ${w.english} — ${w.spanish}
+          </button>
         `).join("")}
       </div>
     </div>
