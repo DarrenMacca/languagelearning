@@ -312,7 +312,7 @@ async function initListen() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("levels");
+    const loaded = await loadModule("listen");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load listening data.</p>";
@@ -411,7 +411,7 @@ async function initFlashcards() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("levels");
+    const loaded = await loadModule("listen");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load flashcards.</p>";
@@ -494,7 +494,7 @@ async function initQuiz() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("levels");
+    const loaded = await loadModule("listen");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load quiz data.</p>";
@@ -564,7 +564,7 @@ async function initBuild() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("levels");
+    const loaded = await loadModule("listen");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load build data.</p>";
@@ -610,7 +610,7 @@ async function initSentence() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("levels");
+    const loaded = await loadModule("listen");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load sentence data.</p>";
@@ -656,7 +656,7 @@ async function initConversation() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("levels");
+    const loaded = await loadModule("listen");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load conversation data.</p>";
@@ -701,7 +701,7 @@ async function initGrammar() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("levels");
+    const loaded = await loadModule("listen");
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load grammar data.</p>";
