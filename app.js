@@ -399,11 +399,12 @@ async function initListen() {
 }
 
 // ============================================================
-// FLASHCARDS MODULE
+// FLASHCARDS MODULE — English front → Translation back
 // ============================================================
 
 let flashcards = [];
 let currentFlashcard = null;
+let cardFlipped = false;
 
 async function initFlashcards() {
   const container = $("flashcardsSection");
@@ -411,7 +412,7 @@ async function initFlashcards() {
 
   let moduleBank;
   try {
-    const loaded = await loadModule("listen");
+    const loaded = await loadModule("listen");   // loads CEFR_LEVELS.js
     moduleBank = loaded.moduleBank;
   } catch (e) {
     container.innerHTML = "<p>Unable to load flashcards.</p>";
@@ -426,9 +427,12 @@ async function initFlashcards() {
     return;
   }
 
+  // Build flashcards
   flashcards = levelData.map(item => ({
     english: item.english,
-    spanish: item.spanish
+    es: item.spanish,
+    fr: item.french,
+    nl: item.dutch
   }));
 
   renderFlashcardWordList(container);
@@ -456,6 +460,7 @@ function renderFlashcardWordList(container) {
     btn.onclick = () => {
       const idx = parseInt(btn.dataset.index, 10);
       currentFlashcard = flashcards[idx];
+      cardFlipped = false;
       renderFlashcardCard();
     };
   });
@@ -465,11 +470,15 @@ function renderFlashcardCard() {
   const container = $("flashcard-card-container");
   if (!container || !currentFlashcard) return;
 
+  const backText =
+    currentFlashcard[appState.activeLanguage] ||
+    currentFlashcard.es;
+
   container.innerHTML = `
     <div id="flashcard" class="flashcard">
       <div class="flashcard-inner">
         <div class="flashcard-front">${currentFlashcard.english}</div>
-        <div class="flashcard-back">${currentFlashcard.spanish}</div>
+        <div class="flashcard-back">${backText}</div>
       </div>
     </div>
   `;
@@ -477,12 +486,17 @@ function renderFlashcardCard() {
   const cardEl = $("flashcard");
 
   cardEl.onclick = () => {
+    cardFlipped = !cardFlipped;
     cardEl.classList.toggle("flipped");
-    if (cardEl.classList.contains("flipped")) {
-      speakText(currentFlashcard.spanish);
+
+    if (cardFlipped) {
+      // First flip → play audio
+      speakText(backText);
     }
+    // Second flip → no audio
   };
 }
+
 
 // ============================================================
 // QUIZ MODULE — uses LEVELS vocab
