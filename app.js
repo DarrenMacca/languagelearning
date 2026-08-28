@@ -519,7 +519,8 @@ let quizState = {
    ============================================================ */
 
 function generateQuizOptions(words, correctWord) {
-    const lang = appState.activeLanguage;
+    const lang = getLangKey();
+
 
     let opts = [correctWord[lang]];
     const count = quizState.harderMode ? 5 : 3;
@@ -596,7 +597,17 @@ function setupQuizEvents() {
     const feedback = document.getElementById("qb-feedback");
     const answerBox = document.getElementById("qb-answer");
 
-    const lang = appState.activeLanguage;
+    // ⭐ Correct language key mapping
+    function getLangKey() {
+        const map = {
+            es: "spanish",
+            fr: "french",
+            nl: "dutch"
+        };
+        return map[appState.activeLanguage];
+    }
+
+    const lang = getLangKey();   // ⭐ FIXED
 
     quizState.selected = null;
 
@@ -612,13 +623,10 @@ function setupQuizEvents() {
 
     // Helper: translate selected → English
     function getEnglishForTranslation(translatedWord) {
-    const levelWords = moduleBank[appState.currentLevel];
-    const match = levelWords.find(w =>
-        (w[lang] || w.spanish) === translatedWord
-    );
-    return match ? match.english : "[no match]";
-}
-
+        const levelWords = moduleBank[appState.currentLevel];
+        const match = levelWords.find(w => w[lang] === translatedWord);
+        return match ? match.english : "[no match]";
+    }
 
     // Check button
     submitBtn.addEventListener("click", () => {
@@ -627,7 +635,7 @@ function setupQuizEvents() {
             return;
         }
 
-        const correct = quizState.currentWord[lang] || quizState.currentWord.spanish;
+        const correct = quizState.currentWord[lang];   // ⭐ FIXED
         const learnerTranslated = quizState.selected;
         const learnerEnglish = getEnglishForTranslation(learnerTranslated);
 
