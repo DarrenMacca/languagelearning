@@ -6,6 +6,14 @@ import { setLanguage, setLevel, loadModule } from "./LanguageLoader.js";
 
 // ---------- GLOBAL STATE ----------
 
+// ============================================================
+// APP CORE — MULTI-LANGUAGE CEFR PLATFORM
+// ============================================================
+
+import { setLanguage, setLevel, loadModule } from "./LanguageLoader.js";
+
+// ---------- GLOBAL STATE ----------
+
 const appState = {
   activeTab: "dashboard",
   activeLanguage: "es",
@@ -23,6 +31,13 @@ const appState = {
   miningWords: [],
   certificateName: ""
 };
+if (!appState.currentLevel) {
+    appState.currentLevel = "A1";
+}
+
+// ============================================================
+// BASIC HELPERS
+// ============================================================
 
 // ============================================================
 // BASIC HELPERS
