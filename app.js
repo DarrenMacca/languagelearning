@@ -45,7 +45,7 @@ function $(id) {
 
 function speakText(text) {
   const utter = new SpeechSynthesisUtterance(text);
-  const lang = appState.activeLanguage;
+const lang = getLangKey();
 
   utter.lang =
     lang === "es" ? "es-ES" :
@@ -514,6 +514,19 @@ let quizState = {
     selected: null
 };
 
+// ============================================================
+// LANGUAGE KEY MAPPER (GLOBAL FOR QUIZ)
+// ============================================================
+
+function getLangKey() {
+    const map = {
+        es: "spanish",
+        fr: "french",
+        nl: "dutch"
+    };
+    return map[appState.activeLanguage];
+}
+
 /* ============================================================
    GENERATE OPTIONS (supports ES / FR / NL)
    ============================================================ */
@@ -527,7 +540,8 @@ function generateQuizOptions(words, correctWord) {
 
     while (opts.length < count) {
         const w = words[Math.floor(Math.random() * words.length)];
-        const translated = w[lang] || w.spanish;   // fallback to Spanish
+        const translated = w[lang];
+   // fallback to Spanish
         if (!opts.includes(translated)) opts.push(translated);
     }
 
@@ -551,7 +565,8 @@ function renderQuizTab() {
         return;
     }
 
-    const lang = appState.activeLanguage;
+   const lang = getLangKey();
+
 
     quizState.currentWord = words[Math.floor(Math.random() * words.length)];
     quizState.options = generateQuizOptions(words, quizState.currentWord);
@@ -961,7 +976,8 @@ async function initDictionary() {
       return;
     }
 
-    const lang = appState.activeLanguage;
+    const lang = getLangKey();
+
     const translation = entry[lang] || entry.es || "";
     outputEl.textContent = translation ? translation : "No translation for this language.";
   };
