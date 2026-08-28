@@ -399,12 +399,10 @@ async function initListen() {
 }
 
 // ============================================================
-// FLASHCARDS MODULE — English front → Translation back
+// FLASHCARDS MODULE — Pills flip in place (English → Translation)
 // ============================================================
 
 let flashcards = [];
-let currentFlashcard = null;
-let cardFlipped = false;
 
 async function initFlashcards() {
   const container = $("flashcardsSection");
@@ -442,59 +440,46 @@ function renderFlashcardWordList(container) {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Flashcards — Level ${appState.activeLevel}</h2>
-      <p>Select a word to reveal the translation.</p>
+      <p>Tap a word to flip it.</p>
       <div id="flashcard-word-grid" class="listen-grid"></div>
-      <div id="flashcard-card-container"></div>
     </div>
   `;
 
   const grid = $("flashcard-word-grid");
 
-  grid.innerHTML = flashcards.map((fc, idx) => `
-    <button class="pill flashcard-pill" data-index="${idx}">
-      ${fc.english}
-    </button>
-  `).join("");
+  grid.innerHTML = flashcards.map((fc, idx) => {
+    const backText =
+      fc[appState.activeLanguage] ||
+      fc.es;
 
-  document.querySelectorAll(".flashcard-pill").forEach(btn => {
-    btn.onclick = () => {
-      const idx = parseInt(btn.dataset.index, 10);
-      currentFlashcard = flashcards[idx];
-      cardFlipped = false;
-      renderFlashcardCard();
+    return `
+      <div class="flashcard flashcard-pill" data-index="${idx}">
+        <div class="flashcard-inner">
+          <div class="flashcard-front">${fc.english}</div>
+          <div class="flashcard-back">${backText}</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  document.querySelectorAll(".flashcard-pill").forEach(card => {
+    card.onclick = () => {
+      const idx = parseInt(card.dataset.index, 10);
+      const fc = flashcards[idx];
+
+      const backText =
+        fc[appState.activeLanguage] ||
+        fc.es;
+
+      // Flip the pill
+      const isFlipped = card.classList.toggle("flipped");
+
+      // Play audio only on first flip
+      if (isFlipped) {
+        speakText(backText);
+      }
     };
   });
-}
-
-function renderFlashcardCard() {
-  const container = $("flashcard-card-container");
-  if (!container || !currentFlashcard) return;
-
-  const backText =
-    currentFlashcard[appState.activeLanguage] ||
-    currentFlashcard.es;
-
-  container.innerHTML = `
-    <div id="flashcard" class="flashcard">
-      <div class="flashcard-inner">
-        <div class="flashcard-front">${currentFlashcard.english}</div>
-        <div class="flashcard-back">${backText}</div>
-      </div>
-    </div>
-  `;
-
-  const cardEl = $("flashcard");
-
-  cardEl.onclick = () => {
-    cardFlipped = !cardFlipped;
-    cardEl.classList.toggle("flipped");
-
-    if (cardFlipped) {
-      // First flip → play audio
-      speakText(backText);
-    }
-    // Second flip → no audio
-  };
 }
 
 
