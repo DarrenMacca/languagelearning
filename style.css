@@ -470,6 +470,18 @@ button.pill.flashcard-pill {
   margin: 0 !important;
   display: inline-block !important;
 }
+/* Fix text overflow inside flashcard pills */
+.flashcard-pill .flashcard-front,
+.flashcard-pill .flashcard-back {
+  max-width: 110px !important;        /* same width as Listen pills */
+  white-space: normal !important;     /* allow wrapping */
+  overflow-wrap: break-word !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
+}
+.flashcard-pill.flashcard {
+  max-width: 120px !important;   /* hard cap */
+}
 
 /* Inner wrapper */
 .flashcard-inner {
