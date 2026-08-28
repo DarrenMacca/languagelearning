@@ -198,19 +198,19 @@ video {
   box-shadow: var(--shadow-neon-strong);
 }
 /* FLASHCARD PILLS — compact like Spanish-Lessons */
-button.flashcard-pill {
+button.pill.flashcard-pill {
   padding: 4px 10px !important;
   font-size: 12px !important;
   border-radius: 999px !important;
   box-shadow: none !important;
   background: var(--neon-blue) !important;
-  min-width: 80px;
+  min-width: 80px !important;
   text-align: center;
 }
 
 /* Optional: slightly smaller text on mobile */
 @media (max-width: 600px) {
-  button.flashcard-pill {
+  button.pill.flashcard-pill {
     padding: 3px 8px !important;
     font-size: 11px !important;
   }
