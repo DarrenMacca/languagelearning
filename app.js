@@ -495,7 +495,6 @@ function renderFlashcardWordList(container) {
 /* ============================================================
    SHARED QUIZ STATE
    ============================================================ */
-let moduleBank = null;
 
 let quizState = {
     currentWord: null,
