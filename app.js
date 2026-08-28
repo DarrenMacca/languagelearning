@@ -63,9 +63,15 @@ function totalXP() {
 // ============================================================
 // TAB ROUTER
 // ============================================================
-function initQuiz() {
+let moduleBank = null;
+
+async function initQuiz() {
+    const loaded = await loadModule("listen");
+    moduleBank = loaded.moduleBank;
     renderQuizTab();
 }
+
+
 
 function switchTab(tabId) {
   appState.activeTab = tabId;
@@ -489,6 +495,7 @@ function renderFlashcardWordList(container) {
 /* ============================================================
    SHARED QUIZ STATE
    ============================================================ */
+let moduleBank = null;
 
 let quizState = {
     currentWord: null,
@@ -522,7 +529,9 @@ function generateQuizOptions(words, correctWord) {
 
 function renderQuizTab() {
     const container = document.getElementById("quiz-content");
-    const words = CEFR_LEVELS[appState.currentLevel];
+    const words = moduleBank[appState.currentLevel];
+
+
 
     if (!words || !words.length) {
         container.innerHTML = `<div class="glass-panel quiz-card">
