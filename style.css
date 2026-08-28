@@ -452,17 +452,26 @@ button.pill.flashcard-pill {
 }
 
 /* Flashcards — NEW SYSTEM ONLY */
-
 .flashcard {
   width: 240px;
   height: 160px;
   margin: 20px auto;
   perspective: 1000px;
-  transform-style: preserve-3d;   /* ← ADD THIS */
+  transform-style: preserve-3d;
   cursor: pointer;
 }
 
+/* FLASHCARD PILLS — override full card size */
+.flashcard-pill.flashcard {
+  width: auto !important;
+  height: auto !important;
+  min-width: 80px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-block !important;
+}
 
+/* Inner wrapper */
 .flashcard-inner {
   width: 100%;
   height: 100%;
@@ -470,57 +479,44 @@ button.pill.flashcard-pill {
   transform-style: preserve-3d;
 }
 
-.flashcard.flipped .flashcard-inner {
+/* Flip */
+.flashcard.flipped .flashcard-inner,
+.flashcard-pill.flipped .flashcard-inner {
   transform: rotateY(180deg);
 }
 
-.flashcard-front,
-.flashcard-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
+/* FLASHCARD PILLS — front/back become pill-sized */
+.flashcard-pill .flashcard-front,
+.flashcard-pill .flashcard-back {
+  position: relative !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--neon-blue) !important;
+  border: 1px solid var(--glass-border-dark) !important;
+  box-shadow: none !important;
   backface-visibility: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 22px;
-  border-radius: 12px;
-  background: #ffffff22;
-  border: 1px solid #ffffff55;
 }
 
+/* Ensure inner wrapper doesn't force full card size */
+.flashcard-pill .flashcard-inner {
+  position: relative !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* Back face rotation */
 .flashcard-back {
   transform: rotateY(180deg);
 }
 
+/* Required for legacy bottom-card container (safe to keep) */
 #flashcard-card-container {
   perspective: 1000px;
-}
-
-/* Review cards */
-
-.ui-review-card {
-  background: var(--glass-bg-dark);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--glass-border-dark);
-  backdrop-filter: var(--blur-lg);
-  padding: var(--space-md) var(--space-lg);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: transform var(--motion-fast) var(--motion-ease),
-              box-shadow var(--motion-fast) var(--motion-ease);
-}
-
-.ui-review-card:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-neon);
-}
-
-.ui-review-text {
-  font-size: var(--font-md);
-  font-weight: 500;
-  color: var(--text-main);
 }
 
 /* Badges */
