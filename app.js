@@ -1,8 +1,4 @@
-// ============================================================
-// APP CORE — MULTI-LANGUAGE CEFR PLATFORM
-// ============================================================
 
-import { setLanguage, setLevel, loadModule } from "./LanguageLoader.js";
 
 // ---------- GLOBAL STATE ----------
 
