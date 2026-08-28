@@ -601,12 +601,13 @@ function setupQuizEvents() {
 
     // Helper: translate selected → English
     function getEnglishForTranslation(translatedWord) {
-        const levelWords = CEFR_LEVELS[appState.currentLevel];
-        const match = levelWords.find(w =>
-            (w[lang] || w.spanish) === translatedWord
-        );
-        return match ? match.english : "[no match]";
-    }
+    const levelWords = moduleBank[appState.currentLevel];
+    const match = levelWords.find(w =>
+        (w[lang] || w.spanish) === translatedWord
+    );
+    return match ? match.english : "[no match]";
+}
+
 
     // Check button
     submitBtn.addEventListener("click", () => {
