@@ -483,75 +483,182 @@ function renderFlashcardWordList(container) {
 }
 
 
-// ============================================================
-// QUIZ MODULE — uses LEVELS vocab
-// ============================================================
+/* ============================================================
+   SHARED QUIZ STATE
+   ============================================================ */
 
-async function initQuiz() {
-  const container = $("quizSection");
-  if (!container) return;
+let quizState = {
+    currentWord: null,
+    options: [],
+    harderMode: false,
+    selected: null
+};
 
-  let moduleBank;
-  try {
-    const loaded = await loadModule("listen");
-    moduleBank = loaded.moduleBank;
-  } catch (e) {
-    container.innerHTML = "<p>Unable to load quiz data.</p>";
-    return;
-  }
+/* ============================================================
+   GENERATE OPTIONS (supports ES / FR / NL)
+   ============================================================ */
 
-  const LEVELS = moduleBank;
-  const levelData = LEVELS[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData) || !levelData.length) {
-    container.innerHTML = "<p>No quiz data available for this level.</p>";
-    return;
-  }
+function generateQuizOptions(words, correctWord) {
+    const lang = appState.activeLanguage;
 
-  const question = levelData[0]; // { english, spanish }
+    let opts = [correctWord[lang]];
+    const count = quizState.harderMode ? 5 : 3;
 
-  const allSpanish = levelData.map(w => w.spanish);
-  const correct = question.spanish;
-  const distractors = allSpanish
-    .filter(w => w !== correct)
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3);
+    while (opts.length < count) {
+        const w = words[Math.floor(Math.random() * words.length)];
+        const translated = w[lang] || w.spanish;   // fallback to Spanish
+        if (!opts.includes(translated)) opts.push(translated);
+    }
 
-  const options = [correct, ...distractors].sort(() => Math.random() - 0.5);
-  const correctIndex = options.indexOf(correct);
-
-  container.innerHTML = `
-    <div class="glass-panel quiz-card">
-      <h2>Quiz — Level ${appState.activeLevel}</h2>
-      <strong>${question.english}</strong>
-      <div class="quiz-options">
-        ${options.map((opt, idx) => `
-          <button class="pill quiz-option" data-index="${idx}">${opt}</button>
-        `).join("")}
-      </div>
-      <div id="quiz-feedback"></div>
-    </div>
-  `;
-
-  const feedbackEl = $("quiz-feedback");
-
-  document.querySelectorAll(".quiz-option").forEach(btn => {
-    btn.onclick = () => {
-      const idx = parseInt(btn.dataset.index, 10);
-
-      if (idx === correctIndex) {
-        if (feedbackEl) feedbackEl.textContent = "Correct!";
-        addXP(2);
-        addScore(2);
-        appState.levelStats[appState.activeLevel].quizzes += 10;
-      } else {
-        if (feedbackEl) feedbackEl.textContent = "Incorrect.";
-        appState.mistakes.push(question.english);
-      }
-
-      updateProgressMeters();
-    };
-  });
+    return opts.sort(() => Math.random() - 0.5);
 }
+
+/* ============================================================
+   QUIZ TAB — RENDER + EVENTS
+   ============================================================ */
+
+function renderQuizTab() {
+    const container = document.getElementById("quiz-content");
+    const words = CEFR_LEVELS[appState.currentLevel];
+
+    if (!words || !words.length) {
+        container.innerHTML = `<div class="glass-panel quiz-card">
+            <p>No words found for level ${appState.currentLevel}.</p>
+        </div>`;
+        return;
+    }
+
+    const lang = appState.activeLanguage;
+
+    quizState.currentWord = words[Math.floor(Math.random() * words.length)];
+    quizState.options = generateQuizOptions(words, quizState.currentWord);
+    quizState.selected = null;
+
+    container.innerHTML = `
+    <div class="glass-panel quiz-card">
+        <h2>Quiz — Level ${appState.currentLevel}</h2>
+        <p>Select the correct translation for the English word.</p>
+
+        <div id="qb-meta"><strong>English:</strong> ${quizState.currentWord.english}</div>
+
+        <div id="qb-grid" class="sb-grid">
+            ${quizState.options.map(opt => `
+                <button class="pill" data-translation="${opt}">${opt}</button>
+            `).join("")}
+        </div>
+
+        <div id="qb-answer" class="qb-answer"></div>
+
+        <div class="sb-controls quiz-controls-tight">
+            <button id="qb-submit">Check</button>
+            <button id="qb-next">Next</button>
+            <button id="qb-harder" class="${quizState.harderMode ? "active" : ""}">Harder</button>
+        </div>
+
+        <div id="qb-feedback" class="qb-feedback"></div>
+    </div>
+    `;
+
+    setupQuizEvents();
+}
+
+/* ============================================================
+   QUIZ EVENTS
+   ============================================================ */
+
+function setupQuizEvents() {
+    const grid = document.getElementById("qb-grid");
+    const submitBtn = document.getElementById("qb-submit");
+    const nextBtn = document.getElementById("qb-next");
+    const harderBtn = document.getElementById("qb-harder");
+    const feedback = document.getElementById("qb-feedback");
+    const answerBox = document.getElementById("qb-answer");
+
+    const lang = appState.activeLanguage;
+
+    quizState.selected = null;
+
+    // Pill selection
+    grid.querySelectorAll(".pill").forEach(btn => {
+        btn.addEventListener("click", () => {
+            grid.querySelectorAll(".pill").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            quizState.selected = btn.dataset.translation;
+            answerBox.textContent = quizState.selected;
+        });
+    });
+
+    // Helper: translate selected → English
+    function getEnglishForTranslation(translatedWord) {
+        const levelWords = CEFR_LEVELS[appState.currentLevel];
+        const match = levelWords.find(w =>
+            (w[lang] || w.spanish) === translatedWord
+        );
+        return match ? match.english : "[no match]";
+    }
+
+    // Check button
+    submitBtn.addEventListener("click", () => {
+        if (!quizState.selected) {
+            feedback.textContent = "Choose an answer first.";
+            return;
+        }
+
+        const correct = quizState.currentWord[lang] || quizState.currentWord.spanish;
+        const learnerTranslated = quizState.selected;
+        const learnerEnglish = getEnglishForTranslation(learnerTranslated);
+
+        // Ensure quizScore is not null before incrementing
+        if (appState.levelStats[appState.currentLevel].quizScore === null) {
+            appState.levelStats[appState.currentLevel].quizScore = 0;
+        }
+
+        // Correct / Incorrect feedback
+        if (learnerTranslated === correct) {
+            feedback.innerHTML = `
+                <div class="quiz-correct">Correct! 🎉</div>
+                <div class="quiz-selected"><strong>You selected:</strong> ${learnerTranslated} (${learnerEnglish})</div>
+            `;
+
+            appState.levelStats[appState.currentLevel].quizScore++;
+            appState.levelStats[appState.currentLevel].quizCompleted++;
+
+            appState.totalXP = (appState.totalXP || 0) + 10; 
+            appState.globalScore = (appState.globalScore || 0) + 5;
+
+            checkAndAdvanceStreak();
+            updateBadges();
+            updateProgressMeters();
+
+        } else {
+            feedback.innerHTML = `
+                <div class="quiz-incorrect">Incorrect — correct answer: ${correct}</div>
+                <div class="quiz-selected"><strong>You selected:</strong> ${learnerTranslated} (${learnerEnglish})</div>
+            `;
+
+            const mistakeString = `${quizState.currentWord.english} ➔ ${correct}`;
+            addIncorrectWord(mistakeString);
+        }
+
+        // Audio
+        setTimeout(() => speakQuiz(correct), 50);
+
+        saveState();
+    });
+
+    // Next button
+    nextBtn.addEventListener("click", () => {
+        renderQuizTab();
+    });
+
+    // Harder mode toggle
+    harderBtn.addEventListener("click", () => {
+        quizState.harderMode = !quizState.harderMode;
+        harderBtn.classList.toggle("active");
+        renderQuizTab();
+    });
+}
+
 
 // ============================================================
 // BUILD MODULE — simple “play Spanish” sentence
