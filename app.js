@@ -63,6 +63,9 @@ function totalXP() {
 // ============================================================
 // TAB ROUTER
 // ============================================================
+function initQuiz() {
+    renderQuizTab();
+}
 
 function switchTab(tabId) {
   appState.activeTab = tabId;
