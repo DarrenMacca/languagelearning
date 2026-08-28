@@ -440,7 +440,7 @@ function renderFlashcardWordList(container) {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Flashcards — Level ${appState.activeLevel}</h2>
-      <p>Tap a word to flip it.</p>
+      <p>Read the words and say it out loud in the translated language. Tap the word to flip it and hear its pronunciation to confirm if your correct.</p>
       <div id="flashcard-word-grid" class="listen-grid"></div>
     </div>
   `;
