@@ -7,22 +7,22 @@ let activeLevel = "A1";      // default
 
 // All modules now use CEFR_LEVELS.js
 const MODULE_FILES = {
-    listen: "CEFR_LEVELS.js",
-    flashcards: "CEFR_LEVELS.js",
-    quiz: "CEFR_LEVELS.js",
-    build: "CEFR_LEVELS.js",
-    sentence: "CEFR_LEVELS.js",
-    conversation: "CEFR_LEVELS.js",
-    conversationAudio: "CEFR_LEVELS.js",
-    grammar: "CEFR_LEVELS.js",
+    listen: null,
+    flashcards: null,
+    quiz: null,
+    build: null,
+    sentence: null,
+    conversation: null,
+    conversationAudio: null,
+    grammar: null,
 
-    // FIXED
     mining: "mining_references.js",
     dictionary: "WORD_DICT.js",
 
     review: null,
     repeat: "repeat"
 };
+
 
 // Load unified CEFR file
 async function loadLevelBank() {
