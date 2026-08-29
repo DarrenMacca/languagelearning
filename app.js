@@ -331,7 +331,7 @@ async function initListen() {
 
   let words;
   try {
-    words = await loadModule(appState.activeLevel);
+    words = await loadListenBank();
   } catch (e) {
     container.innerHTML = "<p>Unable to load listening data.</p>";
     return;
@@ -425,7 +425,7 @@ async function initFlashcards() {
 
   let words;
   try {
-    words = await loadModule(appState.activeLevel);
+    words = await loadFlashcardBank();
   } catch (e) {
     container.innerHTML = "<p>Unable to load flashcards.</p>";
     return;
