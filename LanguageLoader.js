@@ -1,65 +1,122 @@
 // ============================================================
-// MULTI-LANGUAGE + CEFR LEVEL LOADER (Stable Version)
+// MULTI-LANGUAGE CEFR LOADER — FINAL VERSION (Matches new app.js)
 // ============================================================
 
 let activeLanguage = "es";   // default
 let activeLevel = "A1";      // default
 
-// Change language
+// ------------------------------------------------------------
+// LANGUAGE + LEVEL SETTERS
+// ------------------------------------------------------------
 export function setLanguage(lang) {
     activeLanguage = lang;
 }
 
-// Change CEFR level
 export function setLevel(level) {
     activeLevel = level;
 }
 
-// Load CEFR level file (A1.js, A2.js, B1.js, B2.js)
-export async function loadLevelBank(level = activeLevel) {
+// ------------------------------------------------------------
+// LOAD LEVEL WORD BANK (A1.js, A2.js, B1.js, B2.js)
+// ------------------------------------------------------------
+export async function loadModule(level = activeLevel) {
     const path = `./wordbanks/${activeLanguage}/${level}.js`;
+
+    try {
+        const raw = await import(path);
+        return raw.default ?? raw;   // always return array of words
+    } catch (err) {
+        console.error(`❌ Failed to load level file: ${path}`, err);
+        return [];
+    }
+}
+
+// ------------------------------------------------------------
+// LOAD DICTIONARY (WORD_DICT.js)
+// ------------------------------------------------------------
+export async function loadDictionary() {
+    const path = `./wordbanks/${activeLanguage}/WORD_DICT.js`;
 
     try {
         const raw = await import(path);
         return raw.default ?? raw;
     } catch (err) {
-        console.error(`❌ Failed to load CEFR level file: ${path}`, err);
-        return [];   // fail-safe empty array
+        console.error(`❌ Failed to load dictionary: ${path}`, err);
+        return {};
     }
 }
 
-// Load module file (repeat, review, or normal CEFR level)
-export async function loadModuleBank(moduleName) {
+// ------------------------------------------------------------
+// LOAD MINING REFERENCES (mining_references.js)
+// ------------------------------------------------------------
+export async function loadMining() {
+    const path = `./wordbanks/${activeLanguage}/mining_references.js`;
 
-    // REVIEW MODE — no wordbank needed
-    if (moduleName === "review") {
-        return { reviewMode: true };
+    try {
+        const raw = await import(path);
+        return raw.default ?? raw;
+    } catch (err) {
+        console.error(`❌ Failed to load mining references: ${path}`, err);
+        return [];
     }
-
-    // REPEAT MODE — loads repeat/A1.js etc.
-    if (moduleName === "repeat") {
-        const path = `./wordbanks/${activeLanguage}/repeat/${activeLevel}.js`;
-
-        try {
-            const raw = await import(path);
-            return raw.default ?? raw;
-        } catch (err) {
-            console.error(`❌ Failed to load repeat file: ${path}`, err);
-            return { repeatMode: true, words: [] };
-        }
-    }
-
-    // NORMAL MODE — load CEFR level file (A1.js, A2.js, etc.)
-    return loadLevelBank(activeLevel);
 }
 
-// Load everything needed for a module
-export async function loadModule(moduleName) {
-    const levelBank = await loadLevelBank(activeLevel);
-    const moduleBank = await loadModuleBank(moduleName);
+// ------------------------------------------------------------
+// LOAD REPEAT BANK (repeat/A1.js etc.)
+// ------------------------------------------------------------
+export async function loadRepeat(level = activeLevel) {
+    const path = `./wordbanks/${activeLanguage}/repeat/${level}.js`;
 
-    return {
-        levelBank,
-        moduleBank
-    };
+    try {
+        const raw = await import(path);
+        return raw.default ?? raw;
+    } catch (err) {
+        console.error(`❌ Failed to load repeat file: ${path}`, err);
+        return [];
+    }
+}
+
+// ------------------------------------------------------------
+// LOAD CONVERSATION PROMPTS (CEFR_CONVERSATION.js)
+// ------------------------------------------------------------
+export async function loadConversation() {
+    const path = `./wordbanks/${activeLanguage}/CEFR_CONVERSATION.js`;
+
+    try {
+        const raw = await import(path);
+        return raw.default ?? raw;
+    } catch (err) {
+        console.error(`❌ Failed to load conversation file: ${path}`, err);
+        return [];
+    }
+}
+
+// ------------------------------------------------------------
+// LOAD CONVERSATION AUDIO (CEFR_CONVERSATION_AUDIO.js)
+// ------------------------------------------------------------
+export async function loadConversationAudio() {
+    const path = `./wordbanks/${activeLanguage}/CEFR_CONVERSATION_AUDIO.js`;
+
+    try {
+        const raw = await import(path);
+        return raw.default ?? raw;
+    } catch (err) {
+        console.error(`❌ Failed to load conversation audio: ${path}`, err);
+        return {};
+    }
+}
+
+// ------------------------------------------------------------
+// LOAD SENTENCE CHOICES (CEFR_SENTENCE_CHOICES.js)
+// ------------------------------------------------------------
+export async function loadSentenceChoices() {
+    const path = `./wordbanks/${activeLanguage}/CEFR_SENTENCE_CHOICES.js`;
+
+    try {
+        const raw = await import(path);
+        return raw.default ?? raw;
+    } catch (err) {
+        console.error(`❌ Failed to load sentence choices: ${path}`, err);
+        return [];
+    }
 }
