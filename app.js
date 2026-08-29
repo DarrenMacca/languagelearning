@@ -1,7 +1,3 @@
-
-
-// ---------- GLOBAL STATE ----------
-
 // ============================================================
 // APP CORE — MULTI-LANGUAGE CEFR PLATFORM
 // ============================================================
@@ -27,13 +23,6 @@ const appState = {
   miningWords: [],
   certificateName: ""
 };
-if (!appState.currentLevel) {
-    appState.currentLevel = "A1";
-}
-
-// ============================================================
-// BASIC HELPERS
-// ============================================================
 
 // ============================================================
 // BASIC HELPERS
@@ -43,14 +32,19 @@ function $(id) {
   return document.getElementById(id);
 }
 
+function getLangKey() {
+  const map = { es: "spanish", fr: "french", nl: "dutch" };
+  return map[appState.activeLanguage];
+}
+
 function speakText(text) {
   const utter = new SpeechSynthesisUtterance(text);
-const lang = getLangKey();
+  const lang = getLangKey();
 
   utter.lang =
-    lang === "es" ? "es-ES" :
-    lang === "fr" ? "fr-FR" :
-    lang === "nl" ? "nl-NL" :
+    lang === "spanish" ? "es-ES" :
+    lang === "french" ? "fr-FR" :
+    lang === "dutch" ? "nl-NL" :
     "es-ES";
 
   utter.rate = appState.speechRate;
@@ -71,18 +65,20 @@ function totalXP() {
     .reduce((sum, lvl) => sum + lvl.xp, 0);
 }
 
+function addIncorrectWord(mistakeString) {
+  appState.mistakes.push(mistakeString);
+}
+
 // ============================================================
 // TAB ROUTER
 // ============================================================
+
 let moduleBank = null;
 
 async function initQuiz() {
-    const loaded = await loadModule("listen");
-    moduleBank = loaded.moduleBank;
-    renderQuizTab();
+  moduleBank = await loadModule(appState.activeLevel);
+  renderQuizTab();
 }
-
-
 
 function switchTab(tabId) {
   appState.activeTab = tabId;
@@ -194,7 +190,7 @@ function updateProgressMeters() {
   if ($("xpProgress")) $("xpProgress").textContent = `${totalXP()} XP`;
   if ($("streakCount")) $("streakCount").textContent = `${appState.streakDays} days`;
   if ($("scoreRating")) $("scoreRating").textContent = `${appState.scoreRating} pts`;
-  if ($("dueReview")) $("dueReview").textContent = `${appState.mistakes.length} words`;
+  if ($("dueReview")) $("dueReview").textContent = `${appState.mistakes.length} items`;
 }
 
 function initResetAll() {
@@ -259,8 +255,8 @@ async function initDictionaryQuickSearch() {
 
   let dictBank = null;
   try {
-    const { moduleBank } = await loadModule("dictionary");
-    dictBank = moduleBank;
+    const raw = await import(`./wordbanks/${appState.activeLanguage}/WORD_DICT.js`);
+    dictBank = raw.default ?? raw;
   } catch (e) {
     outputEl.textContent = "Dictionary not available.";
     return;
@@ -279,8 +275,8 @@ async function initDictionaryQuickSearch() {
       return;
     }
 
-    const lang = appState.activeLanguage;
-    const translation = entry[lang] || entry.es || "";
+    const langKey = getLangKey();
+    const translation = entry[langKey] || entry.spanish || "";
     outputEl.textContent = translation ? translation : "No translation for this language.";
   });
 }
@@ -310,10 +306,13 @@ function playNextListenWord() {
   speechSynthesis.cancel();
 
   const utter = new SpeechSynthesisUtterance(word);
+  const langKey = getLangKey();
   utter.lang =
-    appState.activeLanguage === "es" ? "es-ES" :
-    appState.activeLanguage === "fr" ? "fr-FR" :
-    appState.activeLanguage === "nl" ? "nl-NL" : "es-ES";
+    langKey === "spanish" ? "es-ES" :
+    langKey === "french" ? "fr-FR" :
+    langKey === "dutch" ? "nl-NL" :
+    "es-ES";
+
   utter.rate = appState.speechRate;
 
   utter.onend = () => {
@@ -330,25 +329,21 @@ async function initListen() {
   const container = $("listenSection");
   if (!container) return;
 
-  let moduleBank;
+  let words;
   try {
-    const loaded = await loadModule("listen");
-    moduleBank = loaded.moduleBank;
+    words = await loadModule(appState.activeLevel);
   } catch (e) {
     container.innerHTML = "<p>Unable to load listening data.</p>";
     return;
   }
 
-  const LEVELS = moduleBank;
-  const levelData = LEVELS[appState.activeLevel];
-
-  if (!levelData || !Array.isArray(levelData)) {
+  if (!Array.isArray(words) || !words.length) {
     container.innerHTML = "<p>No listening data available for this level.</p>";
     return;
   }
 
   const categories = {};
-  levelData.forEach(item => {
+  words.forEach(item => {
     const cat = item.category || "General";
     if (!categories[cat]) categories[cat] = [];
     categories[cat].push(item);
@@ -373,8 +368,8 @@ async function initListen() {
         <h3>${cat}</h3>
         <div class="listen-grid">
           ${categories[cat].map(w => `
-            <button class="ui-pill listen-pill" data-word="${w.spanish}">
-              ${w.english} — ${w.spanish}
+            <button class="ui-pill listen-pill" data-word="${w[getLangKey()]}">
+              ${w.english} — ${w[getLangKey()]}
             </button>
           `).join("")}
         </div>
@@ -384,7 +379,7 @@ async function initListen() {
 
   container.innerHTML = html;
 
-  listenAutoPlay.list = levelData.map(w => w.spanish);
+  listenAutoPlay.list = words.map(w => w[getLangKey()]);
 
   $("listen-playall").onclick = () => {
     listenAutoPlay.active = true;
@@ -428,29 +423,24 @@ async function initFlashcards() {
   const container = $("flashcardsSection");
   if (!container) return;
 
-  let moduleBank;
+  let words;
   try {
-    const loaded = await loadModule("listen");   // loads CEFR_LEVELS.js
-    moduleBank = loaded.moduleBank;
+    words = await loadModule(appState.activeLevel);
   } catch (e) {
     container.innerHTML = "<p>Unable to load flashcards.</p>";
     return;
   }
 
-  const LEVELS = moduleBank;
-  const levelData = LEVELS[appState.activeLevel];
-
-  if (!levelData || !Array.isArray(levelData)) {
+  if (!Array.isArray(words) || !words.length) {
     container.innerHTML = "<p>No flashcards available for this level.</p>";
     return;
   }
 
-  // Build flashcards
-  flashcards = levelData.map(item => ({
+  flashcards = words.map(item => ({
     english: item.english,
-    es: item.spanish,
-    fr: item.french,
-    nl: item.dutch
+    spanish: item.spanish,
+    french: item.french,
+    dutch: item.dutch
   }));
 
   renderFlashcardWordList(container);
@@ -460,7 +450,7 @@ function renderFlashcardWordList(container) {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Flashcards — Level ${appState.activeLevel}</h2>
-      <p>Read the words and say it out loud in the translated language. Tap the word to flip it and hear its pronunciation to confirm if your correct.</p>
+      <p>Read the word, say it in the target language, then tap to flip and hear it.</p>
       <div id="flashcard-word-grid" class="listen-grid"></div>
     </div>
   `;
@@ -468,9 +458,8 @@ function renderFlashcardWordList(container) {
   const grid = $("flashcard-word-grid");
 
   grid.innerHTML = flashcards.map((fc, idx) => {
-    const backText =
-      fc[appState.activeLanguage] ||
-      fc.es;
+    const langKey = getLangKey();
+    const backText = fc[langKey] || fc.spanish;
 
     return `
       <div class="flashcard flashcard-pill" data-index="${idx}">
@@ -486,15 +475,10 @@ function renderFlashcardWordList(container) {
     card.onclick = () => {
       const idx = parseInt(card.dataset.index, 10);
       const fc = flashcards[idx];
+      const langKey = getLangKey();
+      const backText = fc[langKey] || fc.spanish;
 
-      const backText =
-        fc[appState.activeLanguage] ||
-        fc.es;
-
-      // Flip the pill
       const isFlipped = card.classList.toggle("flipped");
-
-      // Play audio only on first flip
       if (isFlipped) {
         speakText(backText);
       }
@@ -502,50 +486,29 @@ function renderFlashcardWordList(container) {
   });
 }
 
-
 /* ============================================================
    SHARED QUIZ STATE
    ============================================================ */
 
 let quizState = {
-    currentWord: null,
-    options: [],
-    harderMode: false,
-    selected: null
+  currentWord: null,
+  options: [],
+  harderMode: false,
+  selected: null
 };
 
-// ============================================================
-// LANGUAGE KEY MAPPER (GLOBAL FOR QUIZ)
-// ============================================================
-
-function getLangKey() {
-    const map = {
-        es: "spanish",
-        fr: "french",
-        nl: "dutch"
-    };
-    return map[appState.activeLanguage];
-}
-
-/* ============================================================
-   GENERATE OPTIONS (supports ES / FR / NL)
-   ============================================================ */
-
 function generateQuizOptions(words, correctWord) {
-    const lang = getLangKey();
+  const langKey = getLangKey();
+  let opts = [correctWord[langKey]];
+  const count = quizState.harderMode ? 5 : 3;
 
+  while (opts.length < count) {
+    const w = words[Math.floor(Math.random() * words.length)];
+    const translated = w[langKey];
+    if (!opts.includes(translated)) opts.push(translated);
+  }
 
-    let opts = [correctWord[lang]];
-    const count = quizState.harderMode ? 5 : 3;
-
-    while (opts.length < count) {
-        const w = words[Math.floor(Math.random() * words.length)];
-        const translated = w[lang];
-   // fallback to Spanish
-        if (!opts.includes(translated)) opts.push(translated);
-    }
-
-    return opts.sort(() => Math.random() - 0.5);
+  return opts.sort(() => Math.random() - 0.5);
 }
 
 /* ============================================================
@@ -553,51 +516,48 @@ function generateQuizOptions(words, correctWord) {
    ============================================================ */
 
 function renderQuizTab() {
-    const container = document.getElementById("quiz-content");
-    const words = moduleBank[appState.currentLevel];
+  const container = document.getElementById("quiz-content");
+  const words = moduleBank;
 
+  if (!words || !words.length) {
+    container.innerHTML = `<div class="glass-panel quiz-card">
+      <p>No words found for level ${appState.activeLevel}.</p>
+    </div>`;
+    return;
+  }
 
+  const langKey = getLangKey();
 
-    if (!words || !words.length) {
-        container.innerHTML = `<div class="glass-panel quiz-card">
-            <p>No words found for level ${appState.currentLevel}.</p>
-        </div>`;
-        return;
-    }
+  quizState.currentWord = words[Math.floor(Math.random() * words.length)];
+  quizState.options = generateQuizOptions(words, quizState.currentWord);
+  quizState.selected = null;
 
-   const lang = getLangKey();
-
-
-    quizState.currentWord = words[Math.floor(Math.random() * words.length)];
-    quizState.options = generateQuizOptions(words, quizState.currentWord);
-    quizState.selected = null;
-
-    container.innerHTML = `
+  container.innerHTML = `
     <div class="glass-panel quiz-card">
-        <h2>Quiz — Level ${appState.currentLevel}</h2>
-        <p>Select the correct translation for the English word.</p>
+      <h2>Quiz — Level ${appState.activeLevel}</h2>
+      <p>Select the correct translation for the English word.</p>
 
-        <div id="qb-meta"><strong>English:</strong> ${quizState.currentWord.english}</div>
+      <div id="qb-meta"><strong>English:</strong> ${quizState.currentWord.english}</div>
 
-        <div id="qb-grid" class="sb-grid">
-            ${quizState.options.map(opt => `
-                <button class="pill" data-translation="${opt}">${opt}</button>
-            `).join("")}
-        </div>
+      <div id="qb-grid" class="sb-grid">
+        ${quizState.options.map(opt => `
+          <button class="pill" data-translation="${opt}">${opt}</button>
+        `).join("")}
+      </div>
 
-        <div id="qb-answer" class="qb-answer"></div>
+      <div id="qb-answer" class="qb-answer"></div>
 
-        <div class="sb-controls quiz-controls-tight">
-            <button id="qb-submit">Check</button>
-            <button id="qb-next">Next</button>
-            <button id="qb-harder" class="${quizState.harderMode ? "active" : ""}">Harder</button>
-        </div>
+      <div class="sb-controls quiz-controls-tight">
+        <button id="qb-submit">Check</button>
+        <button id="qb-next">Next</button>
+        <button id="qb-harder" class="${quizState.harderMode ? "active" : ""}">Harder</button>
+      </div>
 
-        <div id="qb-feedback" class="qb-feedback"></div>
+      <div id="qb-feedback" class="qb-feedback"></div>
     </div>
-    `;
+  `;
 
-    setupQuizEvents();
+  setupQuizEvents();
 }
 
 /* ============================================================
@@ -605,264 +565,443 @@ function renderQuizTab() {
    ============================================================ */
 
 function setupQuizEvents() {
-    const grid = document.getElementById("qb-grid");
-    const submitBtn = document.getElementById("qb-submit");
-    const nextBtn = document.getElementById("qb-next");
-    const harderBtn = document.getElementById("qb-harder");
-    const feedback = document.getElementById("qb-feedback");
-    const answerBox = document.getElementById("qb-answer");
+  const grid = document.getElementById("qb-grid");
+  const submitBtn = document.getElementById("qb-submit");
+  const nextBtn = document.getElementById("qb-next");
+  const harderBtn = document.getElementById("qb-harder");
+  const feedback = document.getElementById("qb-feedback");
+  const answerBox = document.getElementById("qb-answer");
 
-    // ⭐ Correct language key mapping
-    function getLangKey() {
-        const map = {
-            es: "spanish",
-            fr: "french",
-            nl: "dutch"
-        };
-        return map[appState.activeLanguage];
+  const langKey = getLangKey();
+  quizState.selected = null;
+
+  grid.querySelectorAll(".pill").forEach(btn => {
+    btn.addEventListener("click", () => {
+      grid.querySelectorAll(".pill").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      quizState.selected = btn.dataset.translation;
+      answerBox.textContent = quizState.selected;
+    });
+  });
+
+  function getEnglishForTranslation(translatedWord) {
+    const levelWords = moduleBank;
+    const match = levelWords.find(w => w[langKey] === translatedWord);
+    return match ? match.english : "[no match]";
+  }
+
+  submitBtn.addEventListener("click", () => {
+    if (!quizState.selected) {
+      feedback.textContent = "Choose an answer first.";
+      return;
     }
 
-    const lang = getLangKey();   // ⭐ FIXED
+    const correct = quizState.currentWord[langKey];
+    const learnerTranslated = quizState.selected;
+    const learnerEnglish = getEnglishForTranslation(learnerTranslated);
 
-    quizState.selected = null;
-
-    // Pill selection
-    grid.querySelectorAll(".pill").forEach(btn => {
-        btn.addEventListener("click", () => {
-            grid.querySelectorAll(".pill").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            quizState.selected = btn.dataset.translation;
-            answerBox.textContent = quizState.selected;
-        });
-    });
-
-    // Helper: translate selected → English
-    function getEnglishForTranslation(translatedWord) {
-        const levelWords = moduleBank[appState.currentLevel];
-        const match = levelWords.find(w => w[lang] === translatedWord);
-        return match ? match.english : "[no match]";
+    if (!appState.levelStats[appState.activeLevel].quizScore) {
+      appState.levelStats[appState.activeLevel].quizScore = 0;
+    }
+    if (!appState.levelStats[appState.activeLevel].quizCompleted) {
+      appState.levelStats[appState.activeLevel].quizCompleted = 0;
     }
 
-    // Check button
-    submitBtn.addEventListener("click", () => {
-        if (!quizState.selected) {
-            feedback.textContent = "Choose an answer first.";
-            return;
-        }
+    if (learnerTranslated === correct) {
+      feedback.innerHTML = `
+        <div class="quiz-correct">Correct!</div>
+        <div class="quiz-selected"><strong>You selected:</strong> ${learnerTranslated} (${learnerEnglish})</div>
+      `;
 
-        const correct = quizState.currentWord[lang];   // ⭐ FIXED
-        const learnerTranslated = quizState.selected;
-        const learnerEnglish = getEnglishForTranslation(learnerTranslated);
+      appState.levelStats[appState.activeLevel].quizScore++;
+      appState.levelStats[appState.activeLevel].quizCompleted++;
+      addXP(10);
+      addScore(5);
+      updateProgressMeters();
+    } else {
+      feedback.innerHTML = `
+        <div class="quiz-incorrect">Incorrect — correct answer: ${correct}</div>
+        <div class="quiz-selected"><strong>You selected:</strong> ${learnerTranslated} (${learnerEnglish})</div>
+      `;
 
-        // Ensure quizScore is not null before incrementing
-        if (appState.levelStats[appState.currentLevel].quizScore === null) {
-            appState.levelStats[appState.currentLevel].quizScore = 0;
-        }
+      const mistakeString = `${quizState.currentWord.english} ➔ ${correct}`;
+      addIncorrectWord(mistakeString);
+    }
 
-        // Correct / Incorrect feedback
-        if (learnerTranslated === correct) {
-            feedback.innerHTML = `
-                <div class="quiz-correct">Correct! 🎉</div>
-                <div class="quiz-selected"><strong>You selected:</strong> ${learnerTranslated} (${learnerEnglish})</div>
-            `;
+    setTimeout(() => speakText(correct), 50);
+  });
 
-            appState.levelStats[appState.currentLevel].quizScore++;
-            appState.levelStats[appState.currentLevel].quizCompleted++;
+  nextBtn.addEventListener("click", () => {
+    renderQuizTab();
+  });
 
-            appState.totalXP = (appState.totalXP || 0) + 10; 
-            appState.globalScore = (appState.globalScore || 0) + 5;
-
-            checkAndAdvanceStreak();
-            updateBadges();
-            updateProgressMeters();
-
-        } else {
-            feedback.innerHTML = `
-                <div class="quiz-incorrect">Incorrect — correct answer: ${correct}</div>
-                <div class="quiz-selected"><strong>You selected:</strong> ${learnerTranslated} (${learnerEnglish})</div>
-            `;
-
-            const mistakeString = `${quizState.currentWord.english} ➔ ${correct}`;
-            addIncorrectWord(mistakeString);
-        }
-
-        // Audio
-        setTimeout(() => speakQuiz(correct), 50);
-
-        saveState();
-    });
-
-    // Next button
-    nextBtn.addEventListener("click", () => {
-        renderQuizTab();
-    });
-
-    // Harder mode toggle
-    harderBtn.addEventListener("click", () => {
-        quizState.harderMode = !quizState.harderMode;
-        harderBtn.classList.toggle("active");
-        renderQuizTab();
-    });
+  harderBtn.addEventListener("click", () => {
+    quizState.harderMode = !quizState.harderMode;
+    harderBtn.classList.toggle("active");
+    renderQuizTab();
+  });
 }
 
+// ============================================================
+// BUILD MODULE — sentence builder (Spanish-site style)
+// ============================================================
 
-// ============================================================
-// BUILD MODULE — simple “play Spanish” sentence
-// ============================================================
+let buildState = {
+  currentSentence: null,
+  availableWords: [],
+  chosenWords: []
+};
 
 async function initBuild() {
   const container = $("buildSection");
   if (!container) return;
 
-  let moduleBank;
+  let sentences;
   try {
-    const loaded = await loadModule("listen");
-    moduleBank = loaded.moduleBank;
+    const raw = await import(`./wordbanks/${appState.activeLanguage}/CEFR_SENTENCES.js`);
+    sentences = raw.default ?? raw;
   } catch (e) {
     container.innerHTML = "<p>Unable to load build data.</p>";
     return;
   }
 
-  const LEVELS = moduleBank;
-  const levelData = LEVELS[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData) || !levelData.length) {
+  if (!Array.isArray(sentences) || !sentences.length) {
     container.innerHTML = "<p>No build data available for this level.</p>";
     return;
   }
 
-  const item = levelData[0]; // { english, spanish }
+  buildState.currentSentence = sentences[0]; // you can randomize later
+  buildState.availableWords = buildState.currentSentence.words || buildState.currentSentence.spanish.split(" ");
+  buildState.chosenWords = [];
+
+  renderBuildUI(container);
+}
+
+function renderBuildUI(container) {
+  const s = buildState.currentSentence;
 
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Build — Level ${appState.activeLevel}</h2>
-      <strong>${item.english}</strong>
-      <p>Click play, then try to say the Spanish aloud.</p>
-      <button class="pill" id="build-play">Play Spanish</button>
+      <p>Duplicate this sentence in ${appState.activeLanguage.toUpperCase()}.</p>
+      <div><strong>English:</strong> ${s.english}</div>
+
+      <div class="listen-grid" id="build-word-bank">
+        ${buildState.availableWords.map((w, i) => `
+          <button class="ui-pill build-word" data-index="${i}">${w}</button>
+        `).join("")}
+      </div>
+
+      <div class="build-output" id="build-output">
+        ${buildState.chosenWords.join(" ")}
+      </div>
+
+      <div class="sb-controls">
+        <button id="build-undo">Undo</button>
+        <button id="build-reset">Reset</button>
+        <button id="build-check">Check</button>
+        <button id="build-next">Next</button>
+      </div>
+
+      <div id="build-feedback"></div>
     </div>
   `;
 
-  const playBtn = $("build-play");
-  if (playBtn) {
-    playBtn.onclick = () => {
-      speakText(item.spanish);
-      addXP(2);
-      appState.levelStats[appState.activeLevel].sentences += 10;
-      updateProgressMeters();
+  document.querySelectorAll(".build-word").forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.index, 10);
+      const word = buildState.availableWords[idx];
+      buildState.chosenWords.push(word);
+      $("build-output").textContent = buildState.chosenWords.join(" ");
     };
-  }
+  });
+
+  $("build-undo").onclick = () => {
+    buildState.chosenWords.pop();
+    $("build-output").textContent = buildState.chosenWords.join(" ");
+  };
+
+  $("build-reset").onclick = () => {
+    buildState.chosenWords = [];
+    $("build-output").textContent = "";
+    $("build-feedback").textContent = "";
+  };
+
+  $("build-check").onclick = () => {
+    const learnerSentence = buildState.chosenWords.join(" ");
+    const correctSentence = buildState.currentSentence.spanish;
+    const feedbackEl = $("build-feedback");
+
+    if (learnerSentence === correctSentence) {
+      feedbackEl.innerHTML = `
+        <div class="quiz-correct">Correct!</div>
+        <div><strong>Your answer:</strong> ${learnerSentence}</div>
+        <div><strong>Correct:</strong> ${correctSentence}</div>
+      `;
+      addXP(5);
+      appState.levelStats[appState.activeLevel].sentences += 1;
+    } else {
+      feedbackEl.innerHTML = `
+        <div class="quiz-incorrect">Not quite.</div>
+        <div><strong>Your answer:</strong> ${learnerSentence}</div>
+        <div><strong>Correct:</strong> ${correctSentence}</div>
+      `;
+      addIncorrectWord(`${buildState.currentSentence.english} ➔ ${correctSentence}`);
+    }
+
+    speakText(correctSentence);
+    updateProgressMeters();
+  };
+
+  $("build-next").onclick = () => {
+    // For now just reset same sentence; you can later randomize
+    buildState.chosenWords = [];
+    $("build-output").textContent = "";
+    $("build-feedback").textContent = "";
+  };
 }
 
 // ============================================================
-// SENTENCE MODULE — uses LEVELS
+// SENTENCE MODULE — 3-choice multiple choice with audio
 // ============================================================
+
+let sentenceState = {
+  currentItem: null,
+  options: []
+};
 
 async function initSentence() {
   const container = $("sentenceSection");
   if (!container) return;
 
-  let moduleBank;
+  let choices;
   try {
-    const loaded = await loadModule("listen");
-    moduleBank = loaded.moduleBank;
+    const raw = await import(`./wordbanks/${appState.activeLanguage}/CEFR_SENTENCE_CHOICES.js`);
+    choices = raw.default ?? raw;
   } catch (e) {
     container.innerHTML = "<p>Unable to load sentence data.</p>";
     return;
   }
 
-  const LEVELS = moduleBank;
-  const levelData = LEVELS[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData) || !levelData.length) {
+  if (!Array.isArray(choices) || !choices.length) {
     container.innerHTML = "<p>No sentence data available for this level.</p>";
     return;
   }
 
-  const sentence = levelData[0];
+  sentenceState.currentItem = choices[0]; // you can randomize later
+  const langKey = getLangKey();
+
+  sentenceState.options = sentenceState.currentItem.options || sentenceState.currentItem[langKey + "_options"] || [];
 
   container.innerHTML = `
     <div class="glass-panel quiz-card">
-      <h2>Sentence Trainer — Level ${appState.activeLevel}</h2>
-      <strong>${sentence.spanish}</strong>
-      <em>${sentence.english}</em>
-      <button class="pill" id="sentence-play">Play</button>
+      <h2>Sentence — Level ${appState.activeLevel}</h2>
+      <div><strong>English:</strong> ${sentenceState.currentItem.english}</div>
+
+      <div class="sb-grid" id="sentence-options">
+        ${sentenceState.options.map(opt => `
+          <button class="pill sentence-opt" data-value="${opt}">${opt}</button>
+        `).join("")}
+      </div>
+
+      <div class="sb-controls">
+        <button id="sentence-check">Check</button>
+        <button id="sentence-next">Next</button>
+        <button id="sentence-reset">Reset</button>
+      </div>
+
+      <div id="sentence-feedback"></div>
     </div>
   `;
 
-  const playBtn = $("sentence-play");
-  if (playBtn) {
-    playBtn.onclick = () => {
-      speakText(sentence.spanish);
-      addXP(1);
-      appState.levelStats[appState.activeLevel].sentences += 5;
-      updateProgressMeters();
+  let selected = null;
+
+  document.querySelectorAll(".sentence-opt").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".sentence-opt").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selected = btn.dataset.value;
     };
-  }
+  });
+
+  $("sentence-check").onclick = () => {
+    const feedbackEl = $("sentence-feedback");
+    const langKey = getLangKey();
+    const correct = sentenceState.currentItem[langKey];
+
+    if (!selected) {
+      feedbackEl.textContent = "Choose an answer first.";
+      return;
+    }
+
+    if (selected === correct) {
+      feedbackEl.innerHTML = `
+        <div class="quiz-correct">Correct!</div>
+        <div><strong>Your answer:</strong> ${selected}</div>
+        <div><strong>Correct:</strong> ${correct}</div>
+      `;
+      addXP(3);
+      appState.levelStats[appState.activeLevel].sentences += 1;
+    } else {
+      feedbackEl.innerHTML = `
+        <div class="quiz-incorrect">Incorrect.</div>
+        <div><strong>Your answer:</strong> ${selected}</div>
+        <div><strong>Correct:</strong> ${correct}</div>
+      `;
+      addIncorrectWord(`${sentenceState.currentItem.english} ➔ ${correct}`);
+    }
+
+    speakText(correct);
+    updateProgressMeters();
+  };
+
+  $("sentence-next").onclick = () => {
+    // simple reset; you can randomize later
+    $("sentence-feedback").textContent = "";
+    document.querySelectorAll(".sentence-opt").forEach(b => b.classList.remove("active"));
+    selected = null;
+  };
+
+  $("sentence-reset").onclick = () => {
+    $("sentence-feedback").textContent = "";
+    document.querySelectorAll(".sentence-opt").forEach(b => b.classList.remove("active"));
+    selected = null;
+  };
 }
 
 // ============================================================
-// CONVERSATION MODULE — placeholder using LEVELS
+// CONVERSATION MODULE — prompt + 5 options + audio
 // ============================================================
+
+let conversationState = {
+  currentTurn: null,
+  options: []
+};
 
 async function initConversation() {
   const container = $("conversationSection");
   if (!container) return;
 
-  let moduleBank;
+  let convo;
+  let audioBank;
   try {
-    const loaded = await loadModule("listen");
-    moduleBank = loaded.moduleBank;
+    const rawConvo = await import(`./wordbanks/${appState.activeLanguage}/CEFR_CONVERSATION.js`);
+    convo = rawConvo.default ?? rawConvo;
+
+    const rawAudio = await import(`./wordbanks/${appState.activeLanguage}/CEFR_CONVERSATION_AUDIO.js`);
+    audioBank = rawAudio.default ?? rawAudio;
   } catch (e) {
     container.innerHTML = "<p>Unable to load conversation data.</p>";
     return;
   }
 
-  const LEVELS = moduleBank;
-  const levelData = LEVELS[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData) || !levelData.length) {
+  if (!Array.isArray(convo) || !convo.length) {
     container.innerHTML = "<p>No conversation data available for this level.</p>";
     return;
   }
 
-  const turn = levelData[0];
+  conversationState.currentTurn = convo[0]; // you can randomize later
+  const langKey = getLangKey();
+
+  conversationState.options = conversationState.currentTurn.options || conversationState.currentTurn[langKey + "_options"] || [];
 
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Conversation — Level ${appState.activeLevel}</h2>
-      <strong>Speaker:</strong> ${turn.spanish}
-      <button class="pill" id="conversation-play">Play</button>
+      <p>Respond naturally in ${appState.activeLanguage.toUpperCase()}.</p>
+
+      <div><strong>${appState.activeLanguage.toUpperCase()}:</strong> ${conversationState.currentTurn[langKey]}</div>
+      <div><em>English:</em> ${conversationState.currentTurn.english}</div>
+
+      <div class="sb-grid" id="conversation-options">
+        ${conversationState.options.map(opt => `
+          <button class="pill convo-opt" data-value="${opt}">${opt}</button>
+        `).join("")}
+      </div>
+
+      <div class="sb-controls">
+        <button id="conversation-check">Check</button>
+        <button id="conversation-next">Next</button>
+        <button id="conversation-reset">Reset</button>
+      </div>
+
+      <div id="conversation-feedback"></div>
     </div>
   `;
 
-  const playBtn = $("conversation-play");
-  if (playBtn) {
-    playBtn.onclick = () => {
-      speakText(turn.spanish);
-      addXP(2);
-      addScore(1);
-      updateProgressMeters();
+  let selected = null;
+
+  document.querySelectorAll(".convo-opt").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".convo-opt").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selected = btn.dataset.value;
     };
-  }
+  });
+
+  $("conversation-check").onclick = () => {
+    const feedbackEl = $("conversation-feedback");
+    const langKey = getLangKey();
+    const correct = conversationState.currentTurn.correct || conversationState.currentTurn[langKey + "_correct"];
+
+    if (!selected) {
+      feedbackEl.textContent = "Choose an answer first.";
+      return;
+    }
+
+    if (selected === correct) {
+      feedbackEl.innerHTML = `
+        <div class="quiz-correct">Correct!</div>
+        <div><strong>Your answer:</strong> ${selected}</div>
+        <div><strong>Correct:</strong> ${correct}</div>
+      `;
+      addXP(4);
+      addScore(2);
+    } else {
+      feedbackEl.innerHTML = `
+        <div class="quiz-incorrect">Incorrect.</div>
+        <div><strong>Your answer:</strong> ${selected}</div>
+        <div><strong>Correct:</strong> ${correct}</div>
+      `;
+      addIncorrectWord(`Conversation: ${conversationState.currentTurn.english} ➔ ${correct}`);
+    }
+
+    const audioKey = conversationState.currentTurn.audioKey;
+    const audioText = audioBank[audioKey] || correct;
+    speakText(audioText);
+    updateProgressMeters();
+  };
+
+  $("conversation-next").onclick = () => {
+    $("conversation-feedback").textContent = "";
+    document.querySelectorAll(".convo-opt").forEach(b => b.classList.remove("active"));
+    selected = null;
+  };
+
+  $("conversation-reset").onclick = () => {
+    $("conversation-feedback").textContent = "";
+    document.querySelectorAll(".convo-opt").forEach(b => b.classList.remove("active"));
+    selected = null;
+  };
 }
 
 // ============================================================
-// GRAMMAR MODULE — uses LEVELS as rules
+// GRAMMAR MODULE — simple list from level words
 // ============================================================
 
 async function initGrammar() {
   const container = $("grammarSection");
   if (!container) return;
 
-  let moduleBank;
+  let words;
   try {
-    const loaded = await loadModule("listen");
-    moduleBank = loaded.moduleBank;
+    words = await loadModule(appState.activeLevel);
   } catch (e) {
     container.innerHTML = "<p>Unable to load grammar data.</p>";
     return;
   }
 
-  const LEVELS = moduleBank;
-  const levelData = LEVELS[appState.activeLevel];
-  if (!levelData || !Array.isArray(levelData) || !levelData.length) {
+  if (!Array.isArray(words) || !words.length) {
     container.innerHTML = "<p>No grammar data available for this level.</p>";
     return;
   }
@@ -871,8 +1010,8 @@ async function initGrammar() {
     <div class="glass-panel quiz-card">
       <h2>Grammar — Level ${appState.activeLevel}</h2>
       <ul>
-        ${levelData.map(rule => `
-          <li><strong>${rule.english}</strong><br>${rule.spanish}</li>
+        ${words.map(rule => `
+          <li><strong>${rule.english}</strong><br>${rule[getLangKey()]}</li>
         `).join("")}
       </ul>
     </div>
@@ -880,53 +1019,46 @@ async function initGrammar() {
 }
 
 // ============================================================
-// MINING MODULE
+// MINING MODULE — wired to mining_references.js
 // ============================================================
 
 async function initMining() {
   const container = $("miningSection");
   if (!container) return;
 
-  container.innerHTML = `
-    <div class="glass-panel quiz-card">
-      <h2>Mining — Level ${appState.activeLevel}</h2>
-      <input id="mining-input" class="pill" placeholder="Type a word">
-      <button class="pill" id="mining-add">Add</button>
-      <div id="mining-list"></div>
-    </div>
-  `;
-
-  const inputEl = $("mining-input");
-  const addBtn = $("mining-add");
-
-  if (addBtn && inputEl) {
-    addBtn.onclick = () => {
-      const text = inputEl.value.trim();
-      if (!text) return;
-
-      appState.miningWords.push(text);
-      inputEl.value = "";
-      renderMiningList();
-    };
-  }
-
-  renderMiningList();
-}
-
-function renderMiningList() {
-  const listEl = $("mining-list");
-  if (!listEl) return;
-
-  if (!appState.miningWords.length) {
-    listEl.innerHTML = "<p>No mined items yet.</p>";
+  let miningBank;
+  try {
+    const raw = await import(`./wordbanks/${appState.activeLanguage}/mining_references.js`);
+    miningBank = raw.default ?? raw;
+  } catch (e) {
+    container.innerHTML = "<p>Unable to load mining references.</p>";
     return;
   }
 
-  listEl.innerHTML = `
-    <ul>
-      ${appState.miningWords.map(w => `<li>${w}</li>`).join("")}
-    </ul>
+  container.innerHTML = `
+    <div class="glass-panel quiz-card">
+      <h2>Mining — Level ${appState.activeLevel}</h2>
+      <div id="mining-pill-grid" class="listen-grid">
+        ${miningBank.map((item, i) => `
+          <button class="ui-pill mining-pill" data-index="${i}">
+            ${item.english} — ${item[getLangKey()]}
+          </button>
+        `).join("")}
+      </div>
+    </div>
   `;
+
+  document.querySelectorAll(".mining-pill").forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.index, 10);
+      const item = miningBank[idx];
+      const langKey = getLangKey();
+      const word = item[langKey];
+      speakText(word);
+      appState.miningWords.push(`${item.english} ➔ ${word}`);
+      updateProgressMeters();
+    };
+  });
 }
 
 // ============================================================
@@ -937,16 +1069,14 @@ async function initDictionary() {
   const container = $("dictionarySection");
   if (!container) return;
 
-  let moduleBank;
+  let dictBank;
   try {
-    const loaded = await loadModule("dictionary");
-    moduleBank = loaded.moduleBank;
+    const raw = await import(`./wordbanks/${appState.activeLanguage}/WORD_DICT.js`);
+    dictBank = raw.default ?? raw;
   } catch (e) {
     container.innerHTML = "<p>Unable to load dictionary.</p>";
     return;
   }
-
-  const DICT = moduleBank;
 
   container.innerHTML = `
     <div class="glass-panel quiz-card">
@@ -970,21 +1100,20 @@ async function initDictionary() {
       return;
     }
 
-    const entry = DICT[query];
+    const entry = dictBank[query];
     if (!entry) {
       outputEl.textContent = "No entry found.";
       return;
     }
 
-    const lang = getLangKey();
-
-    const translation = entry[lang] || entry.es || "";
+    const langKey = getLangKey();
+    const translation = entry[langKey] || entry.spanish || "";
     outputEl.textContent = translation ? translation : "No translation for this language.";
   };
 }
 
 // ============================================================
-// REVIEW MODULE
+// REVIEW MODULE — Play + Got it!
 // ============================================================
 
 function initReview() {
@@ -1004,34 +1133,54 @@ function initReview() {
   container.innerHTML = `
     <div class="glass-panel quiz-card">
       <h2>Review — Level ${appState.activeLevel}</h2>
-      <ul>
-        ${appState.mistakes.map(w => `<li>${w}</li>`).join("")}
+      <ul id="review-list">
+        ${appState.mistakes.map((w, i) => `
+          <li data-index="${i}">
+            ${w}
+            <button class="pill review-play">Play</button>
+            <button class="pill review-gotit">Got it!</button>
+          </li>
+        `).join("")}
       </ul>
     </div>
   `;
+
+  document.querySelectorAll("#review-list li").forEach(li => {
+    const idx = parseInt(li.dataset.index, 10);
+    const text = appState.mistakes[idx];
+
+    li.querySelector(".review-play").onclick = () => {
+      speakText(text.split("➔")[1] || text);
+    };
+
+    li.querySelector(".review-gotit").onclick = () => {
+      appState.mistakes.splice(idx, 1);
+      initReview();
+      updateProgressMeters();
+    };
+  });
 }
 
 // ============================================================
-// REPEAT MODULE
+// REPEAT MODULE — repeat/A1.js etc.
 // ============================================================
 
 async function initRepeat() {
   const container = $("repeatSection");
   if (!container) return;
 
-  let moduleBank;
+  let repeatBank;
   try {
-    const loaded = await loadModule("repeat");
-    moduleBank = loaded.moduleBank;
+    const raw = await import(`./wordbanks/${appState.activeLanguage}/repeat/${appState.activeLevel}.js`);
+    repeatBank = raw.default ?? raw;
   } catch (e) {
     container.innerHTML = "<p>Unable to load repeat practice.</p>";
     return;
   }
 
-  const REPEAT_BANK = moduleBank;
-  const items = REPEAT_BANK[appState.activeLevel] || REPEAT_BANK;
+  const items = Array.isArray(repeatBank) ? repeatBank : [];
 
-  if (!items || !Array.isArray(items) || !items.length) {
+  if (!items.length) {
     container.innerHTML = "<p>No repeat items available for this level.</p>";
     return;
   }
@@ -1041,8 +1190,8 @@ async function initRepeat() {
       <h2>Repeat Practice — Level ${appState.activeLevel}</h2>
       <div id="repeat-list">
         ${items.map(w => `
-          <button class="pill repeat-pill" data-word="${w.spanish}">
-            ${w.english} — ${w.spanish}
+          <button class="pill repeat-pill" data-word="${w[getLangKey()]}">
+            ${w.english} — ${w[getLangKey()]}
           </button>
         `).join("")}
       </div>
@@ -1124,3 +1273,4 @@ function initApp() {
 }
 
 document.addEventListener("DOMContentLoaded", initApp);
+
