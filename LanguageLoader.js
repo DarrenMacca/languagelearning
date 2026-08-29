@@ -1,5 +1,5 @@
 // ============================================================
-// MULTI-LANGUAGE CEFR LOADER — FINAL VERSION (Matches new app.js)
+// MULTI-LANGUAGE CEFR LOADER — FINAL VERSION (Listen + Flashcards fixed)
 // ============================================================
 
 let activeLanguage = "es";   // default
@@ -17,14 +17,15 @@ export function setLevel(level) {
 }
 
 // ------------------------------------------------------------
-// LOAD LEVEL WORD BANK (A1.js, A2.js, B1.js, B2.js)
+// LOAD CEFR LEVEL WORD BANK (A1.js, A2.js, B1.js, B2.js)
+// Used by: QUIZ, SENTENCE, CONVERSATION, GRAMMAR, REPEAT
 // ------------------------------------------------------------
 export async function loadModule(level = activeLevel) {
     const path = `./wordbanks/${activeLanguage}/${level}.js`;
 
     try {
         const raw = await import(path);
-        return raw.default ?? raw;   // always return array of words
+        return raw.default ?? raw;
     } catch (err) {
         console.error(`❌ Failed to load level file: ${path}`, err);
         return [];
@@ -32,7 +33,37 @@ export async function loadModule(level = activeLevel) {
 }
 
 // ------------------------------------------------------------
-// LOAD DICTIONARY (WORD_DICT.js)
+// LISTEN TAB — loads LISTEN_VOCAB.js
+// ------------------------------------------------------------
+export async function loadListenBank() {
+    const path = `./wordbanks/${activeLanguage}/LISTEN_VOCAB.js`;
+
+    try {
+        const raw = await import(path);
+        return raw.default ?? raw;
+    } catch (err) {
+        console.error(`❌ Failed to load LISTEN_VOCAB.js: ${path}`, err);
+        return [];
+    }
+}
+
+// ------------------------------------------------------------
+// FLASHCARDS TAB — loads CEFR_LEVELS.js
+// ------------------------------------------------------------
+export async function loadFlashcardBank() {
+    const path = `./wordbanks/${activeLanguage}/CEFR_LEVELS.js`;
+
+    try {
+        const raw = await import(path);
+        return raw.default ?? raw;
+    } catch (err) {
+        console.error(`❌ Failed to load CEFR_LEVELS.js: ${path}`, err);
+        return {};
+    }
+}
+
+// ------------------------------------------------------------
+// DICTIONARY (WORD_DICT.js)
 // ------------------------------------------------------------
 export async function loadDictionary() {
     const path = `./wordbanks/${activeLanguage}/WORD_DICT.js`;
@@ -47,7 +78,7 @@ export async function loadDictionary() {
 }
 
 // ------------------------------------------------------------
-// LOAD MINING REFERENCES (mining_references.js)
+// MINING REFERENCES (mining_references.js)
 // ------------------------------------------------------------
 export async function loadMining() {
     const path = `./wordbanks/${activeLanguage}/mining_references.js`;
@@ -62,7 +93,7 @@ export async function loadMining() {
 }
 
 // ------------------------------------------------------------
-// LOAD REPEAT BANK (repeat/A1.js etc.)
+// REPEAT BANK (repeat/A1.js etc.)
 // ------------------------------------------------------------
 export async function loadRepeat(level = activeLevel) {
     const path = `./wordbanks/${activeLanguage}/repeat/${level}.js`;
@@ -77,7 +108,7 @@ export async function loadRepeat(level = activeLevel) {
 }
 
 // ------------------------------------------------------------
-// LOAD CONVERSATION PROMPTS (CEFR_CONVERSATION.js)
+// CONVERSATION PROMPTS (CEFR_CONVERSATION.js)
 // ------------------------------------------------------------
 export async function loadConversation() {
     const path = `./wordbanks/${activeLanguage}/CEFR_CONVERSATION.js`;
@@ -92,7 +123,7 @@ export async function loadConversation() {
 }
 
 // ------------------------------------------------------------
-// LOAD CONVERSATION AUDIO (CEFR_CONVERSATION_AUDIO.js)
+// CONVERSATION AUDIO (CEFR_CONVERSATION_AUDIO.js)
 // ------------------------------------------------------------
 export async function loadConversationAudio() {
     const path = `./wordbanks/${activeLanguage}/CEFR_CONVERSATION_AUDIO.js`;
@@ -107,7 +138,7 @@ export async function loadConversationAudio() {
 }
 
 // ------------------------------------------------------------
-// LOAD SENTENCE CHOICES (CEFR_SENTENCE_CHOICES.js)
+// SENTENCE CHOICES (CEFR_SENTENCE_CHOICES.js)
 // ------------------------------------------------------------
 export async function loadSentenceChoices() {
     const path = `./wordbanks/${activeLanguage}/CEFR_SENTENCE_CHOICES.js`;
